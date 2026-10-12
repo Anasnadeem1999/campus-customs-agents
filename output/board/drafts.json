@@ -1,0 +1,43 @@
+[
+  {
+    "id": 1,
+    "ticket_id": 103,
+    "ticket_requester": "Yale AI Club",
+    "recipient": "Yale AI Club",
+    "subject": "Your bulk hoodie request",
+    "body": "We can supply 8 size M CC-HOOD-NAVY hoodies from current stock, but we can\u2019t fill all 20 from stock; 12 would need to be restocked. The list price is $58 each, and a proposed discounted price must remain conditional on approval. The restock cost for the 12-unit shortfall is $264, and $22 per hoodie is break-even\u2014so any proposed price below $22 would be below cost. We\u2019ll confirm whether we can offer a discount and complete the order after the pricing and restock arrangements are approved.",
+    "drafted_by": "customer_service",
+    "drafted_on_shop_date": "2026-08-31",
+    "delivery_status": "not_sent",
+    "note": "Draft only. This server has no tool that sends anything."
+  },
+  {
+    "id": 2,
+    "record_type": "purchase_order",
+    "vendor_id": 1,
+    "vendor_name": "Bulldog Print Co",
+    "sku": "CC-TEE-WHITE",
+    "size": "S",
+    "qty": 1,
+    "approval_id": 3,
+    "approved_by": "Anas Nadeem",
+    "needed_for_ticket": 101,
+    "placed_on_shop_date": "2026-08-31",
+    "lead_days": 5,
+    "eta": "2026-09-05",
+    "delivery_status": "not_sent",
+    "note": "Order recorded on the board. No vendor was contacted."
+  },
+  {
+    "id": 3,
+    "ticket_id": 103,
+    "ticket_requester": "Yale AI Club",
+    "recipient": "Yale AI Club",
+    "subject": "Your navy hoodie order",
+    "body": "We can offer 8 CC-HOOD-NAVY hoodies in size M at the approved bulk price of $50 each, subject to your confirmation. We can\u2019t fulfill the full 20-hoodie request: only 8 are currently available, and we can\u2019t commit to the remaining 12 or give a restock date. Would you like to proceed with the 8 available hoodies at $50 each?",
+    "drafted_by": "customer_service",
+    "drafted_on_shop_date": "2026-08-31",
+    "delivery_status": "not_sent",
+    "note": "Draft only. This server has no tool that sends anything."
+  }
+]

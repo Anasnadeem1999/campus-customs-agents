@@ -229,8 +229,13 @@ def _extract_tool_calls(result: Any) -> list[ToolCallRecord]:
                 key = part.tool_call_id
                 if key in calls:
                     calls[key].result_summary = audit.summarise(part.content)
-                    text = str(part.content).lower()
-                    calls[key].is_error = "refused" in text or "error" in text
+                    # Ask the SDK whether the call failed rather than sniffing
+                    # the payload for words. Searching for "refused" flagged
+                    # every successful `list_approvals` red, because an
+                    # agent's own approval reason routinely contains the
+                    # phrase "if refused" -- a tool reporting a refusal it was
+                    # asked about is not a tool that failed.
+                    calls[key].is_error = getattr(part, "outcome", "success") != "success"
     return [calls[k] for k in order if k in calls]
 
 

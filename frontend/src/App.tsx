@@ -117,10 +117,23 @@ export default function App() {
     [events, selected],
   )
 
-  /** What each agent did on this ticket — the per-agent summary. */
+  /** What each agent did on this ticket — the per-agent summary.
+   *
+   * Scoped to the ticket's **most recent run**, not its whole history. The
+   * audit trail accumulates across every run ever made, so summing all of it
+   * reported "Facilities — 7 turns" for a ticket this run touched twice,
+   * silently folding in work from days ago. The question a desk is asking is
+   * "what just happened", so the summary answers that one.
+   */
+  const latestRunEvents = useMemo(() => {
+    if (!ticketEvents.length) return ticketEvents
+    const lastRun = ticketEvents[ticketEvents.length - 1].run_id
+    return ticketEvents.filter((e) => e.run_id === lastRun)
+  }, [ticketEvents])
+
   const perAgent = useMemo(() => {
     const byAgent = new Map<string, { steps: number; tools: Set<string>; last: AgentEvent }>()
-    for (const e of ticketEvents) {
+    for (const e of latestRunEvents) {
       const entry = byAgent.get(e.agent) ?? { steps: 0, tools: new Set<string>(), last: e }
       entry.steps += 1
       entry.last = e
@@ -128,7 +141,7 @@ export default function App() {
       byAgent.set(e.agent, entry)
     }
     return [...byAgent.entries()]
-  }, [ticketEvents])
+  }, [latestRunEvents])
 
   const pending = approvals.filter((a) => a.status === 'pending')
 
@@ -279,7 +292,7 @@ export default function App() {
 
           {selectedTicket && perAgent.length > 0 && (
             <div className="summary">
-              <h4>What each colleague did</h4>
+              <h4>What each colleague did — latest run</h4>
               {perAgent.map(([agent, info]) => {
                 const face = faceOf(agent)
                 return (

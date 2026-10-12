@@ -16,6 +16,7 @@ touched either way -- `reset_db.py` hashes it before and after to prove it.
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -32,15 +33,49 @@ def reset_working_db() -> None:
     )
 
 
+WORKING_DB = REPO_ROOT / "data" / "campus_customs_new.db"
+BOARD = REPO_ROOT / "output" / "board"
+BOARD_FILES = ("approvals.json", "drafts.json")
+
+
 @pytest.fixture(scope="session", autouse=True)
-def leave_the_shop_as_we_found_it():
-    """Reset the working database once the whole suite has finished."""
-    yield
-    reset_working_db()
-    # The approval board is part of that state: an approved request pointing at
-    # an invoice the reset has just reopened is exactly the half-state this
-    # fixture exists to prevent.
-    for name in ("approvals.json", "drafts.json"):
-        path = REPO_ROOT / "output" / "board" / name
+def leave_the_shop_as_we_found_it(tmp_path_factory):
+    """Put the shop back exactly as it was, not merely back to the seed.
+
+    Resetting to the seed was the first version of this, and it was wrong in a
+    way that only showed up at the end of the assignment: a finished run leaves
+    the shop at $160 with two payments written, and that state *is* the
+    deliverable. A test run that reset to $3,400 afterwards would quietly
+    destroy the result the artefacts describe, and the cash figures in
+    `resolved_tickets.json` would stop matching the database they were checked
+    against.
+
+    So the suite takes a copy of whatever it found, lets the tests do what they
+    like, and restores it. Run the tests before a run or after one; either way
+    the shop is as you left it.
+    """
+    keep = tmp_path_factory.mktemp("shop-before-tests")
+    saved_db = keep / "campus_customs_new.db"
+    if WORKING_DB.exists():
+        shutil.copy2(WORKING_DB, saved_db)
+
+    saved_board = {}
+    for name in BOARD_FILES:
+        path = BOARD / name
         if path.exists():
+            saved_board[name] = path.read_bytes()
+
+    yield
+
+    if saved_db.exists():
+        shutil.copy2(saved_db, WORKING_DB)
+    else:
+        reset_working_db()
+
+    for name in BOARD_FILES:
+        path = BOARD / name
+        if name in saved_board:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(saved_board[name])
+        elif path.exists():
             path.unlink()

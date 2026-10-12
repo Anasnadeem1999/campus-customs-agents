@@ -14,7 +14,8 @@ each new problem arrives rather than being planned out in advance.
 | 6 | Plan the three tickets (`output/desk_tickets.html`) | Done |
 | 7 | Backend routes (FastAPI, `backend/main.py`) | Done |
 | 8 | Agent dashboard (React + Vite + TS) | Done |
-| 9 | *awaiting the next problem from the user* | — |
+| 9 | Resolve the tickets: full run, cash ledger, artefacts | Done |
+| 10 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -357,3 +358,61 @@ cash at $160, two payments written and invoice 501 paid, while all three
 tickets still read `open` — so opening the desk after `pytest` showed a shop
 that had never existed. A session fixture now restores the working copy on the
 way out. **38 tests passing.**
+
+## 9 - Resolve the tickets
+
+Database reset from the pristine seed, then one full run over all three
+tickets with a human deciding every spend.
+
+| Ticket | Final status | What happened |
+|---|---|---|
+| 101 | `blocked` | Invoice 501 paid, vendor unblocked, tee ordered for $8, ETA 2026-09-05. Blocked on delivery. |
+| 102 | `resolved` | Notice checked against the lease, $2,400 paid, lease rolled to 2026-10-02. |
+| 103 | `resolved` | Declined with a counter-offer: 8 of 20 on hand, $264 restock refused, $50/unit approved, draft filed unsent. |
+
+### The money, checked not asserted
+
+`$3,400.00 - $840.00 - $2,400.00 = $160.00`, and `cash_accounts.balance` for
+`checking` reads **$160.00**. `scripts/build_resolved.py` exits non-zero if
+those disagree and `scripts/fill_desk_actuals.py` refuses to write the page at
+all, so a wrong figure cannot reach a deliverable quietly.
+
+Three things deliberately did not move the balance: the $8 purchase order (a
+commitment, invoiced later), the $264 restock (refused, never a payment), and
+the $50 price override (a price, not a payment).
+
+### Plan versus run
+
+Expected plans were written in Problem 6 before the run and were not edited
+afterwards.
+
+- **103 - 3 of 3.** Followed the plan step for step, including Inventory
+  before Accounting on a ticket typed `price_override`.
+- **102 - 1 of 2, and the plan was wrong.** The expected
+  `Facilities -> Accounting` hop did not happen; both agents read
+  `get_cash_position` themselves. Shop rule 7 says not to delegate what a tool
+  already answers, so the team was right.
+- **101 - 2 of 3, and the miss matters.** Customer Service was never called,
+  so **Tauhid Zaman was never written to**. The shop ordered his tee and told
+  him nothing. Only visible because a plan existed to compare against.
+
+### Artefacts
+
+- `output/resolved_tickets.json` - per ticket: status, outcome, every agent's
+  turns, tools and contribution, and every human approval.
+- `output/desk_tickets.html` - Expected and Actual side by side, plus a Cash
+  tab itemising the ledger. Reflection tab still a stub for a later problem.
+- `output/resolved_board.html` - the React board per resolved ticket,
+  screenshots embedded as base64 so it opens on a double-click.
+- `output/audit_trail.json` - **25 steps appended** across four run ids;
+  earlier runs untouched. Every step resolved to `gpt-6-luna-2026-09-22`.
+- `output/harness.md` - finished: tables, MCP tools, agents, routes,
+  dashboard, safety, and this run. 11 sections.
+
+### The test suite now restores the shop rather than resetting it
+
+Resetting to the seed after a test run would have destroyed exactly this
+result - the run ends at $160 with two payments written, and that state *is*
+the deliverable. The session fixture now copies whatever it finds and puts it
+back, so tests can be run before or after a run without invalidating it.
+**38 tests passing**, and the shop is unchanged afterwards.

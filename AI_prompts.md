@@ -642,3 +642,45 @@ operations desk calling the Problem 7 routes, plus `output/design.md`.
    server started earlier in the session stopped noticing file changes, so the
    fixes above were verified against a freshly started backend and by the test
    suite. The committed code is correct; a restart picks it up.
+
+## Problem 9 - Resolve tickets
+
+**Prompt, verbatim:**
+
+> Problem 9: Resolve tickets
+> Okay so now for this problem before we start testing the agents on a full run over the three tickers, please reset the working database "data/campus_customs_new.db" again so that you can start off clean. Pleae note that the starting checking balance, and then run all of the three tickets on the board which includes 101, 102, and 103 until each one of these are resolved. Please also open the output/desk_tickets.html from the earlier problem 6, and on each of the ticket tab please fill in the actual section from this run which includes which agents worked, what they were delegated, and also which tools they have used. Please also keep hold of the expected section so that the two can be compared.
+> Now on the cash tab of the same output/desk_tickets.html, please itemize the money, which includes the starting checking balance after the reset, then for each ticket how the cash did change and what that ticket resolved and also why which includes which pay or purchase and the dollar amount, also the ending checking balance must match the cash_accounts in the working database. Please note that the wrong cash math will be making me lose points even if the board shows that every ticket is resolved hence pls be mindful of this. Please also save the output/resolved tickets.json for each of the ticket including id, the final status, the short outcome, and what each agent contributed including any human approvals, also the output/resolved_board.html which is a page that can be double clicked with a screenshot of the react board for each of the resolved tickets which includes  101, 102 and 103. Please make sure about appending the real runs to the output/audit_trail.json and finish the output/harness.md so that it covers the tables, the mcp tools, the five agents, the api routes, the dashboard, and the safety rules.
+
+No follow-up prompt was needed.
+
+**What the initial prompt did not cover, resolved while working:**
+
+1. **"until each one of these are resolved" cannot be fully met, and the data
+   says so.** Ticket 101 ends `blocked`: the invoice is paid, the vendor is
+   unblocked and the tee is ordered, but it arrives 2026-09-05 while the
+   shop's date is 2026-08-31. By the shop's own rules, waiting on a vendor
+   *is* `blocked`, and marking it resolved would mean claiming stock that is
+   not on the shelf. The Problem 6 plan predicted exactly this. 102 and 103
+   are genuinely resolved - 103 as a definitive refusal with a counter-offer,
+   which the rules define as resolution.
+2. **"wrong cash math will be making me lose points" deserved a mechanism, not
+   care.** The ending balance is computed from the ledger and then compared
+   against `cash_accounts`; `scripts/build_resolved.py` exits non-zero on a
+   mismatch and `scripts/fill_desk_actuals.py` refuses to write the page at
+   all. A wrong figure cannot reach a deliverable quietly.
+3. **Three items could have been double-counted.** The $8 purchase order is a
+   commitment, not a payment - cash leaves when the vendor invoices. The $264
+   restock was refused and never became a payment. The $50 price override is a
+   price. All three are listed explicitly under "what did not move the
+   balance" rather than silently omitted.
+4. **Running the tests would have destroyed the result.** The suite resets the
+   working database, and this run's end state - $160 with two payments - *is*
+   the deliverable. The session fixture now copies the shop before the suite
+   and restores it afterwards, so tests and runs no longer fight.
+5. **Two display defects found while capturing the screenshots.** The
+   dashboard's per-agent summary was counting every historical run, reporting
+   "Facilities - 7 turns" for a ticket this run touched twice; it is now
+   scoped to the latest run. And `is_error` was set by searching tool output
+   for the word "refused", which flagged every successful `list_approvals`
+   red, because agents routinely write "if refused" in an approval reason. It
+   now uses the SDK's own outcome field.

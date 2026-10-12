@@ -829,6 +829,180 @@ real database, with no model and no network.
 
 ---
 
+---
+
+## 9. The dashboard (Problem 8)
+
+`frontend/` — React + Vite + TypeScript. Start it from that folder:
+
+```bash
+npm run dev          # http://localhost:5180
+```
+
+It calls the backend directly at `http://localhost:8000`. There is no dev
+proxy, deliberately: a proxy would make the request same-origin and hide
+whether CORS is configured correctly, so the browser makes a genuine
+cross-origin request and the backend's allowance is exercised every time.
+
+**Port 5180, not Vite's default 5173.** Another project in this workspace
+already holds 5173, and the first run of this dashboard served *that project's
+storefront* — the browser looked perfectly healthy while showing an entirely
+different application. `strictPort` now makes a clash fail loudly.
+
+### Layout
+
+A fixed, full-height three-column workspace, ordered the way the work flows:
+
+| Column | Holds |
+|---|---|
+| **The board** | The three tickets, each with status and a *Put the team on it* button |
+| **The team at work** | Per-agent summary for the latest run, then the live agent feed |
+| **Waiting on you** | Approvals needing a human decision, then the team roster |
+
+Cash sits in the masthead, because it constrains every ticket rather than one
+panel, and it is the largest number on the page.
+
+### How the agents read apart
+
+Each of the five carries **three** consistent signals — a fixed colour as a
+spine down its event cards, a two-letter monogram, and its name — so the feed
+is followable by colour without reading a name on every line, and still works
+in greyscale. Each event card shows who asked them, what they said as prose,
+which MCP tools they called, **the figures they cited with the source tool in
+the tooltip**, what blocked them, and a footer carrying the resolved model,
+tokens and seconds.
+
+That figures row is the quiet centrepiece: the shop rules forbid stating a
+number that did not come from a tool, and the row is that rule made visible.
+
+### Resolved tickets and cash
+
+A resolved ticket **recedes rather than disappears** — green spine, `RESOLVED`
+chip, 62% opacity, strikethrough. It is still part of the day but has stopped
+asking for attention. `working` pulses amber and is the only animated element
+on the page; `blocked` is red; `awaiting approval` is amber.
+
+The till **flashes only when the balance actually changes**, never on the
+two-second poll, so the one time it catches the eye is the time money moved.
+Below it, when anything is approved but unpaid, a second line separates what is
+in the bank from what is already spoken for.
+
+Full reasoning, including what was deliberately left out, is in
+**`output/design.md`**.
+
+---
+
+## 10. The full run (Problem 9)
+
+One run over all three tickets, from a database reset immediately beforehand.
+Opening balance **$3,400.00**, shop date **2026-08-31**.
+
+### Outcomes
+
+| Ticket | Final status | What happened |
+|---|---|---|
+| **101** Bulldog tee | `blocked` | Invoice 501 paid, lifting the vendor's shipping block; the one size-S tee ordered for $8, ETA **2026-09-05**. Blocked on that delivery — everything in the shop's power is done, but the tee is not on the shelf on 2026-08-31. |
+| **102** Rent due | `resolved` | Notice checked against lease 1 and found correct; $2,400 paid; lease rolled to 2026-10-02 so the month cannot be paid twice. |
+| **103** Bulk hoodies | `resolved` | Declined with a counter-offer. 8 of 20 on hand; the $264 restock refused against $160 uncommitted; $50/unit approved and a draft filed, unsent. |
+
+### The money
+
+| Stage | Change | Balance |
+|---|---:|---:|
+| Opening, after reset | — | **$3,400.00** |
+| Ticket 101 — invoice 501 paid | −840.00 | $2,560.00 |
+| Ticket 102 — rent on lease 1 | −2,400.00 | $160.00 |
+| Ticket 103 — restock refused | — | $160.00 |
+| **Closing** | **−3,240.00** | **$160.00** |
+
+`$3,400.00 − $840.00 − $2,400.00 = $160.00`, and `cash_accounts.balance` for
+`checking` reads **$160.00**. Checked, not asserted —
+`scripts/build_resolved.py` exits non-zero if the two disagree, and
+`scripts/fill_desk_actuals.py` refuses to write the page at all.
+
+Three things deliberately did **not** move the balance: the $8 purchase order
+(a commitment; cash leaves when the vendor invoices), the $264 restock
+(refused, so it never became a payment), and the $50 price override (a price,
+not a payment).
+
+### Human decisions
+
+Five approval requests, decided by a human outside anything an agent can reach:
+
+| # | What | Amount | Decision |
+|---|---|---:|---|
+| 1 | invoice payment, invoice 501 | $840.00 | approved → paid |
+| 2 | rent payment, lease 1 | $2,400.00 | approved → paid |
+| 3 | purchase order, 1 tee | $8.00 | approved → placed, no cash |
+| 4 | price override, ticket 103 | $50.00/unit | approved, no cash |
+| 5 | purchase order, 12 hoodies | $264.00 | **rejected** — $160 will not cover it |
+
+Request 5 is the seeded cash squeeze landing exactly where the data said it
+would, and being refused out loud rather than part-funded or quietly dropped.
+
+### Plan versus run
+
+The expected plans were written in Problem 6 **before** this run and were not
+edited afterwards. Side by side in `output/desk_tickets.html`:
+
+- **Ticket 103 — 3 of 3.** The run followed the plan step for step, including
+  calling Inventory rather than Accounting first on a ticket typed
+  `price_override`, which the plan had flagged as the call most likely to be
+  got wrong.
+- **Ticket 102 — 1 of 2, and the miss was the plan's fault.** The expected
+  `Facilities → Accounting` hop did not happen; both agents read
+  `get_cash_position` themselves instead. Shop rule 7 says not to delegate what
+  a tool in front of you already answers, so the team was right and the plan
+  was wrong.
+- **Ticket 101 — 2 of 3, and the miss matters.** Customer Service was never
+  called, so **Tauhid Zaman was never written to**. The shop ordered his tee
+  and told him nothing. The clearest failure of the run, and only visible
+  because the plan existed to compare against.
+
+### Provenance
+
+- **25 steps appended** to `output/audit_trail.json` across four run ids —
+  earlier runs were not overwritten, and the file now holds every run since
+  Problem 5.
+- **Every step resolved to `gpt-6-luna-2026-09-22`**, checked against what the
+  gateway reported rather than what was requested.
+- Artefacts: `output/resolved_tickets.json`, `output/desk_tickets.html`
+  (Expected and Actual side by side, plus the Cash tab),
+  `output/resolved_board.html` (board screenshots, self-contained).
+
+---
+
+## 11. What this harness covers
+
+| Piece | Where |
+|---|---|
+| The nine tables | §1, with the three tickets' linkage in §2 |
+| Facts agents must compute, never recall | §3 |
+| The MCP tools — all fourteen, with the tables each uses | §4 (the first three) and §6.2 (the full table) |
+| Connecting and smoke-testing the server | §5 |
+| The five agents, their prompts and the delegation graph | §6 |
+| The audit trail and the model check | §6.3, §6.4 |
+| Safety and guard rails, including token limits | §7 |
+| The API routes, one line each | §8 |
+| The dashboard | §9, with full design reasoning in `output/design.md` |
+| The full three-ticket run and its cash | §10 |
+
+### The rules, in one place
+
+1. The seed database is never opened — `db.connect()` raises rather than touch it.
+2. Every shop fact comes from the MCP server; nothing else reads SQLite.
+3. `desk.date_today` is "today"; the wall clock is never consulted for shop logic.
+4. A vendor holding an unpaid invoice ships nothing.
+5. **No agent can approve spending** — the verb does not exist on the MCP server.
+6. A payment moves cash, the `payments` row and the invoice or lease together, or not at all.
+7. The balance may never go negative; the pay tools refuse and write nothing.
+8. Cash only goes out — revenue is not modelled.
+9. Nothing is ever sent to a customer or a vendor; there is no send tool.
+10. `.env` is never committed; `.env.example` carries placeholders.
+11. Every agent runs on `gpt-6-luna`, and the **resolved** name is checked on every call.
+
+---
+
 ## Appendix — verified data integrity
 
 Checked against the seed at Problem 2; no surprises to code around.
