@@ -110,3 +110,13 @@ shortfall 1, 103 → shortfall 12 with 8 available, apparel vendor
   reads `.mcp.json` at startup. Noted in the evidence under
   `vibe_coder_connection`; a restart makes them callable.
 
+
+### Connection confirmed live (after a session restart)
+
+The restart Problem 4 said was needed has happened, so the caveat above is
+settled: the vibe coder now exposes `mcp__campus-customs__check_stock_by_size`,
+`find_restock_vendors` and `check_rent_due`, and all three were called from the
+chat with the harness's own arguments. Each payload is structurally identical
+to the stored `tool_output` for its case — checked by equality, not by eye.
+`output/mcp_smoke.json` → `vibe_coder_connection` carries the live payloads and
+now reads `confirmed live in the vibe coder`.

@@ -360,3 +360,19 @@ Decisions taken under that delegation:
    tools called against `list_tools()`, so the file cannot claim to have
    tested all three while skipping one.
 
+
+**Follow-up prompt, typed after restarting the session:**
+
+> I was asked to restart to activate the tools
+
+What this prompt closed: item 1 above. The restart is the one thing the
+writing session could not do for itself, and it turned the pending connection
+into a real one. The three tools appeared as `mcp__campus-customs__*` and were
+called straight from the chat — `check_stock_by_size` with
+`CC-TEE-WHITE`/`S`/1, `find_restock_vendors` with `specialty_contains:
+"apparel"`, and `check_rent_due` with `lease_id: 1`, the same arguments the
+harness used. All three payloads came back **structurally identical** to the
+stored `tool_output` for their case, compared by full equality rather than by
+eye. `output/mcp_smoke.json` → `vibe_coder_connection` now records the live
+payloads and reads `confirmed live in the vibe coder` instead of
+`requires a vibe-coder restart`.
