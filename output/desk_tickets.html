@@ -248,9 +248,9 @@
     <table>
       <thead><tr><th>Agent</th><th>Turns</th><th>Asked by</th><th>What they contributed</th><th>MCP tools used</th></tr></thead>
       <tbody>
-<tr><td><strong>Inventory</strong></td><td>5</td><td>Boss</td><td>Found size S at qty 0 against a request for 1, identified Bulldog Print Co as the only apparel vendor, and reported it could not ship while invoice 501 was open. Placed the restock order once the invoice was paid and the order approved.</td><td class='toolcell'><code>find_restock_vendors</code> <code>list_invoices</code> <code>check_stock_by_size</code> <code>list_tickets</code> <code>update_ticket</code> <code>list_approvals</code> <code>get_cash_position</code> <code>place_purchase_order</code></td></tr>
-<tr><td><strong>Accounting</strong></td><td>2</td><td>Boss</td><td>Priced the blocker at $840, three days overdue, checked it against the $3,400 balance, and raised approval 1 for the invoice payment.</td><td class='toolcell'><code>list_approvals</code> <code>get_cash_position</code> <code>check_rent_due</code> <code>list_invoices</code> <code>list_tickets</code> <code>request_approval</code> <code>update_ticket</code></td></tr>
-<tr><td><strong>Boss</strong></td><td>4</td><td>the run</td><td>Followed the ticket's own link to invoice 501, delegated the stock and the cash questions separately, paid the invoice once a human approved it, then requested and placed the $8 purchase order for the single tee.</td><td class='toolcell'><code>list_approvals</code> <code>list_tickets</code> <code>check_stock_by_size</code> <code>list_invoices</code> <code>get_cash_position</code> <code>find_restock_vendors</code> <code>update_ticket</code> <code>pay_invoice</code> <code>quote_discount</code> <code>request_approval</code> <code>place_purchase_order</code></td></tr>
+<tr><td><strong>Inventory</strong></td><td>5</td><td>Boss</td><td>Found size S at qty 0 against a request for 1, identified Bulldog Print Co as the only apparel vendor, and reported it could not ship while invoice 501 was open. Placed the restock order once the invoice was paid and the order approved.</td><td class='toolcell'><code>find_restock_vendors</code> <code>list_invoices</code> <code>check_stock_by_size</code> <code>list_tickets</code> <code>update_ticket</code> <code>list_approvals</code> <code>quote_discount</code></td></tr>
+<tr><td><strong>Accounting</strong></td><td>3</td><td>Boss</td><td>Priced the blocker at $840, three days overdue, checked it against the $3,400 balance, and raised approval 1 for the invoice payment.</td><td class='toolcell'><code>list_approvals</code> <code>get_cash_position</code> <code>check_rent_due</code> <code>list_invoices</code> <code>list_tickets</code> <code>request_approval</code> <code>update_ticket</code></td></tr>
+<tr><td><strong>Boss</strong></td><td>4</td><td>the run</td><td>Followed the ticket's own link to invoice 501, delegated the stock and the cash questions separately, paid the invoice once the owner approved it, then requested and placed the $8 purchase order for the single tee.</td><td class='toolcell'><code>list_approvals</code> <code>list_tickets</code> <code>check_stock_by_size</code> <code>list_invoices</code> <code>get_cash_position</code> <code>find_restock_vendors</code> <code>update_ticket</code> <code>pay_invoice</code> <code>request_approval</code> <code>quote_discount</code> <code>place_purchase_order</code></td></tr>
       </tbody>
     </table>
 
@@ -287,7 +287,7 @@
 
     <h3>Where it diverged</h3>
     <ul class="tight">
-      <li><strong>Customer Service was never called.</strong> The plan had it third, drafting Tauhid a reply. It did not happen, so the one person actually waiting on this ticket was never written to. The shop ordered his tee and told him nothing. This is the clearest miss of the run.</li>
+      <li><strong>Customer Service was never called.</strong> The plan had it third, drafting Tauhid a reply. It did not happen, so the one person actually waiting on this ticket was never written to. The shop paid an invoice, ordered his tee and told him nothing. This is the clearest miss of the run &mdash; and it repeated from the previous run, so it is a pattern in how the Boss handles this ticket rather than a one-off.</li>
     </ul>
 
     <p class="note"><strong>Verdict:</strong> 2 of 3 planned delegations happened. The missing one was the customer.</p>
@@ -410,8 +410,8 @@
     <table>
       <thead><tr><th>Agent</th><th>Turns</th><th>Asked by</th><th>What they contributed</th><th>MCP tools used</th></tr></thead>
       <tbody>
-<tr><td><strong>Facilities</strong></td><td>2</td><td>Boss</td><td>Checked the landlord's notice against lease 1 and confirmed $2,400 genuinely due 2026-09-02 -- two days out, not overdue. Paid the rent against the approved request and closed the ticket.</td><td class='toolcell'><code>check_rent_due</code> <code>list_tickets</code> <code>list_approvals</code> <code>get_cash_position</code> <code>pay_rent</code> <code>update_ticket</code></td></tr>
-<tr><td><strong>Boss</strong></td><td>2</td><td>the run</td><td>Delegated verification to Facilities rather than taking the notice at face value, raised approval 2 for the $2,400 once the lease confirmed it, and recorded the outcome.</td><td class='toolcell'><code>list_approvals</code> <code>list_tickets</code> <code>check_rent_due</code> <code>get_cash_position</code> <code>request_approval</code> <code>update_ticket</code></td></tr>
+<tr><td><strong>Facilities</strong></td><td>2</td><td>Boss</td><td>Checked the landlord's notice against lease 1 and confirmed $2,400 genuinely due 2026-09-02 -- two days out, not overdue. Paid the rent against the approved request and closed the ticket.</td><td class='toolcell'><code>check_rent_due</code> <code>list_approvals</code> <code>update_ticket</code> <code>get_cash_position</code></td></tr>
+<tr><td><strong>Boss</strong></td><td>2</td><td>the run</td><td>Delegated verification to Facilities rather than taking the notice at face value, raised approval 2 for the $2,400 once the lease confirmed it, and recorded the outcome.</td><td class='toolcell'><code>list_approvals</code> <code>list_tickets</code> <code>check_rent_due</code> <code>get_cash_position</code> <code>request_approval</code> <code>update_ticket</code> <code>pay_rent</code></td></tr>
       </tbody>
     </table>
 
@@ -446,7 +446,7 @@
 
     <h3>Where it diverged</h3>
     <ul class="tight">
-      <li><strong>The Facilities &rarr; Accounting hop did not happen.</strong> The plan expected a peer-to-peer delegation to check affordability. Instead Facilities and the Boss each called <code>get_cash_position</code> themselves. <em>This divergence is arguably the team being right and the plan being wrong:</em> shop rule 7 says not to delegate what a tool in front of you already answers, and asking a colleague would have cost a whole model call to return the same number.</li>
+      <li><strong>The Facilities &rarr; Accounting hop did not happen</strong>, again. Both Facilities and the Boss called <code>get_cash_position</code> themselves instead. <em>This is the team being right and the plan being wrong:</em> shop rule 7 says not to delegate what a tool in front of you already answers, and asking a colleague would have spent a model call to return the same number.</li>
     </ul>
 
     <p class="note"><strong>Verdict:</strong> 1 of 2 planned delegations happened, and skipping the other was the better call.</p>
@@ -557,18 +557,18 @@
   <div class="card">
     <div class="ticket-head">
       <h3 style="margin:0">Final status</h3>
-      <span class="chip s-resolved">resolved</span>
+      <span class="chip s-blocked">blocked</span>
     </div>
-    <p>Declined as asked, with a concrete counter-offer. 8 of the 20 size-M hoodies are on hand; the 12-unit shortfall needed a $264 restock against $160 of uncommitted cash, so the owner refused it. A price of $50 a unit was approved, and a draft offering the 8 available at that price sits on the board, unsent.</p>
+    <p>Blocked, with the refusal reasoned and a draft already written. 8 of the 20 size-M hoodies are on hand; the 12-unit shortfall needs a $264 restock against $160 of uncommitted cash, a gap of $104. The team deliberately did NOT raise a purchase-order request it knew could not be funded, so no approval was ever put in front of a human for it. A draft offering the Yale AI Club the 8 hoodies that actually exist sits on the board, unsent.</p>
 
     <h3>Who worked it, and with what</h3>
     <table>
       <thead><tr><th>Agent</th><th>Turns</th><th>Asked by</th><th>What they contributed</th><th>MCP tools used</th></tr></thead>
       <tbody>
-<tr><td><strong>Inventory</strong></td><td>2</td><td>Boss</td><td>Reported 8 size M hoodies on hand against 20 requested -- a shortfall of 12 -- and confirmed the same apparel vendor blocked by the same invoice 501 as ticket 101.</td><td class='toolcell'><code>check_stock_by_size</code> <code>find_restock_vendors</code> <code>quote_discount</code></td></tr>
-<tr><td><strong>Accounting</strong></td><td>3</td><td>Boss</td><td>Quoted the deal: $22 unit cost against a $58 list, $50 proposed leaving $28 margin a unit, and $264 to restock the 12 missing. Said plainly that $264 would not fit in $160 of uncommitted cash, and raised both the price override and the restock request rather than hiding the one it expected to be refused.</td><td class='toolcell'><code>quote_discount</code> <code>get_cash_position</code> <code>list_approvals</code> <code>list_tickets</code> <code>find_restock_vendors</code> <code>update_ticket</code> <code>check_stock_by_size</code> <code>list_invoices</code> <code>check_rent_due</code> <code>request_approval</code></td></tr>
-<tr><td><strong>Boss</strong></td><td>3</td><td>the run</td><td>Reframed a discount ticket as a supply question, ranked the restock below the rent and the invoice, and closed it as a declined-with-an-offer rather than a promise the shop could not keep.</td><td class='toolcell'><code>list_approvals</code> <code>list_tickets</code> <code>get_cash_position</code> <code>quote_discount</code> <code>check_stock_by_size</code> <code>find_restock_vendors</code> <code>update_ticket</code> <code>list_invoices</code></td></tr>
-<tr><td><strong>Customer Service</strong></td><td>2</td><td>Boss</td><td>Drafted the Yale AI Club a reply offering the 8 hoodies actually on the shelf at the approved $50, and saying the remaining 12 are not being promised. Filed, not sent.</td><td class='toolcell'><code>list_tickets</code> <code>quote_discount</code> <code>draft_customer_message</code> <code>update_ticket</code> <code>check_stock_by_size</code> <code>list_approvals</code></td></tr>
+<tr><td><strong>Inventory</strong></td><td>5</td><td>Boss</td><td>Reported 8 size M hoodies on hand against 20 requested -- a shortfall of 12 -- and confirmed the same apparel vendor blocked by the same invoice 501 as ticket 101.</td><td class='toolcell'><code>check_stock_by_size</code> <code>find_restock_vendors</code> <code>quote_discount</code> <code>list_tickets</code> <code>update_ticket</code> <code>list_approvals</code> <code>get_cash_position</code></td></tr>
+<tr><td><strong>Accounting</strong></td><td>5</td><td>Boss</td><td>Quoted the deal: $22 unit cost against a $58 list, and $264 to restock the 12 missing. Put the $104 funding gap in figures and escalated the call back up to the Boss rather than requesting a commitment the shop could not meet.</td><td class='toolcell'><code>quote_discount</code> <code>get_cash_position</code> <code>list_approvals</code> <code>list_tickets</code> <code>find_restock_vendors</code> <code>update_ticket</code> <code>list_invoices</code> <code>check_rent_due</code> <code>check_stock_by_size</code></td></tr>
+<tr><td><strong>Boss</strong></td><td>6</td><td>Accounting, the run</td><td>Reframed a discount ticket as a supply question, ranked the restock below the rent and the invoice, and held the ticket at blocked with the gap stated in figures rather than promising stock the shop could not buy.</td><td class='toolcell'><code>list_approvals</code> <code>list_tickets</code> <code>get_cash_position</code> <code>quote_discount</code> <code>check_stock_by_size</code> <code>find_restock_vendors</code> <code>update_ticket</code> <code>list_invoices</code> <code>draft_customer_message</code></td></tr>
+<tr><td><strong>Customer Service</strong></td><td>3</td><td>Boss</td><td>Drafted the Yale AI Club a reply offering the 8 hoodies actually on the shelf and saying plainly that the remaining 12 are not being promised. Filed, not sent.</td><td class='toolcell'><code>list_tickets</code> <code>quote_discount</code> <code>draft_customer_message</code> <code>update_ticket</code> <code>check_stock_by_size</code> <code>list_approvals</code> <code>get_cash_position</code> <code>find_restock_vendors</code></td></tr>
       </tbody>
     </table>
 
@@ -576,20 +576,19 @@
     <table>
       <thead><tr><th>#</th><th>What</th><th>Amount</th><th>Decision</th><th>Effect</th></tr></thead>
       <tbody>
-<tr><td>#4</td><td>price override (ref 103)</td><td>$50.00</td><td><span class='chip s-resolved'>approved</span> by Anas Nadeem</td><td>no cash moved</td></tr>
-<tr><td>#5</td><td>purchase order (ref 1)</td><td>$264.00</td><td><span class='chip s-blocked'>rejected</span> by Anas Nadeem</td><td>no cash moved</td></tr>
+<tr><td colspan='5'>None raised for this ticket.</td></tr>
       </tbody>
     </table>
 
     <h3>Left on the board</h3>
-    <ul class='tight'><li>customer message to <strong>Yale AI Club</strong> &mdash; Your bulk hoodie request <em>(not sent)</em></li><li>customer message to <strong>Yale AI Club</strong> &mdash; Your navy hoodie order <em>(not sent)</em></li></ul>
+    <ul class='tight'><li>customer message to <strong>Yale AI Club</strong> &mdash; Your bulk hoodie request <em>(not sent)</em></li><li>customer message to <strong>Yale AI Club</strong> &mdash; Bulk hoodie request <em>(not sent)</em></li><li>customer message to <strong>Yale AI Club</strong> &mdash; Update on your size-M hoodie request <em>(not sent)</em></li><li>customer message to <strong>Yale AI Club</strong> &mdash; Your size-M hoodie order <em>(not sent)</em></li></ul>
 
     <h3>Cash effect</h3>
     <p>
       $160.00 &rarr;
       <strong>$160.00</strong>
       (no change).
-      No money moved. The $264 restock was the third spend the shop could not fund, and it was refused outright rather than part-funded or quietly dropped.
+      No money moved, and none was ever asked for. The $264 restock is the third spend the shop cannot fund on $160, and the team declined to request it rather than put an unfundable commitment in front of the owner.
     </p>
   </div>
 
@@ -606,10 +605,12 @@
 
     <h3>Where it diverged</h3>
     <ul class="tight">
-      <li>Nothing. The run followed the plan step for step, including the optional <code>price_override</code> request the plan said it would not penalise either way.</li>
+      <li><strong>Accounting delegated upward to the Boss</strong> &mdash; an <code>accounting &rarr; boss</code> hop the plan did not anticipate. This is the fully-connected team doing something a hub-and-spoke one could not: a specialist escalating a judgement call rather than answering beyond its remit.</li>
+      <li><strong>No approval was raised for the restock at all.</strong> The plan expected the $264 request to reach a human and be refused. Instead Accounting put the $104 funding gap in figures and declined to ask, on the grounds that the shop cannot fund it. Defensible &mdash; the shop rules say not to request what cannot be funded &mdash; but it means the owner never saw the trade-off. A human might reasonably want to make that call themselves.</li>
+      <li>The ticket ends <code>blocked</code> rather than resolved, because no price was ever agreed. The plan allowed for this, calling the price override optional.</li>
     </ul>
 
-    <p class="note"><strong>Verdict:</strong> 3 of 3 planned delegations happened, in the planned order.</p>
+    <p class="note"><strong>Verdict:</strong> 3 of 3 planned delegations happened, plus one upward hop the plan missed.</p>
   </div>
 </section>
 
@@ -636,7 +637,7 @@
         </tr>
 <tr><td class='step'>#101</td><td>blocked</td><td class='num'>$3,400.00</td><td class='num'><strong>-840.00</strong></td><td class='num'>$2,560.00</td><td>Paid invoice 501 -- $840, three days overdue -- to unblock the only apparel vendor. The $8 purchase order is a commitment, not a payment: cash leaves when the vendor invoices, so it does not appear in this balance.</td></tr>
 <tr><td class='step'>#102</td><td>resolved</td><td class='num'>$2,560.00</td><td class='num'><strong>-2,400.00</strong></td><td class='num'>$160.00</td><td>Paid $2,400 rent on lease 1. Top spending priority, because losing the space ends every other ticket on the board.</td></tr>
-<tr><td class='step'>#103</td><td>resolved</td><td class='num'>$160.00</td><td class='num'>&mdash;</td><td class='num'>$160.00</td><td>No money moved. The $264 restock was the third spend the shop could not fund, and it was refused outright rather than part-funded or quietly dropped.</td></tr>
+<tr><td class='step'>#103</td><td>blocked</td><td class='num'>$160.00</td><td class='num'>&mdash;</td><td class='num'>$160.00</td><td>No money moved, and none was ever asked for. The $264 restock is the third spend the shop cannot fund on $160, and the team declined to request it rather than put an unfundable commitment in front of the owner.</td></tr>
         <tr class="closing">
           <td class="step">&mdash;</td><td><strong>closing balance</strong></td>
           <td class="num">&mdash;</td>

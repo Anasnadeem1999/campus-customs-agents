@@ -41,8 +41,10 @@ VERDICTS = {
         "diverged": [
             "<strong>Customer Service was never called.</strong> The plan had it third, drafting "
             "Tauhid a reply. It did not happen, so the one person actually waiting on this "
-            "ticket was never written to. The shop ordered his tee and told him nothing. "
-            "This is the clearest miss of the run.",
+            "ticket was never written to. The shop paid an invoice, ordered his tee and told "
+            "him nothing. This is the clearest miss of the run &mdash; and it repeated from the "
+            "previous run, so it is a pattern in how the Boss handles this ticket rather than "
+            "a one-off.",
         ],
         "verdict": "2 of 3 planned delegations happened. The missing one was the customer.",
     },
@@ -55,12 +57,11 @@ VERDICTS = {
             "No stock question, and the landlord is not a customer.",
         ],
         "diverged": [
-            "<strong>The Facilities &rarr; Accounting hop did not happen.</strong> The plan "
-            "expected a peer-to-peer delegation to check affordability. Instead Facilities and "
-            "the Boss each called <code>get_cash_position</code> themselves. "
-            "<em>This divergence is arguably the team being right and the plan being wrong:</em> "
-            "shop rule 7 says not to delegate what a tool in front of you already answers, and "
-            "asking a colleague would have cost a whole model call to return the same number.",
+            "<strong>The Facilities &rarr; Accounting hop did not happen</strong>, again. Both "
+            "Facilities and the Boss called <code>get_cash_position</code> themselves instead. "
+            "<em>This is the team being right and the plan being wrong:</em> shop rule 7 says "
+            "not to delegate what a tool in front of you already answers, and asking a "
+            "colleague would have spent a model call to return the same number.",
         ],
         "verdict": "1 of 2 planned delegations happened, and skipping the other was the better call.",
     },
@@ -74,10 +75,20 @@ VERDICTS = {
             "<strong>Facilities was not called</strong>, as predicted.",
         ],
         "diverged": [
-            "Nothing. The run followed the plan step for step, including the optional "
-            "<code>price_override</code> request the plan said it would not penalise either way.",
+            "<strong>Accounting delegated upward to the Boss</strong> &mdash; an "
+            "<code>accounting &rarr; boss</code> hop the plan did not anticipate. This is the "
+            "fully-connected team doing something a hub-and-spoke one could not: a specialist "
+            "escalating a judgement call rather than answering beyond its remit.",
+            "<strong>No approval was raised for the restock at all.</strong> The plan expected "
+            "the $264 request to reach a human and be refused. Instead Accounting put the $104 "
+            "funding gap in figures and declined to ask, on the grounds that the shop cannot "
+            "fund it. Defensible &mdash; the shop rules say not to request what cannot be "
+            "funded &mdash; but it means the owner never saw the trade-off. A human might "
+            "reasonably want to make that call themselves.",
+            "The ticket ends <code>blocked</code> rather than resolved, because no price was "
+            "ever agreed. The plan allowed for this, calling the price override optional.",
         ],
-        "verdict": "3 of 3 planned delegations happened, in the planned order.",
+        "verdict": "3 of 3 planned delegations happened, plus one upward hop the plan missed.",
     },
 }
 

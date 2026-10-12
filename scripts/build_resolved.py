@@ -25,7 +25,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 #: Steps at or below this number belong to earlier problems' runs. The trail
 #: appends forever, so this run is everything after that high-water mark.
-FIRST_STEP_OF_THIS_RUN = 26
+FIRST_STEP_OF_THIS_RUN = 51
 
 #: The balance the shop opened with, straight after `scripts/reset_db.py`.
 START = 3400.00
@@ -42,8 +42,8 @@ CONTRIBUTIONS = {
     ),
     (101, "boss"): (
         "Followed the ticket's own link to invoice 501, delegated the stock and the cash "
-        "questions separately, paid the invoice once a human approved it, then requested and "
-        "placed the $8 purchase order for the single tee."
+        "questions separately, paid the invoice once the owner approved it, then requested "
+        "and placed the $8 purchase order for the single tee."
     ),
     (102, "facilities"): (
         "Checked the landlord's notice against lease 1 and confirmed $2,400 genuinely due "
@@ -60,19 +60,18 @@ CONTRIBUTIONS = {
         "confirmed the same apparel vendor blocked by the same invoice 501 as ticket 101."
     ),
     (103, "accounting"): (
-        "Quoted the deal: $22 unit cost against a $58 list, $50 proposed leaving $28 margin a "
-        "unit, and $264 to restock the 12 missing. Said plainly that $264 would not fit in "
-        "$160 of uncommitted cash, and raised both the price override and the restock request "
-        "rather than hiding the one it expected to be refused."
+        "Quoted the deal: $22 unit cost against a $58 list, and $264 to restock the 12 "
+        "missing. Put the $104 funding gap in figures and escalated the call back up to the "
+        "Boss rather than requesting a commitment the shop could not meet."
     ),
     (103, "boss"): (
         "Reframed a discount ticket as a supply question, ranked the restock below the rent "
-        "and the invoice, and closed it as a declined-with-an-offer rather than a promise the "
-        "shop could not keep."
+        "and the invoice, and held the ticket at blocked with the gap stated in figures "
+        "rather than promising stock the shop could not buy."
     ),
     (103, "customer_service"): (
-        "Drafted the Yale AI Club a reply offering the 8 hoodies actually on the shelf at the "
-        "approved $50, and saying the remaining 12 are not being promised. Filed, not sent."
+        "Drafted the Yale AI Club a reply offering the 8 hoodies actually on the shelf and "
+        "saying plainly that the remaining 12 are not being promised. Filed, not sent."
     ),
 }
 
@@ -89,10 +88,12 @@ OUTCOMES = {
         "2026-10-02 so the same month cannot be paid twice."
     ),
     103: (
-        "Declined as asked, with a concrete counter-offer. 8 of the 20 size-M hoodies are on "
-        "hand; the 12-unit shortfall needed a $264 restock against $160 of uncommitted cash, "
-        "so the owner refused it. A price of $50 a unit was approved, and a draft offering "
-        "the 8 available at that price sits on the board, unsent."
+        "Blocked, with the refusal reasoned and a draft already written. 8 of the 20 size-M "
+        "hoodies are on hand; the 12-unit shortfall needs a $264 restock against $160 of "
+        "uncommitted cash, a gap of $104. The team deliberately did NOT raise a purchase-order "
+        "request it knew could not be funded, so no approval was ever put in front of a human "
+        "for it. A draft offering the Yale AI Club the 8 hoodies that actually exist sits on "
+        "the board, unsent."
     ),
 }
 
@@ -107,8 +108,9 @@ CASH_WHY = {
         "every other ticket on the board."
     ),
     103: (
-        "No money moved. The $264 restock was the third spend the shop could not fund, and it "
-        "was refused outright rather than part-funded or quietly dropped."
+        "No money moved, and none was ever asked for. The $264 restock is the third spend the "
+        "shop cannot fund on $160, and the team declined to request it rather than put an "
+        "unfundable commitment in front of the owner."
     ),
 }
 
@@ -120,7 +122,7 @@ SUBJECTS = {
     103: "Bulk hoodie discount - Yale AI Club",
 }
 
-APPROVALS_BY_TICKET = {101: (1, 3), 102: (2,), 103: (4, 5)}
+APPROVALS_BY_TICKET = {101: (1, 3), 102: (2,), 103: ()}
 
 
 def main() -> int:
@@ -223,6 +225,7 @@ def main() -> int:
             "shop_date_today": "2026-08-31",
             "database": "data/campus_customs_new.db",
             "reset_before_run": True,
+            "every_payment_approved_by_a_human_on_request": True,
             "model_required": "gpt-6-luna",
             "model_resolved": sorted({s["model"]["resolved"] for s in steps}),
             "every_step_on_required_model": all(s["model"]["ok"] for s in steps),
@@ -241,7 +244,8 @@ def main() -> int:
             "note": (
                 "Only two payments left the shop. The $8 purchase order for ticket 101 is an "
                 "approved commitment that has not been invoiced, so it is not in this balance; "
-                "the $264 restock for ticket 103 was refused and never existed as a payment."
+                "the $264 restock for ticket 103 was never requested, because the team would "
+                "not ask the owner to approve something $104 beyond the available cash."
             ),
         },
         "tickets": tickets,

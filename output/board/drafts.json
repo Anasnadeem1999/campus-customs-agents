@@ -13,6 +13,18 @@
   },
   {
     "id": 2,
+    "ticket_id": 103,
+    "ticket_requester": "Yale AI Club",
+    "recipient": "Yale AI Club",
+    "subject": "Bulk hoodie request",
+    "body": "We can offer the 8 navy hoodies in size M currently on hand, but we cannot confirm the full 20-hoodie order or the requested bulk price of $50 per hoodie now. The remaining 12 size-M hoodies require a $264 restock, while only $160 is uncommitted; the $50 price override and restock approval are not approved. We will need funding and human approval before confirming the full order or a delivery date.",
+    "drafted_by": "boss",
+    "drafted_on_shop_date": "2026-08-31",
+    "delivery_status": "not_sent",
+    "note": "Draft only. This server has no tool that sends anything."
+  },
+  {
+    "id": 3,
     "record_type": "purchase_order",
     "vendor_id": 1,
     "vendor_name": "Bulldog Print Co",
@@ -29,12 +41,24 @@
     "note": "Order recorded on the board. No vendor was contacted."
   },
   {
-    "id": 3,
+    "id": 4,
     "ticket_id": 103,
     "ticket_requester": "Yale AI Club",
     "recipient": "Yale AI Club",
-    "subject": "Your navy hoodie order",
-    "body": "We can offer 8 CC-HOOD-NAVY hoodies in size M at the approved bulk price of $50 each, subject to your confirmation. We can\u2019t fulfill the full 20-hoodie request: only 8 are currently available, and we can\u2019t commit to the remaining 12 or give a restock date. Would you like to proceed with the 8 available hoodies at $50 each?",
+    "subject": "Update on your size-M hoodie request",
+    "body": "We currently have 8 of the 20 size-M hoodies on hand, so we can\u2019t fill the full quantity now. The bulk discount and restock have not been approved, so we can\u2019t confirm a discounted price or a restock date yet. We\u2019ll follow up once those decisions are made; if you\u2019d like, please let us know whether you\u2019d consider taking the 8 available hoodies while the remaining 12 are unresolved.",
+    "drafted_by": "customer_service",
+    "drafted_on_shop_date": "2026-08-31",
+    "delivery_status": "not_sent",
+    "note": "Draft only. This server has no tool that sends anything."
+  },
+  {
+    "id": 5,
+    "ticket_id": 103,
+    "ticket_requester": "Yale AI Club",
+    "recipient": "Yale AI Club",
+    "subject": "Your size-M hoodie order",
+    "body": "We can offer the 8 size-M hoodies currently on hand, but we cannot confirm the full 20-hoodie order or the proposed $50-per-hoodie price yet: both the 12-unit restock and price override are unapproved. The supported alternative is to take the 8 available now, if that works for you; please let us know whether you would like that option. The full order would require a 12-unit restock costing $264, and no delivery date is promised while it remains unapproved.",
     "drafted_by": "customer_service",
     "drafted_on_shop_date": "2026-08-31",
     "delivery_status": "not_sent",

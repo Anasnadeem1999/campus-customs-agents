@@ -54,8 +54,8 @@
     "kind": "purchase_order",
     "ref_id": 1,
     "amount": 8.0,
-    "reason": "Ticket 101 needs one CC-TEE-WHITE size S, and none are on hand. Invoice 501 has now been paid, clearing Bulldog Print Co's shipping block; approving the $8 restock cost lets us order the missing unit, with a 5-day lead time and ETA 2026-09-05 if ordered today. The already approved $2,400 rent payment is committed against the $2,560 balance, leaving $160 uncommitted; refusing this order keeps the customer request unfilled.",
-    "detail": "Ticket 101, CC-TEE-WHITE size S, qty 1; unit cost $8 from quote_discount. Vendor 1 is Bulldog Print Co.",
+    "reason": "Ticket 101 is an unfilled customer order: size S is out of stock (shortfall 1), and Bulldog Print Co can ship now that invoice 501 is paid. Approving the $8.00 restock PO would let us place the one-unit order with ETA 2026-09-05; refusing leaves Tauhid Zaman's order unfilled. Current $160 cash leaves $152 after this commitment; rent due 2026-09-02 was already paid under approval 2.",
+    "detail": "Ticket 101; CC-TEE-WHITE size S, quantity 1; vendor 1 Bulldog Print Co. Cost from quote_discount restock_cost_for_shortfall.",
     "requested_by": "boss",
     "requested_on_shop_date": "2026-08-31",
     "status": "approved",
@@ -71,69 +71,11 @@
       "vendor_blocked_by_invoices": []
     },
     "cash_at_request_time": {
-      "total_balance": 2560.0,
-      "already_approved_unpaid": 2400.0,
+      "total_balance": 160.0,
+      "already_approved_unpaid": 0.0,
       "uncommitted": 160.0,
       "would_leave_uncommitted": 152.0,
       "fits_within_uncommitted": true
     }
-  },
-  {
-    "id": 4,
-    "kind": "price_override",
-    "ref_id": 103,
-    "amount": 50.0,
-    "reason": "Ticket 103 proposes $50 per CC-HOOD-NAVY size M hoodie, $8 below the $58 list price, leaving $28/unit margin ($560 total on 20) above the $22 unit cost. This price approval alone does not fund the 12-unit shortfall: a separate $264 purchase-order approval is needed, and Bulldog Print Co cannot ship until already-paid invoice 501 is cleared (it is now paid). Rent for 2026-09-02 was paid; next rent is due 2026-10-02. Current cash/uncommitted is $160, so the $264 restock request cannot be funded from available uncommitted cash; without additional funds, the full order cannot be filled. If this price override is refused, do not offer $50; if restock funding is refused, only 8 units are in stock and the remaining 12 cannot be supplied.",
-    "detail": "Approval requested for proposed unit price only; stock 8/20, restock shortfall 12 at $22 cost each ($264). Separate purchase_order approval required for vendor 1 after confirming cash availability.",
-    "requested_by": "accounting",
-    "requested_on_shop_date": "2026-08-31",
-    "status": "approved",
-    "approved_by": "Anas Nadeem",
-    "approved_at": "2026-08-31",
-    "consumed_by_payment_id": null,
-    "spends_cash": false,
-    "checks_at_request_time": {
-      "ticket_sku": "CC-HOOD-NAVY",
-      "ticket_qty": 20
-    },
-    "cash_at_request_time": {
-      "total_balance": 160.0,
-      "already_approved_unpaid": 0.0,
-      "uncommitted": 160.0,
-      "would_leave_uncommitted": 160.0,
-      "fits_within_uncommitted": true
-    }
-  },
-  {
-    "id": 5,
-    "kind": "purchase_order",
-    "ref_id": 1,
-    "amount": 264.0,
-    "reason": "Ticket 103 needs 12 additional CC-HOOD-NAVY size M hoodies; the $264 restock cost at $22 each is required to fulfill the 20-unit request, and approval 4 is pending for the proposed $50/unit price ($28/unit margin, $560 total). Invoice 501 has been paid, so Bulldog Print Co's former shipping block is cleared, and rent was paid; next rent is due 2026-10-02. However, only $160 is currently uncommitted, so this $264 commitment does not fit and I am not requesting an unfundable purchase order. If refused/not funded, only the 8 on-hand units are available and the remaining 12 cannot be supplied.",
-    "detail": "Ticket 103 CC-HOOD-NAVY size M, shortfall 12. Current uncommitted $160; request amount exceeds it. Vendor 1 is Bulldog Print Co by apparel-reprint specialty; confirm cash before requesting.",
-    "requested_by": "accounting",
-    "requested_on_shop_date": "2026-08-31",
-    "status": "rejected",
-    "approved_by": null,
-    "approved_at": null,
-    "consumed_by_payment_id": null,
-    "spends_cash": true,
-    "checks_at_request_time": {
-      "vendor_name": "Bulldog Print Co",
-      "lead_days": 5,
-      "eta_if_ordered_today": "2026-09-05",
-      "vendor_can_ship": true,
-      "vendor_blocked_by_invoices": []
-    },
-    "cash_at_request_time": {
-      "total_balance": 160.0,
-      "already_approved_unpaid": 0.0,
-      "uncommitted": 160.0,
-      "would_leave_uncommitted": -104.0,
-      "fits_within_uncommitted": false
-    },
-    "rejected_by": "Anas Nadeem",
-    "rejected_at": "2026-08-31",
-    "rejected_reason": "Only $160 uncommitted against a $264 restock. Cannot fund it; offer the 8 on hand at the approved $50."
   }
 ]
