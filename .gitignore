@@ -21,7 +21,7 @@ frontend/dist/
 .vite/
 
 # --- run artifacts ---
-output/
+# output/ is NOT ignored: harness.md and the run transcripts are deliverables.
 *.log
 
 # --- os ---

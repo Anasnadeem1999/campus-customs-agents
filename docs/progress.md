@@ -7,7 +7,8 @@ each new problem arrives rather than being planned out in advance.
 |---|---|---|
 | — | Setup: repo, data, reset script, model check | Done |
 | 1 | Vibe coder prompts (`AI_prompts.md`) | Done |
-| 2 | *awaiting the next problem from the user* | — |
+| 2 | Study the database; start `output/harness.md` | Done |
+| 3 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -42,3 +43,26 @@ with a note on what the initial prompt was missing.
   enough, rather than inventing a prompt that was never typed.
 - The file is updated as part of each problem's work, not reconstructed at the
   end.
+
+## 2 — Study the database; start `output/harness.md`
+
+- Read all nine tables field by field (types, PKs, the two FKs on `tickets`,
+  the FK on `invoices`), and refreshed `data/campus_customs_new.db` from the
+  seed.
+- `output/harness.md` now carries a section per table — real field list plus a
+  line on why the agent team cares — followed by the three-ticket linkage
+  study, the cross-ticket analysis, and the list of figures agents must
+  recompute rather than recall. It is the file that grows each problem.
+- **Fixed a trap from setup:** `.gitignore` had excluded `output/`, which
+  would have kept the harness deliverable out of the public repo. Rule
+  removed, comment left in its place.
+
+### What the data actually says
+
+- Vendor 1 (Bulldog Print Co) is the **only** apparel vendor, and it is
+  blocked by invoice 501 — $840, 3 days overdue. Tickets 101 *and* 103 both
+  need an apparel reprint, so that one invoice gates both.
+- Ticket 103 is short by **12** hoodies, not merely a discount question.
+- Cash is the binding constraint: $3,400 covers the $840 invoice and the
+  $2,400 rent with **$160** left, so the $264 hoodie restock cannot be funded.
+  The pay tool's insufficient-funds refusal sits on the main path.

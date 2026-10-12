@@ -157,3 +157,43 @@ and say why the first prompt sufficed.
 
 **Standing rule from this prompt:** this file is updated as part of the work on
 every problem, not reconstructed at the end.
+
+---
+
+## Problem 2 — Study the Campus Customs Database
+
+**Prompt typed:**
+
+> Problem 2: Study the Campus Customs Database
+> Now please open the data/campus_customs.db and pls go through every table in
+> there finding its fields. Then copy the original file into the
+> data/campus_customs_new.db and for the later problems pls update this
+> working copy. First study the three open tickets so that you can make sense
+> of how they link with the other tables.
+> Then also start output/harness.md. Here for each of the tables please list
+> down the fields including one brief line on why that table matters to the
+> agents. This harness file is to be kept growing for the later problems.
+
+**What was done:** read all nine tables field by field out of SQLite —
+including types, primary keys and the two foreign keys — then traced each of
+the three open tickets through its links and wrote `output/harness.md`.
+
+**Follow-up needed:** none typed. The prompt was specific about the file, the
+per-table format and the ticket study.
+
+**What the initial prompt did not cover, resolved while working:**
+
+1. **`output/` was gitignored.** The setup `.gitignore` excluded `output/` as
+   a run-artifact directory, which would have silently kept `harness.md` — a
+   required deliverable — out of the public repo. The ignore rule was removed
+   and a comment added so it does not come back. Worth noting as a case where
+   a later problem invalidated an earlier assumption.
+2. **The copy already existed.** `scripts/reset_db.py` had made the working
+   copy during setup; the prompt's copy step was satisfied by re-running the
+   reset, which also re-verified the seed's hash was unchanged.
+3. **No format was given for the harness beyond "fields plus one brief line".**
+   Written as a per-table section with the real SQLite field list and a short
+   "why it matters" paragraph, then extended past the literal ask with the
+   ticket-linkage study the prompt also requested, the cross-ticket cash and
+   vendor analysis, and a list of the figures agents must recompute from the
+   database rather than recall.
