@@ -1,19 +1,17 @@
 # HW5 progress
 
+The assignment hands over its problems one at a time, so this table grows as
+each new problem arrives rather than being planned out in advance.
+
 | # | Problem | Status |
 |---|---|---|
-| 1 | Repo skeleton, data, reset script, model check | Done |
-| 2 | MCP server — shop tools over the working DB | Not started |
-| 3 | Agent team (Boss + 4 specialists, fully connected) | Not started |
-| 4 | FastAPI backend — board, runs, approvals | Not started |
-| 5 | React dashboard | Not started |
-| 6 | Full reset-and-run over all three tickets | Not started |
-| 7 | Push to a public GitHub repo | Not started |
+| — | Setup: repo, data, reset script, model check | Done |
+| 1 | Vibe coder prompts (`AI_prompts.md`) | Done |
+| 2 | *awaiting the next problem from the user* | — |
 
-*(The brief did not number the problems; this is the working breakdown and it
-will be revised as the user hands over each next problem.)*
+## Setup — repo, data, reset script, model check
 
-## 1 — Repo skeleton, data, reset script, model check
+Done before the numbered problems began.
 
 - Unzipped the supplied archive to `data/campus_customs.db` (53 KB, 9 tables).
 - `scripts/reset_db.py` copies the seed to `data/campus_customs_new.db`,
@@ -27,3 +25,20 @@ will be revised as the user hands over each next problem.)*
   `gpt-6-luna-2026-09-22`. A deliberately wrong name did *not* error — it
   silently answered as `gpt-5.6-luna-2026-07-09`. Hence the runtime assertion
   on `response.model` recorded in CLAUDE.md.
+
+## 1 — Vibe coder prompts
+
+`AI_prompts.md` is the complete log of prompts typed into the vibe coder, in
+the format the problem specifies: one section per problem, carrying the
+problem number and title, at least one verbatim prompt, and a follow-up prompt
+with a note on what the initial prompt was missing.
+
+- Rewrote the file from its earlier shape (grouped by work done) into the
+  required per-problem structure.
+- The three prompts that preceded the assignment's own numbering — working
+  folder, project brief, readiness check — are kept as a **Setup** section, so
+  the brief and the ground rules stay in the log.
+- Sections with no follow-up say so and explain why the first prompt was
+  enough, rather than inventing a prompt that was never typed.
+- The file is updated as part of each problem's work, not reconstructed at the
+  end.

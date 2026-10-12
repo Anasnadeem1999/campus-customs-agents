@@ -1,16 +1,47 @@
-# AI prompts — Homework 5
+# AI prompts — Campus Customs Homework 5
 
-A running log of the prompts given to the assistant, one section per problem.
+A complete log of what was typed into the vibe coder while building this
+assignment. One section per problem, in the order the problems were worked.
 
-## Problem 1 — setup, data, and the shop brief
+**Each section carries:**
+
+- the problem number and title,
+- at least one prompt exactly as it was typed — typos, run-on sentences and
+  all, because the point of the log is the real prompt, not a tidied one,
+- a follow-up prompt where one was needed, together with a note on **what the
+  initial prompt was missing** that made the follow-up necessary.
+
+Where no follow-up was needed, the section says so and explains why the first
+prompt was already enough. Nothing in this file is reconstructed or
+paraphrased: if a prompt is quoted, it was typed.
+
+---
+
+## Setup — before the numbered problems
+
+These three prompts came before the assignment's own numbering started. They
+are logged because they set the working folder, the project brief and the
+ground rules that every later problem depends on.
+
+### S1 — Where to work
+
+**Prompt typed:**
 
 > Hello Mister, we are working on HW 5 of the AI foundations course, please
 > work in the separate HW5 folder available in the AI Foundations folder.
 
-In answer to two setup questions: HW5 gets **its own git repo** (as HW4 did),
-and **nothing is carried over from HW4** — a fresh start.
+**What was missing:** the prompt named the folder but not how HW5 should be
+version-controlled, and not whether HW4's codebase was a starting point. Both
+mattered immediately — the answer decides whether `git init` runs at all.
+Rather than a typed follow-up, the gap was closed with two questions put back
+to the user, answered as:
 
-Then, with `data.zip` attached:
+- **git setup** → *"Own repo in HW5 (like HW4)"*
+- **HW4 carryover** → *"Nothing — fresh start"*
+
+### S2 — The project brief
+
+**Prompt typed** (with `data.zip` attached):
 
 > Okay so we are making campus customs multi agent operations team which is an
 > agentic team that is suppose to run the shop. The open tickets will be
@@ -62,3 +93,67 @@ Then, with `data.zip` attached:
 >
 > Okay so now pls work one problem at a time. The final submission is to be
 > public Github repo.
+
+**What was missing:** nothing that blocked a start — this prompt carried the
+architecture, the agent roster, the data rules and the model policy. Two gaps
+surfaced only once work began, and both were resolved without a typed
+follow-up:
+
+1. The brief said *"gpt-6-luna equivalent"*, which left open whether that
+   exact string was a live route. Probing the gateway settled it: it is, and
+   it resolves to `gpt-6-luna-2026-09-22`. The same probe turned up a trap —
+   a nonsense model name does **not** error, it silently answers as
+   `gpt-5.6-luna`. That is precisely the "other model shows up in the runs"
+   the brief warns loses points, so every agent call asserts the resolved
+   model name.
+2. The brief did not say whether the seed database should be committed. It is
+   the assignment's input and a grader cannot run anything without it, so the
+   seed is committed and only the working copy is ignored. Flagged back to the
+   user as a reversible call.
+
+### S3 — Readiness check
+
+**Prompt typed:**
+
+> Do you need anything from me
+
+**Why it mattered:** it surfaced the one genuine gap — there was no official
+HW5 instructions sheet on disk, unlike HW1–HW4 which each shipped a `.docx` in
+`Assignments/`. Everything else (Portkey key, data, GitHub auth) was already
+in hand. The answer to this prompt is what prompted the user to supply the
+assignment's own numbered problems, starting with Problem 1 below.
+
+---
+
+## Problem 1 — Vibe coder prompts
+
+**Prompt typed:**
+
+> Problem 1: Vibe coder prompts
+> Please start of by creating AI_prompts.md at the very start of the assignment
+> and please also keep the work updated as we work. This file should be
+> complete log of what we type into the vibe coder. Please put one section for
+> each of the problem, where each section includes the problem number and the
+> tittle, atleast one prompt that I typed, and one followup prompt if needed
+> including what was missing in the initial prompt.
+
+**What was done:** this file. It had existed since the start of the session in
+a looser shape — a running log grouped by work done rather than by problem —
+and was rewritten to the structure this prompt specifies: numbered sections,
+verbatim prompts, and an explicit note on what each initial prompt was
+missing. The three prompts that preceded the assignment's numbering are kept
+as a Setup section rather than discarded, since the project brief lives there.
+
+**Follow-up needed:** none so far. The prompt specified the file name, the
+timing ("at the very start", "keep the work updated as we work"), the section
+granularity, and the three required ingredients per section — enough to write
+the file without guessing.
+
+One judgment call was left open by the prompt and resolved rather than asked
+about: *"one followup prompt if needed"* does not say what to do for a problem
+that needed no follow-up. Inventing one would corrupt a log whose whole value
+is being a true record, so those sections state that no follow-up was needed
+and say why the first prompt sufficed.
+
+**Standing rule from this prompt:** this file is updated as part of the work on
+every problem, not reconstructed at the end.

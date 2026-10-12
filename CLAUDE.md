@@ -95,6 +95,14 @@ be paid, but only $160 survives — so any third spend has to be refused.
 
 ## Working notes
 
-- `AI_prompts.md` — running log of the user's prompts, one section per problem.
+- `AI_prompts.md` — **required deliverable (Problem 1).** The complete log of
+  prompts typed into the vibe coder. One section per problem, each carrying
+  the problem number and title, at least one prompt quoted verbatim, and a
+  follow-up prompt where one was needed plus a note on what the initial prompt
+  was missing. Update it **as part of each problem's work**, never
+  reconstructed afterwards. Prompts are quoted exactly as typed — never
+  invent, tidy, or paraphrase one; if a problem needed no follow-up, say so
+  and explain why the first prompt sufficed.
 - `docs/progress.md` — status of each problem.
-- Don't pre-build files a problem hasn't asked for yet.
+- The assignment arrives one numbered problem at a time. Don't pre-build files
+  a problem hasn't asked for yet, and don't guess at the numbering ahead.
