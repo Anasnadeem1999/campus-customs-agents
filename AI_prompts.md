@@ -297,7 +297,40 @@ truth adjacent to it rather than discarding it.
 speaks real MCP over stdio; `output/mcp_smoke.json` holding the evidence; and
 section 5 of `output/harness.md`.
 
-**Follow-up needed:** none typed.
+**Follow-up prompt typed:**
+
+> Please choose how to connect the server in our tool, and also write the test
+> prompt for each of the tool. please also check each of the output against
+> campus_customs_new.db.
+
+**What the initial prompt was missing — and what the follow-up fixed:** the
+first prompt said *"save the connecting JSON text in the .mcp.json at the
+project root **or however the local mcp server lists are saved**"*, which left
+the connection method genuinely open — project file, host global config, or
+CLI registration. It also asked for *"the prompt given by me to the vibe
+coder"* while being a single instruction covering all three tools, so there
+were no three per-tool prompts to quote. The follow-up resolved both by
+delegating the choice, which also settled the provenance question: the test
+prompts are now authored at the user's explicit request rather than invented
+and attributed to them.
+
+Decisions taken under that delegation:
+
+- **Connection:** project-scoped `.mcp.json`, committed, with
+  `campus-customs` pre-approved by name in `.claude/settings.json`. It travels
+  with the submission, writes no global machine state, and removes the
+  approval prompt without blanket-enabling every future project server.
+  `scripts/setup_mcp_config.py` was added because the absolute venv path in
+  the config does not survive a clone; it regenerates the file per machine and
+  reproduces the committed one byte for byte here.
+- **Test prompts:** one per tool, written the way someone working the shop
+  would type it and worded so only the target tool can answer, each stored in
+  the evidence beside a plain-English statement of the expected answer.
+- **Checking:** all 21 returned fields compared against
+  `campus_customs_new.db` via independently written SQL. All 21 match, and the
+  working copy still hashes identical to the seed afterwards, confirming the
+  read tools wrote nothing.
+
 
 **What the initial prompt did not cover, resolved while working:**
 

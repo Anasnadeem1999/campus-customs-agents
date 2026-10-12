@@ -49,38 +49,48 @@ DRIVING_PROMPT = (
     "data/campus_customs_new.db"
 )
 
-# One case per tool. `prompt` is the natural-language request a person would
-# type at the vibe coder to make it reach for this tool -- phrased from the
-# ticket it unlocks, so the call is driven by the shop's real work rather than
-# by an arbitrary argument list.
+# One case per tool. Each `prompt` is a test prompt written for this smoke
+# test at the user's instruction ("please also write the test prompt for each
+# of the tool"), phrased the way a person working the shop would actually type
+# it, and worded so that it can only be answered by the tool it targets.
 CASES: list[dict[str, Any]] = [
     {
         "ticket": 101,
         "prompt": (
-            "Ticket 101: Tauhid Zaman wants 1 Bulldog tee, SKU CC-TEE-WHITE, in "
-            "size S. Do we have it on the shelf, and if not how many are we short?"
+            "Ticket 101 just came in: Tauhid Zaman wants one Bulldog tee, SKU "
+            "CC-TEE-WHITE, in size S. Check the shelf for that exact size -- how "
+            "many do we have, and if we cannot fill it, how many are we short?"
         ),
         "tool": "check_stock_by_size",
         "arguments": {"sku": "CC-TEE-WHITE", "size": "S", "requested_qty": 1},
+        "expects": "Size S is empty, so the order cannot be filled and we are short 1.",
     },
     {
         "ticket": 103,
         "prompt": (
-            "Ticket 103: the Yale AI Club wants 20 hoodies in size M and we only "
-            "hold 8. Who could reprint the other 12, will they actually ship, and "
-            "when would the order land?"
+            "Ticket 103: the Yale AI Club wants 20 navy hoodies in size M and we "
+            "only hold 8. Find me a vendor who could reprint the missing 12 -- "
+            "give me their lead time, whether anything is stopping them from "
+            "shipping, and the date an order placed today would land."
         ),
         "tool": "find_restock_vendors",
         "arguments": {"specialty_contains": "apparel"},
+        "expects": (
+            "Exactly one apparel vendor, Bulldog Print Co, blocked from shipping "
+            "by an unpaid invoice, with a 5-day lead time."
+        ),
     },
     {
         "ticket": 102,
         "prompt": (
-            "Ticket 102: Elm City Properties emailed saying shop rent is due in "
-            "two days. What does the lease itself say we owe and when?"
+            "Ticket 102: Elm City Properties emailed claiming the shop rent is due "
+            "in two days. Do not take the email's word for it -- pull the lease "
+            "itself and tell me the landlord, the amount owed, the due date, and "
+            "how many days away that is."
         ),
         "tool": "check_rent_due",
         "arguments": {"lease_id": 1},
+        "expects": "Lease 1, Elm City Properties, $2,400 due 2026-09-02, two days out.",
     },
 ]
 
@@ -226,6 +236,7 @@ async def main() -> int:
                     {
                         "ticket": case["ticket"],
                         "prompt": case["prompt"],
+                        "expected_in_plain_english": case["expects"],
                         "tool": case["tool"],
                         "arguments": case["arguments"],
                         "tool_output": output,
@@ -252,11 +263,34 @@ async def main() -> int:
         "model_calls_made": 0,
         "driving_prompt_from_user": DRIVING_PROMPT,
         "prompt_provenance": (
-            "driving_prompt_from_user is quoted verbatim. Each case's 'prompt' is "
-            "the natural-language request written for that tool from the ticket it "
-            "unlocks -- it was composed for this test, not transcribed from a "
-            "separately typed user message."
+            "driving_prompt_from_user and prompt_authorship_instruction are quoted "
+            "verbatim from the user. Each case's 'prompt' was written by the "
+            "assistant at the user's explicit request -- they are test prompts "
+            "authored for this smoke test, not transcriptions of separately typed "
+            "user messages."
         ),
+        "prompt_authorship_instruction": (
+            "Please choose how to connect the server in our tool, and also write "
+            "the test prompt for each of the tool. please also check each of the "
+            "output against campus_customs_new.db."
+        ),
+        "connection_method": {
+            "chosen": "project-scoped .mcp.json, committed, pre-approved in .claude/settings.json",
+            "why": (
+                "The config travels with the repository, so a graded clone gets the "
+                "server without any manual setup, and nothing is written to global "
+                "machine state. .claude/settings.json lists campus-customs under "
+                "enabledMcpjsonServers so the host does not have to prompt for "
+                "approval -- scoped to this one server rather than enabling all "
+                "project servers blanket."
+            ),
+            "portability": (
+                "The command is an absolute path to this project's venv, which does "
+                "not survive a clone onto another machine. scripts/setup_mcp_config.py "
+                "regenerates .mcp.json for whatever machine it runs on; --check "
+                "reports drift without writing."
+            ),
+        },
         "vibe_coder_connection": {
             "config_file": ".mcp.json",
             "server_key": SERVER_NAME,

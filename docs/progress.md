@@ -99,7 +99,14 @@ shortfall 1, 103 → shortfall 12 with 8 available, apparel vendor
   arguments, the full output, and a field-by-field cross-check against the
   working database using independently written SQL.
 - **21 of 21 fields matched; overall PASS.** No model calls.
+- **Connection method chosen:** project-scoped `.mcp.json`, committed, with
+  `campus-customs` pre-approved by name in `.claude/settings.json` — it
+  travels with the submission and writes no global state.
+  `scripts/setup_mcp_config.py` regenerates the config per machine, since the
+  absolute venv path does not survive a clone.
+- **Test prompts written**, one per tool, each stored in the evidence next to
+  the expected answer in plain English.
 - The tools are not live in the session that wrote the config — Claude Code
   reads `.mcp.json` at startup. Noted in the evidence under
-  `vibe_coder_connection`; a restart plus approval makes them callable.
+  `vibe_coder_connection`; a restart makes them callable.
 

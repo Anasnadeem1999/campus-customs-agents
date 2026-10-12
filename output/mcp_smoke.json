@@ -1,6 +1,6 @@
 {
   "problem": "4 - Add the MCP server to the vibe coder and test each tool",
-  "run_at": "2026-10-11T22:42:09-04:00",
+  "run_at": "2026-10-11T22:46:07-04:00",
   "transport": "stdio",
   "launched_from": ".mcp.json",
   "server_name": "campus-customs",
@@ -12,7 +12,13 @@
   "database_under_test": "data/campus_customs_new.db",
   "model_calls_made": 0,
   "driving_prompt_from_user": "Problem 4: Add the MCP server to vibe coder and test each tool -- Alright so now please add the MCP server to this assignment so that the tools can be called upon. Please save the connecting JSON text in the .mcp.json at the project root or however the local mcp server lists are saved. Once the vibe coder is connected please test each one of the three mcp tools while saving the evidence into output/mcp_smoke.json. For every tool it shall include the prompt given by me to the vibe coder, the tools name, the tools output which must match the values in data/campus_customs_new.db",
-  "prompt_provenance": "driving_prompt_from_user is quoted verbatim. Each case's 'prompt' is the natural-language request written for that tool from the ticket it unlocks -- it was composed for this test, not transcribed from a separately typed user message.",
+  "prompt_provenance": "driving_prompt_from_user and prompt_authorship_instruction are quoted verbatim from the user. Each case's 'prompt' was written by the assistant at the user's explicit request -- they are test prompts authored for this smoke test, not transcriptions of separately typed user messages.",
+  "prompt_authorship_instruction": "Please choose how to connect the server in our tool, and also write the test prompt for each of the tool. please also check each of the output against campus_customs_new.db.",
+  "connection_method": {
+    "chosen": "project-scoped .mcp.json, committed, pre-approved in .claude/settings.json",
+    "why": "The config travels with the repository, so a graded clone gets the server without any manual setup, and nothing is written to global machine state. .claude/settings.json lists campus-customs under enabledMcpjsonServers so the host does not have to prompt for approval -- scoped to this one server rather than enabling all project servers blanket.",
+    "portability": "The command is an absolute path to this project's venv, which does not survive a clone onto another machine. scripts/setup_mcp_config.py regenerates .mcp.json for whatever machine it runs on; --check reports drift without writing."
+  },
   "vibe_coder_connection": {
     "config_file": ".mcp.json",
     "server_key": "campus-customs",
@@ -34,7 +40,8 @@
   "cases": [
     {
       "ticket": 101,
-      "prompt": "Ticket 101: Tauhid Zaman wants 1 Bulldog tee, SKU CC-TEE-WHITE, in size S. Do we have it on the shelf, and if not how many are we short?",
+      "prompt": "Ticket 101 just came in: Tauhid Zaman wants one Bulldog tee, SKU CC-TEE-WHITE, in size S. Check the shelf for that exact size -- how many do we have, and if we cannot fill it, how many are we short?",
+      "expected_in_plain_english": "Size S is empty, so the order cannot be filled and we are short 1.",
       "tool": "check_stock_by_size",
       "arguments": {
         "sku": "CC-TEE-WHITE",
@@ -96,7 +103,8 @@
     },
     {
       "ticket": 103,
-      "prompt": "Ticket 103: the Yale AI Club wants 20 hoodies in size M and we only hold 8. Who could reprint the other 12, will they actually ship, and when would the order land?",
+      "prompt": "Ticket 103: the Yale AI Club wants 20 navy hoodies in size M and we only hold 8. Find me a vendor who could reprint the missing 12 -- give me their lead time, whether anything is stopping them from shipping, and the date an order placed today would land.",
+      "expected_in_plain_english": "Exactly one apparel vendor, Bulldog Print Co, blocked from shipping by an unpaid invoice, with a 5-day lead time.",
       "tool": "find_restock_vendors",
       "arguments": {
         "specialty_contains": "apparel"
@@ -207,7 +215,8 @@
     },
     {
       "ticket": 102,
-      "prompt": "Ticket 102: Elm City Properties emailed saying shop rent is due in two days. What does the lease itself say we owe and when?",
+      "prompt": "Ticket 102: Elm City Properties emailed claiming the shop rent is due in two days. Do not take the email's word for it -- pull the lease itself and tell me the landlord, the amount owed, the due date, and how many days away that is.",
+      "expected_in_plain_english": "Lease 1, Elm City Properties, $2,400 due 2026-09-02, two days out.",
       "tool": "check_rent_due",
       "arguments": {
         "lease_id": 1

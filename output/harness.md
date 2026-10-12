@@ -401,15 +401,92 @@ the tools actually called against `list_tools()`, so the file cannot claim
 full coverage while silently skipping one. No model calls were made; this is
 transport and data, not inference.
 
+### How the server is connected — and why this way
+
+**Project-scoped `.mcp.json`, committed to the repo, with the server
+pre-approved in `.claude/settings.json`.**
+
+Three reasons this beats the alternatives:
+
+- **It travels with the submission.** The config is a file in the repo, so a
+  clone gets the server with no manual setup. Registering the server in the
+  host's global config would leave the public repo describing a connection the
+  grader does not have.
+- **It writes no global machine state.** Nothing outside this folder changes.
+- **It removes the approval prompt without over-granting.**
+  `.claude/settings.json` lists `campus-customs` under
+  `enabledMcpjsonServers` — this one server by name, rather than
+  `enableAllProjectMcpServers`, which would wave through any server a future
+  config happens to add.
+
+The one real weakness is portability: `command` is an absolute path to this
+project's venv, which does not survive a clone onto another machine. Hence
+`scripts/setup_mcp_config.py`, which rewrites `.mcp.json` for whatever machine
+it runs on — `--check` reports drift without writing. Run on this machine it
+reproduces the committed file byte for byte.
+
 ### Connection status, stated plainly
 
 The tools are **not** live in the session that wrote the config. Claude Code
 reads `.mcp.json` when a session starts, so `mcp__campus-customs__*` appears
-only after a restart and an approval of the project server. That limitation is
-recorded in the evidence file under `vibe_coder_connection` rather than
-papered over. What *is* proven is the config: the smoke test launches the
-server through it, over the same stdio transport the vibe coder uses, and all
-three tools answer correctly.
+only after a restart. That limitation is recorded in the evidence file under
+`vibe_coder_connection` rather than papered over. What *is* proven is the
+config: the smoke test launches the server through it, over the same stdio
+transport the vibe coder uses, and all three tools answer correctly.
+
+### The test prompts
+
+Written for this smoke test at the user's instruction, one per tool, each
+phrased the way someone working the shop would type it and worded so that only
+its target tool can answer it.
+
+| Ticket | Tool | Test prompt |
+|---|---|---|
+| 101 | `check_stock_by_size` | *"Ticket 101 just came in: Tauhid Zaman wants one Bulldog tee, SKU CC-TEE-WHITE, in size S. Check the shelf for that exact size — how many do we have, and if we cannot fill it, how many are we short?"* |
+| 103 | `find_restock_vendors` | *"Ticket 103: the Yale AI Club wants 20 navy hoodies in size M and we only hold 8. Find me a vendor who could reprint the missing 12 — give me their lead time, whether anything is stopping them from shipping, and the date an order placed today would land."* |
+| 102 | `check_rent_due` | *"Ticket 102: Elm City Properties emailed claiming the shop rent is due in two days. Do not take the email's word for it — pull the lease itself and tell me the landlord, the amount owed, the due date, and how many days away that is."* |
+
+Each prompt is stored in `output/mcp_smoke.json` beside the tool's actual
+output and the SQL cross-check, along with a plain-English statement of the
+answer expected before the call was made.
+
+### Every returned field, checked against `campus_customs_new.db`
+
+**21 of 21 match.**
+
+| Ticket | Field | Database | Tool |
+|---|---|---|---|
+| 101 | `qty_on_hand` | 0 | 0 |
+| 101 | `location` | Aisle B | Aisle B |
+| 101 | `product_name` | Classic Bulldog Tee | Classic Bulldog Tee |
+| 101 | `shortfall` | 1 | 1 |
+| 103 | `vendor_count` | 1 | 1 |
+| 103 | `vendor_id` | 1 | 1 |
+| 103 | `name` | Bulldog Print Co | Bulldog Print Co |
+| 103 | `specialty` | apparel reprint | apparel reprint |
+| 103 | `lead_days` | 5 | 5 |
+| 103 | `eta_if_ordered_today` | 2026-09-05 | 2026-09-05 |
+| 103 | `can_ship` | false | false |
+| 103 | `blocked_amount` | 840.0 | 840.0 |
+| 103 | `blocking_invoice_ids` | [501] | [501] |
+| 103 | `days_overdue` | 3 | 3 |
+| 102 | `lease_id` | 1 | 1 |
+| 102 | `space_name` | Chapel Street shop | Chapel Street shop |
+| 102 | `landlord` | Elm City Properties | Elm City Properties |
+| 102 | `amount_due` | 2400.0 | 2400.0 |
+| 102 | `next_due` | 2026-09-02 | 2026-09-02 |
+| 102 | `days_until_due` | 2 | 2 |
+| 102 | `is_overdue` | false | false |
+
+The "Database" column is not the tool's own answer echoed back — it is a
+separate `SELECT` written independently in `scripts/mcp_smoke.py`. The derived
+values are the ones worth watching: `shortfall`, `days_overdue`,
+`eta_if_ordered_today` and `days_until_due` are all computed from
+`desk.date_today`, so they would drift immediately if any tool reached for the
+wall clock.
+
+After the run, `campus_customs_new.db` still hashes identical to the seed —
+confirming the three read tools changed nothing.
 
 ---
 
