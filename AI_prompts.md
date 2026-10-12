@@ -476,3 +476,61 @@ Boss-reply shape — both recorded below.
 cash $3,400 → $160, invoice and rent both paid with the approver named in the
 books, the $264 restock correctly refused, 19 audit steps appended across two
 runs, every step on `gpt-6-luna-2026-09-22`, 22 tests passing.
+
+## Problem 6 - Plan the three tickets
+
+**Prompt, verbatim:**
+
+> Problem 6: Plan the three tickets
+> Okay so now before we wire the back end, please write down what we expect the team to do for the each of the open ticket. Please build the output/desk_tickets.html which shall be a page which we can double click with one tab for each of the ticket for example 101, 102 or/and 103. Please also add empty cash and reflection tabs which are to be updated in later problems for now leave them blank  or maybe a short "will be coming later" note for the time being. For each tick tab please fill an expected section only and leaving room for an actual section which is to be filled after we run the agents.
+> Also for each of the tickets expected section please write and have approved by me who the boss should be calling first and the reason for it, also all the agent delegations that we expect please do not simply write that boss calls everyone, and also the mcp tools that we expect that will be running to use. Please note that plans that will be sending every specialist on every ticket will be scoring low, hence plan accordingly, also we will be comparing this plan to what is actually happening when the agents resolve the three tickets.
+
+**Follow-up prompts, verbatim:**
+
+> approve
+
+> Now please write the Expected plan for each ticket before running anything: who Boss calls first and why, the specific delegations, and the tools we expect. please don't send every specialist on every ticket.
+
+The plan was approved as written and nothing in it was changed afterwards. The
+second follow-up restates the same request as the original prompt and arrived
+after the page was already built and approved, so it was answered by pointing
+at the delivered plan rather than by writing a second one.
+
+**What was built:** `output/desk_tickets.html` - a single self-contained file
+with no server, no build step and no network references, so it opens on a
+double-click from a graded clone. Five tabs: 101, 102, 103, plus Cash and
+Reflection carrying a short "coming in a later problem" note. Each ticket tab
+has a filled **Expected** section and an empty **Actual** one.
+
+**The plan in one line each:**
+
+- **101** - Boss calls **Inventory** first (a supply question before a money
+  question); then Accounting, then Customer Service. Facilities not called.
+- **102** - Boss calls **Facilities** first (the notice is a claim, check it
+  against the lease); then **Facilities to Accounting directly**, peer to peer.
+  Inventory and Customer Service not called.
+- **103** - Boss calls **Inventory** first, *not* Accounting, despite the
+  ticket being typed `price_override`: a discount on units the shop cannot
+  supply is not a deal, and the 12-unit shortfall is the input Accounting
+  needs. Then Accounting, then Customer Service. Facilities not called.
+
+Eight delegations across three tickets rather than the fifteen that sending
+every specialist everywhere would cost.
+
+**What the initial prompt did not cover, resolved while working:**
+
+1. **"we will be comparing this plan to what is actually happening" makes the
+   source of the plan matter.** Problem 5 had already been run, so the actual
+   agent behaviour on all three tickets was known. Writing the expected plan
+   from that transcript would have guaranteed a flattering comparison and
+   taught nothing. The plan is written from what each ticket *warrants* on the
+   data, and is expected to diverge in places. The file says so, and records
+   that the expected section is not edited after a run.
+2. **"leaving room for an actual section" needed a rule, not just a gap.** An
+   empty box invites quietly reshaping the prediction once the result is in.
+   The page states the expected plan is frozen, because the comparison is only
+   worth something if the prediction stands still.
+3. **Whether a `price_override` approval is required on 103 was undecided.**
+   Called out explicitly and left *optional*: agreeing a price for stock the
+   shop cannot fund is premature, so its absence is not counted against a run.
+   Flagged for the user rather than silently decided.

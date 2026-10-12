@@ -11,7 +11,8 @@ each new problem arrives rather than being planned out in advance.
 | 3 | Build the MCP server (FastMCP, three tools) | Done |
 | 4 | Connect the MCP server; smoke-test each tool | Done |
 | 5 | Agent team (5 agents, PydanticAI) + 7 new MCP tools | Done |
-| 6 | *awaiting the next problem from the user* | — |
+| 6 | Plan the three tickets (`output/desk_tickets.html`) | Done |
+| 7 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -216,3 +217,39 @@ which costs the whole turn and buys nothing.
 ### Open
 
 Nothing outstanding on Problem 5. Awaiting the next problem.
+
+## 6 - Plan the three tickets
+
+`output/desk_tickets.html`: one self-contained file, no server and no network
+references, so it opens on a double-click. Tabs for 101, 102 and 103 with a
+filled **Expected** section and an empty **Actual** one, plus Cash and
+Reflection stubbed for later problems.
+
+**Who the Boss calls first, and why** - the part the problem asked to have
+approved:
+
+| Ticket | First call | Why that one |
+|---|---|---|
+| 101 | **Inventory** | A supply question before a money question. Until the shortfall is known there is nothing to spend on and nothing to tell the customer. |
+| 102 | **Facilities** | The notice is a *claim*. Check it against the lease the shop signed before asking whether $2,400 is affordable. |
+| 103 | **Inventory**, not Accounting | Typed `price_override`, but a discount on units the shop cannot supply is not a deal. The 12-unit shortfall is the input Accounting needs. |
+
+**Eight delegations, not fifteen.** Facilities is not called on 101 or 103;
+Inventory and Customer Service are not called on 102 - the landlord is not a
+customer and the rules forbid replying to them. The plan names who is *not*
+called on each ticket and why, since a plan that sends every specialist
+everywhere scores low.
+
+The **Facilities to Accounting** hop on 102 is deliberate: specialist to
+specialist rather than back through the Boss, which is what makes the team
+fully connected rather than a hub with spokes.
+
+**Expected landings:** 102 is the only ticket that should finish. 101 cannot -
+a 5-day lead puts the tee at 2026-09-05 whatever is approved. 103 should land
+`blocked`, refused in figures: $160 uncommitted against a $264 restock.
+
+**Written independently of the Problem 5 runs.** Those runs were already on
+disk, so the plan could have been copied from them for a flattering
+comparison. It is written from what the tickets warrant instead, and is
+expected to diverge. The expected section is frozen from here - editing it
+after a run would make the comparison worthless.

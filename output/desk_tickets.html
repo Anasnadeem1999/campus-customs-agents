@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<!--
+  Campus Customs — the desk, Problem 6.
+
+  Self-contained on purpose: no server, no build, no network. Double-click it.
+  Everything below is inline so the file survives being emailed, zipped or
+  opened from a graded clone.
+
+  Each ticket tab carries an EXPECTED section, written before the backend is
+  wired, and an ACTUAL section left deliberately empty. The point of the
+  exercise is the gap between them, so the expected plan is not edited after a
+  run — the comparison is only worth something if the prediction stands still.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Customs — The Desk</title>
+<style>
+  :root {
+    --yale: #00356B;
+    --yale-light: #286dc0;
+    --ink: #1a1a1a;
+    --muted: #5b6670;
+    --line: #dfe3e8;
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --good: #0f7b3f;
+    --warn: #8a5a00;
+    --stop: #a01b26;
+    --ghost: #f0f2f5;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  header {
+    background: var(--yale); color: #fff; padding: 22px 32px 18px;
+  }
+  header h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: .2px; }
+  header p { margin: 0; opacity: .85; font-size: 14px; }
+  .shell { max-width: 1060px; margin: 0 auto; padding: 0 20px 64px; }
+  nav {
+    display: flex; gap: 4px; flex-wrap: wrap;
+    border-bottom: 2px solid var(--line); margin: 24px 0 0; padding: 0;
+  }
+  nav button {
+    appearance: none; border: 0; background: transparent; cursor: pointer;
+    font: inherit; font-weight: 600; color: var(--muted);
+    padding: 11px 18px; border-radius: 8px 8px 0 0;
+    border-bottom: 3px solid transparent; margin-bottom: -2px;
+  }
+  nav button:hover { background: var(--ghost); color: var(--ink); }
+  nav button[aria-selected="true"] {
+    color: var(--yale); border-bottom-color: var(--yale); background: var(--card);
+  }
+  nav button .sub { display: block; font-weight: 400; font-size: 12px; opacity: .75; }
+  .panel { display: none; padding-top: 26px; }
+  .panel.active { display: block; }
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 26px; margin-bottom: 20px;
+  }
+  .card > h2:first-child, .card > h3:first-child { margin-top: 0; }
+  h2 { font-size: 19px; margin: 28px 0 12px; color: var(--yale); }
+  h3 { font-size: 16px; margin: 22px 0 8px; }
+  .ticket-head { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: baseline; }
+  .ticket-head h2 { margin: 0; }
+  .chip {
+    display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .3px;
+    padding: 3px 10px; border-radius: 999px; background: var(--ghost); color: var(--muted);
+  }
+  .chip.order { background: #e7f0fa; color: var(--yale); }
+  .chip.rent  { background: #fdf2dd; color: var(--warn); }
+  .chip.price { background: #fbe9ea; color: var(--stop); }
+  dl.facts { display: grid; grid-template-columns: 170px 1fr; gap: 6px 16px; margin: 14px 0 0; }
+  dl.facts dt { color: var(--muted); font-size: 14px; }
+  dl.facts dd { margin: 0; font-size: 14px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--ghost); font-size: 13px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
+  td.step { font-weight: 700; color: var(--yale); white-space: nowrap; }
+  code, .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13.5px; background: var(--ghost); padding: 1px 6px; border-radius: 4px;
+  }
+  .first-call {
+    border-left: 4px solid var(--yale); background: #f3f7fc;
+    padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;
+  }
+  .first-call strong { color: var(--yale); }
+  .not-called { border-left: 4px solid var(--muted); background: var(--ghost);
+    padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+  .actual {
+    border: 2px dashed var(--line); border-radius: 12px;
+    padding: 26px; text-align: center; color: var(--muted); background: #fcfdfe;
+  }
+  .actual h3 { margin: 0 0 6px; color: var(--muted); }
+  .later {
+    border: 2px dashed var(--line); border-radius: 12px; padding: 46px 26px;
+    text-align: center; color: var(--muted); background: #fcfdfe;
+  }
+  .later h2 { color: var(--muted); margin-top: 0; }
+  ul.tight { margin: 8px 0; padding-left: 22px; }
+  ul.tight li { margin: 5px 0; }
+  .note { font-size: 14px; color: var(--muted); }
+  footer { color: var(--muted); font-size: 13px; padding: 10px 0 0; border-top: 1px solid var(--line); margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Campus Customs — The Desk</h1>
+  <p>Shop date <strong>2026-08-31</strong> &middot; checking <strong>$3,400.00</strong> &middot; three tickets open</p>
+</header>
+
+<div class="shell">
+
+<nav role="tablist">
+  <button role="tab" aria-selected="true"  data-tab="t101">Ticket 101<span class="sub">Bulldog tee</span></button>
+  <button role="tab" aria-selected="false" data-tab="t102">Ticket 102<span class="sub">Rent due</span></button>
+  <button role="tab" aria-selected="false" data-tab="t103">Ticket 103<span class="sub">Hoodie discount</span></button>
+  <button role="tab" aria-selected="false" data-tab="cash">Cash<span class="sub">later</span></button>
+  <button role="tab" aria-selected="false" data-tab="reflection">Reflection<span class="sub">later</span></button>
+</nav>
+
+<!-- ───────────────────────── TICKET 101 ───────────────────────── -->
+<section class="panel active" id="t101">
+  <div class="card">
+    <div class="ticket-head">
+      <h2>Ticket 101 — Bulldog tee</h2>
+      <span class="chip order">customer_order</span>
+    </div>
+    <dl class="facts">
+      <dt>Requester</dt><dd>Tauhid Zaman</dd>
+      <dt>Wants</dt><dd>1 &times; <code>CC-TEE-WHITE</code>, size <strong>S</strong></dd>
+      <dt>Ticket links to</dt><dd>invoice <strong>501</strong> &mdash; a real foreign key, and the whole story</dd>
+      <dt>Customer's note</dt><dd>&ldquo;Needs a tee in size S.&rdquo;</dd>
+    </dl>
+  </div>
+
+  <h2>Expected</h2>
+
+  <div class="card">
+    <div class="first-call">
+      <strong>Boss calls Inventory first.</strong>
+      <p style="margin:8px 0 0">
+        On its face this is one question — can we put a size-S tee in a customer's
+        hand? Until that is answered there is nothing to spend money on and nothing
+        to tell the customer, so every other specialist would be answering a
+        question nobody has asked yet. Calling Accounting first would mean asking
+        &ldquo;can we afford it?&rdquo; before knowing what <em>it</em> is or whether
+        it is even needed; the shelf might simply have one.
+      </p>
+      <p style="margin:8px 0 0" class="note">
+        It is also the cheapest call on the board. One tool, one answer, and it
+        either closes the ticket outright or reframes it — which is exactly what we
+        expect here.
+      </p>
+    </div>
+
+    <h3>The delegations we expect, in order</h3>
+    <table>
+      <thead><tr><th>#</th><th>Who asks whom</th><th>The question</th><th>Why this colleague</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="step">1</td>
+          <td><strong>Boss &rarr; Inventory</strong></td>
+          <td>Can we fill one <code>CC-TEE-WHITE</code> in S, and if not, who can reprint it and when?</td>
+          <td>Stock by size, shortfalls and vendor lead times are Inventory's and nobody else's.</td>
+        </tr>
+        <tr>
+          <td class="step">2</td>
+          <td><strong>Boss &rarr; Accounting</strong></td>
+          <td>Invoice 501 is blocking the only apparel vendor. What is owed, can the shop pay it, and will you raise the approval?</td>
+          <td>Only once Inventory reports the block does this become a money question. Cash and approvals are Accounting's.</td>
+        </tr>
+        <tr>
+          <td class="step">3</td>
+          <td><strong>Boss &rarr; Customer Service</strong></td>
+          <td>Draft Tauhid a reply: S is empty, a reprint is pending approval, ETA 2026-09-05, and these sizes are on the shelf today.</td>
+          <td>A real customer is waiting on an answer. Nobody else writes what a customer reads.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="not-called">
+      <strong>Facilities is not called, and that is deliberate.</strong>
+      <p style="margin:8px 0 0">
+        This ticket has no lease, no rent and no premises question. Asking Facilities
+        would cost a model call to be told, correctly, that it has nothing to add.
+        Three of the four specialists are enough here; the fourth would be padding.
+      </p>
+    </div>
+
+    <h3>MCP tools we expect to run</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>Called by</th><th>What we expect back</th></tr></thead>
+      <tbody>
+        <tr><td><code>list_tickets</code></td><td>Boss</td><td>The ticket, including <code>invoice_id: 501</code>.</td></tr>
+        <tr><td><code>check_stock_by_size</code></td><td>Inventory</td><td><strong>qty 0</strong> in S, shortfall <strong>1</strong>; M/L/XL at 5/3/2.</td></tr>
+        <tr><td><code>find_restock_vendors</code></td><td>Inventory</td><td>Bulldog Print Co, 5-day lead, <strong><code>can_ship: false</code></strong>, blocked by invoice 501.</td></tr>
+        <tr><td><code>list_invoices</code></td><td>Accounting</td><td>Invoice 501, <strong>$840</strong>, 3 days overdue.</td></tr>
+        <tr><td><code>get_cash_position</code></td><td>Accounting</td><td>$3,400 on hand, $3,400 uncommitted <em>if this ticket runs first</em>.</td></tr>
+        <tr><td><code>request_approval</code></td><td>Accounting</td><td>One <code>invoice_payment</code> request for $840 — pending.</td></tr>
+        <tr><td><code>draft_customer_message</code></td><td>Customer Service</td><td>A draft, <code>not_sent</code>.</td></tr>
+        <tr><td><code>update_ticket</code></td><td>Boss</td><td>Status <code>awaiting_approval</code>.</td></tr>
+      </tbody>
+    </table>
+    <p class="note">
+      After a human approves, the resume run should add <code>pay_invoice</code>
+      (cash $3,400 &rarr; $2,560, invoice <code>paid</code>, vendor unblocked), then a
+      second <code>request_approval</code> for the purchase order and
+      <code>place_purchase_order</code> once that is signed too.
+    </p>
+
+    <h3>Where we expect this to land</h3>
+    <p>
+      <strong>Not resolved today.</strong> Even with everything approved immediately,
+      the tee has a 5-day lead time and arrives <strong>2026-09-05</strong>. The honest
+      outcome is <code>awaiting_approval</code> on the first pass and <code>blocked</code>
+      on delivery after that — with Tauhid told the truth and offered the sizes that
+      are genuinely on the shelf.
+    </p>
+  </div>
+
+  <div class="actual">
+    <h3>Actual</h3>
+    <p>To be filled in after the agents run. Left empty on purpose — the expected
+    plan above is not edited afterwards, or the comparison means nothing.</p>
+  </div>
+</section>
+
+<!-- ───────────────────────── TICKET 102 ───────────────────────── -->
+<section class="panel" id="t102">
+  <div class="card">
+    <div class="ticket-head">
+      <h2>Ticket 102 — Rent due</h2>
+      <span class="chip rent">rent_notice</span>
+    </div>
+    <dl class="facts">
+      <dt>From</dt><dd>Elm City Properties (the landlord)</dd>
+      <dt>Ticket links to</dt><dd>lease <strong>1</strong></dd>
+      <dt>The claim</dt><dd>&ldquo;Email: shop rent due in 2 days.&rdquo;</dd>
+    </dl>
+  </div>
+
+  <h2>Expected</h2>
+
+  <div class="card">
+    <div class="first-call">
+      <strong>Boss calls Facilities first.</strong>
+      <p style="margin:8px 0 0">
+        The lease is Facilities' and nobody else's, and this ticket is a
+        <em>claim</em> rather than a fact: a landlord's email asserting what is owed.
+        The first move is to check it against the lease the shop actually signed, and
+        Facilities is the one that reads leases.
+      </p>
+      <p style="margin:8px 0 0" class="note">
+        Calling Accounting first would skip that check and go straight to
+        &ldquo;can we afford $2,400?&rdquo; — taking the landlord's figure on trust.
+        A shop that pays what the invoice says without opening the contract is a shop
+        that quietly overpays for years.
+      </p>
+    </div>
+
+    <h3>The delegations we expect, in order</h3>
+    <table>
+      <thead><tr><th>#</th><th>Who asks whom</th><th>The question</th><th>Why this colleague</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="step">1</td>
+          <td><strong>Boss &rarr; Facilities</strong></td>
+          <td>Does the lease agree with this notice — landlord, amount, due date?</td>
+          <td>Leases and the landlord relationship are Facilities' remit.</td>
+        </tr>
+        <tr>
+          <td class="step">2</td>
+          <td><strong>Facilities &rarr; Accounting</strong></td>
+          <td>The lease confirms $2,400 due 2026-09-02. Does that fit, and will you raise the approval?</td>
+          <td>
+            <strong>Specialist to specialist, not back through the Boss.</strong>
+            Facilities has a verified figure and one follow-on question; routing it
+            via the Boss would add a turn and change nothing. This is the delegation
+            that shows the team is genuinely fully connected rather than a hub and
+            spokes.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="not-called">
+      <strong>Inventory and Customer Service are both not called.</strong>
+      <ul class="tight" style="margin-top:8px">
+        <li><strong>Inventory</strong> — no stock, no SKU, no size. Nothing to say.</li>
+        <li><strong>Customer Service</strong> — the landlord is not a customer, and
+        the shop rules forbid replying to them at all. Drafting a message here would
+        be work that must never be sent.</li>
+      </ul>
+      <p class="note" style="margin:8px 0 0">
+        Two specialists on this ticket, not four. It is the simplest of the three and
+        the plan should look it.
+      </p>
+    </div>
+
+    <h3>MCP tools we expect to run</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>Called by</th><th>What we expect back</th></tr></thead>
+      <tbody>
+        <tr><td><code>list_tickets</code></td><td>Boss</td><td>The ticket, with <code>lease_id: 1</code>.</td></tr>
+        <tr><td><code>check_rent_due</code></td><td>Facilities</td><td>Elm City Properties, <strong>$2,400</strong>, due <strong>2026-09-02</strong>, 2 days out, <strong>not overdue</strong> — the notice checks out.</td></tr>
+        <tr><td><code>get_cash_position</code></td><td>Accounting</td><td>$3,400 on hand. Uncommitted depends on whether 101's $840 approval already exists.</td></tr>
+        <tr><td><code>request_approval</code></td><td>Accounting</td><td>One <code>rent_payment</code> request for $2,400 — pending.</td></tr>
+        <tr><td><code>update_ticket</code></td><td>Boss / Facilities</td><td>Status <code>awaiting_approval</code>.</td></tr>
+      </tbody>
+    </table>
+    <p class="note">
+      After approval, the resume run should call <code>pay_rent</code>: cash down
+      $2,400, a <code>payments</code> row naming the approver, and the lease rolling
+      <strong>2026-09-02 &rarr; 2026-10-02</strong> so the same month cannot be paid twice.
+    </p>
+
+    <h3>Where we expect this to land</h3>
+    <p>
+      <strong>The one ticket that should actually finish.</strong>
+      <code>awaiting_approval</code> on the first pass, then <code>resolved</code>
+      once a human signs and the payment goes through. Nothing here depends on a
+      vendor, a lead time or a customer's patience — only on the owner saying yes.
+    </p>
+    <p class="note">
+      Watch for the failure mode: confirming the rent is genuinely owed and stopping
+      there. That leaves the landlord unpaid with the ticket closed, which is worse
+      than leaving it open, because nobody is looking for it any more.
+    </p>
+  </div>
+
+  <div class="actual">
+    <h3>Actual</h3>
+    <p>To be filled in after the agents run.</p>
+  </div>
+</section>
+
+<!-- ───────────────────────── TICKET 103 ───────────────────────── -->
+<section class="panel" id="t103">
+  <div class="card">
+    <div class="ticket-head">
+      <h2>Ticket 103 — Bulk hoodie discount</h2>
+      <span class="chip price">price_override</span>
+    </div>
+    <dl class="facts">
+      <dt>Requester</dt><dd>Yale AI Club</dd>
+      <dt>Wants</dt><dd>20 &times; <code>CC-HOOD-NAVY</code>, size <strong>M</strong>, at a bulk discount</dd>
+      <dt>Ticket links to</dt><dd>nothing — no invoice, no lease. The link that matters is hidden.</dd>
+    </dl>
+  </div>
+
+  <h2>Expected</h2>
+
+  <div class="card">
+    <div class="first-call">
+      <strong>Boss calls Inventory first — not Accounting.</strong>
+      <p style="margin:8px 0 0">
+        This is the call we most expect a weaker plan to get wrong. The ticket is
+        typed <code>price_override</code> and reads like a pricing question, which
+        argues for Accounting. We expect Inventory, because
+        <strong>a discount on units the shop cannot supply is not a deal</strong> —
+        only 8 of the 20 are on the shelf.
+      </p>
+      <p style="margin:8px 0 0">
+        The shortfall is also the input Accounting needs: the real cost of this deal
+        is not the discount, it is the <strong>$264</strong> of stock that must be
+        bought before a single unit ships. Ask Accounting first and it prices 20
+        hoodies the shop does not have.
+      </p>
+    </div>
+
+    <h3>The delegations we expect, in order</h3>
+    <table>
+      <thead><tr><th>#</th><th>Who asks whom</th><th>The question</th><th>Why this colleague</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="step">1</td>
+          <td><strong>Boss &rarr; Inventory</strong></td>
+          <td>Can we supply 20 navy hoodies in M, and if not, who reprints the gap and when?</td>
+          <td>Reframes the ticket from a discount question into a supply question. Also surfaces the vendor block.</td>
+        </tr>
+        <tr>
+          <td class="step">2</td>
+          <td><strong>Boss &rarr; Accounting</strong></td>
+          <td>8 on hand, 12 short at $22 each. What price holds a margin, and can the shop fund the $264 restock?</td>
+          <td>Margins, cost and affordability. The answer we expect is partly <em>no</em>.</td>
+        </tr>
+        <tr>
+          <td class="step">3</td>
+          <td><strong>Boss &rarr; Customer Service</strong></td>
+          <td>Draft the Yale AI Club a reply: 8 available now, 12 depend on a restock that is not funded, and the price is not agreed yet.</td>
+          <td>A student group is waiting, and this is mostly bad news — which makes the wording matter more, not less.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="not-called">
+      <strong>Facilities is not called.</strong>
+      <p style="margin:8px 0 0">No lease, no premises. Nothing to contribute.</p>
+    </div>
+
+    <h3>MCP tools we expect to run</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>Called by</th><th>What we expect back</th></tr></thead>
+      <tbody>
+        <tr><td><code>list_tickets</code></td><td>Boss</td><td>The ticket: 20 units, size M.</td></tr>
+        <tr><td><code>check_stock_by_size</code></td><td>Inventory</td><td><strong>8</strong> on hand, shortfall <strong>12</strong>.</td></tr>
+        <tr><td><code>find_restock_vendors</code></td><td>Inventory</td><td>Bulldog Print Co again — <code>can_ship: false</code>, blocked by the same invoice 501.</td></tr>
+        <tr><td><code>quote_discount</code></td><td>Accounting</td><td>Unit cost <strong>$22</strong>, list <strong>$58</strong>, restock cost <strong>$264</strong>, margin at whatever price is proposed.</td></tr>
+        <tr><td><code>get_cash_position</code></td><td>Accounting</td><td>After 101 and 102 are approved: <strong>$160 uncommitted</strong> — which does not cover $264.</td></tr>
+        <tr><td><code>list_approvals</code></td><td>Accounting</td><td>Invoice 501 already has a request from ticket 101. <strong>Do not raise a second one.</strong></td></tr>
+        <tr><td><code>draft_customer_message</code></td><td>Customer Service</td><td>A draft, <code>not_sent</code>.</td></tr>
+        <tr><td><code>update_ticket</code></td><td>Boss</td><td>Status <code>blocked</code>.</td></tr>
+      </tbody>
+    </table>
+    <p class="note">
+      A <code>price_override</code> approval request is <em>optional</em> here and we
+      will not count its absence against the run. Agreeing a price for stock the shop
+      cannot buy is premature; a team that holds the price open until the restock is
+      funded is reasoning correctly, not dodging.
+    </p>
+
+    <h3>Where we expect this to land</h3>
+    <p>
+      <strong>Blocked, and refused in figures.</strong> $3,400 funds the $840 invoice
+      and the $2,400 rent, leaving <strong>$160</strong> against a <strong>$264</strong>
+      restock. This is the seeded cash squeeze, and ticket 103 is where it bites.
+    </p>
+    <p>
+      The outcome we are looking for is not a resolution — it is a clean, explained
+      refusal: what is on hand, what the gap costs, what the shop cannot fund, and an
+      offer of the 8 hoodies that genuinely exist. A run that quietly promises 20 has
+      failed this ticket even if it sounds confident.
+    </p>
+  </div>
+
+  <div class="actual">
+    <h3>Actual</h3>
+    <p>To be filled in after the agents run.</p>
+  </div>
+</section>
+
+<!-- ───────────────────────── CASH ───────────────────────── -->
+<section class="panel" id="cash">
+  <div class="later">
+    <h2>Cash</h2>
+    <p>Coming in a later problem.</p>
+    <p class="note" style="max-width:520px;margin:10px auto 0">
+      This tab will track the balance as the agents spend it — what was approved,
+      what was paid, and what was refused for want of funds.
+    </p>
+  </div>
+</section>
+
+<!-- ───────────────────────── REFLECTION ───────────────────────── -->
+<section class="panel" id="reflection">
+  <div class="later">
+    <h2>Reflection</h2>
+    <p>Coming in a later problem.</p>
+    <p class="note" style="max-width:520px;margin:10px auto 0">
+      This tab will hold the comparison: where the agents followed the plan above,
+      where they did not, and which of the two was right.
+    </p>
+  </div>
+</section>
+
+<footer>
+  Expected plans written 2026-10-11, before the agents were run against these
+  tickets. Figures quoted above come from <code>data/campus_customs.db</code>;
+  the agents read their own from the MCP server at run time.
+</footer>
+
+</div>
+
+<script>
+  // Plain tabs. No framework, no build step -- the file has to work when it is
+  // double-clicked from a folder, with no server and no network.
+  const tabs = document.querySelectorAll('nav button');
+  const panels = document.querySelectorAll('.panel');
+
+  function show(id) {
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === id)));
+    panels.forEach(p => p.classList.toggle('active', p.id === id));
+    // Remember the tab across reloads so a reader does not lose their place.
+    try { localStorage.setItem('desk-tab', id); } catch (e) { /* file:// with storage off */ }
+  }
+
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+
+  try {
+    const saved = localStorage.getItem('desk-tab');
+    if (saved && document.getElementById(saved)) show(saved);
+  } catch (e) { /* ignore -- the default tab is already open */ }
+</script>
+
+</body>
+</html>
