@@ -1,0 +1,285 @@
+{
+  "problem": "4 - Add the MCP server to the vibe coder and test each tool",
+  "run_at": "2026-10-11T22:42:09-04:00",
+  "transport": "stdio",
+  "launched_from": ".mcp.json",
+  "server_name": "campus-customs",
+  "server_info": {
+    "name": "campus-customs",
+    "version": "1.30.0",
+    "protocol_version": "2025-11-25"
+  },
+  "database_under_test": "data/campus_customs_new.db",
+  "model_calls_made": 0,
+  "driving_prompt_from_user": "Problem 4: Add the MCP server to vibe coder and test each tool -- Alright so now please add the MCP server to this assignment so that the tools can be called upon. Please save the connecting JSON text in the .mcp.json at the project root or however the local mcp server lists are saved. Once the vibe coder is connected please test each one of the three mcp tools while saving the evidence into output/mcp_smoke.json. For every tool it shall include the prompt given by me to the vibe coder, the tools name, the tools output which must match the values in data/campus_customs_new.db",
+  "prompt_provenance": "driving_prompt_from_user is quoted verbatim. Each case's 'prompt' is the natural-language request written for that tool from the ticket it unlocks -- it was composed for this test, not transcribed from a separately typed user message.",
+  "vibe_coder_connection": {
+    "config_file": ".mcp.json",
+    "server_key": "campus-customs",
+    "status": "configured; requires a vibe-coder restart to appear as tools",
+    "detail": "Claude Code reads .mcp.json when a session starts, so the session that wrote this config does not itself expose the tools as mcp__campus-customs__*. Restart the session (and approve the project server when prompted) to call them from the chat. This evidence was produced by launching the server with the exact command, args and env from .mcp.json over the same stdio transport the vibe coder uses, so the config is proven to work even though the chat connection is pending a restart."
+  },
+  "tools_registered": [
+    "check_stock_by_size",
+    "find_restock_vendors",
+    "check_rent_due"
+  ],
+  "tools_tested": [
+    "check_stock_by_size",
+    "find_restock_vendors",
+    "check_rent_due"
+  ],
+  "all_tools_tested": true,
+  "overall_result": "PASS",
+  "cases": [
+    {
+      "ticket": 101,
+      "prompt": "Ticket 101: Tauhid Zaman wants 1 Bulldog tee, SKU CC-TEE-WHITE, in size S. Do we have it on the shelf, and if not how many are we short?",
+      "tool": "check_stock_by_size",
+      "arguments": {
+        "sku": "CC-TEE-WHITE",
+        "size": "S",
+        "requested_qty": 1
+      },
+      "tool_output": {
+        "sku": "CC-TEE-WHITE",
+        "product_name": "Classic Bulldog Tee",
+        "size": "S",
+        "size_is_stocked": true,
+        "qty_on_hand": 0,
+        "location": "Aisle B",
+        "other_sizes": {
+          "L": 3,
+          "M": 5,
+          "S": 0,
+          "XL": 2
+        },
+        "requested_qty": 1,
+        "can_fulfil_from_stock": false,
+        "shortfall": 1,
+        "qty_available_now": 0
+      },
+      "database_crosscheck": {
+        "source": "SELECT qty, location, name FROM inventory WHERE sku=? AND size=?",
+        "qty_on_hand": 0,
+        "location": "Aisle B",
+        "product_name": "Classic Bulldog Tee",
+        "shortfall": 1
+      },
+      "verification": {
+        "all_match": true,
+        "fields_checked": 4,
+        "fields": {
+          "qty_on_hand": {
+            "expected_from_sql": 0,
+            "returned_by_tool": 0,
+            "match": true
+          },
+          "location": {
+            "expected_from_sql": "Aisle B",
+            "returned_by_tool": "Aisle B",
+            "match": true
+          },
+          "product_name": {
+            "expected_from_sql": "Classic Bulldog Tee",
+            "returned_by_tool": "Classic Bulldog Tee",
+            "match": true
+          },
+          "shortfall": {
+            "expected_from_sql": 1,
+            "returned_by_tool": 1,
+            "match": true
+          }
+        }
+      },
+      "is_error": false
+    },
+    {
+      "ticket": 103,
+      "prompt": "Ticket 103: the Yale AI Club wants 20 hoodies in size M and we only hold 8. Who could reprint the other 12, will they actually ship, and when would the order land?",
+      "tool": "find_restock_vendors",
+      "arguments": {
+        "specialty_contains": "apparel"
+      },
+      "tool_output": {
+        "shop_date_today": "2026-08-31",
+        "filter_specialty_contains": "apparel",
+        "vendor_count": 1,
+        "vendors": [
+          {
+            "vendor_id": 1,
+            "name": "Bulldog Print Co",
+            "specialty": "apparel reprint",
+            "lead_days": 5,
+            "eta_if_ordered_today": "2026-09-05",
+            "can_ship": false,
+            "blocking_invoices": [
+              {
+                "invoice_id": 501,
+                "amount": 840.0,
+                "due_date": "2026-08-28",
+                "status": "open",
+                "description": "Rush reprint CC-TEE-WHITE S",
+                "days_overdue": 3,
+                "is_overdue": true
+              }
+            ],
+            "blocked_amount": 840.0
+          }
+        ]
+      },
+      "database_crosscheck": {
+        "source": "SELECT vendors JOIN unpaid invoices, lead time from vendors.lead_days",
+        "vendor_count": 1,
+        "vendor_id": 1,
+        "name": "Bulldog Print Co",
+        "specialty": "apparel reprint",
+        "lead_days": 5,
+        "eta_if_ordered_today": "2026-09-05",
+        "can_ship": false,
+        "blocked_amount": 840.0,
+        "blocking_invoice_ids": [
+          501
+        ],
+        "days_overdue": 3
+      },
+      "verification": {
+        "all_match": true,
+        "fields_checked": 10,
+        "fields": {
+          "vendor_count": {
+            "expected_from_sql": 1,
+            "returned_by_tool": 1,
+            "match": true
+          },
+          "vendor_id": {
+            "expected_from_sql": 1,
+            "returned_by_tool": 1,
+            "match": true
+          },
+          "name": {
+            "expected_from_sql": "Bulldog Print Co",
+            "returned_by_tool": "Bulldog Print Co",
+            "match": true
+          },
+          "specialty": {
+            "expected_from_sql": "apparel reprint",
+            "returned_by_tool": "apparel reprint",
+            "match": true
+          },
+          "lead_days": {
+            "expected_from_sql": 5,
+            "returned_by_tool": 5,
+            "match": true
+          },
+          "eta_if_ordered_today": {
+            "expected_from_sql": "2026-09-05",
+            "returned_by_tool": "2026-09-05",
+            "match": true
+          },
+          "can_ship": {
+            "expected_from_sql": false,
+            "returned_by_tool": false,
+            "match": true
+          },
+          "blocked_amount": {
+            "expected_from_sql": 840.0,
+            "returned_by_tool": 840.0,
+            "match": true
+          },
+          "blocking_invoice_ids": {
+            "expected_from_sql": [
+              501
+            ],
+            "returned_by_tool": [
+              501
+            ],
+            "match": true
+          },
+          "days_overdue": {
+            "expected_from_sql": 3,
+            "returned_by_tool": 3,
+            "match": true
+          }
+        }
+      },
+      "is_error": false
+    },
+    {
+      "ticket": 102,
+      "prompt": "Ticket 102: Elm City Properties emailed saying shop rent is due in two days. What does the lease itself say we owe and when?",
+      "tool": "check_rent_due",
+      "arguments": {
+        "lease_id": 1
+      },
+      "tool_output": {
+        "shop_date_today": "2026-08-31",
+        "lease_count": 1,
+        "leases": [
+          {
+            "lease_id": 1,
+            "space_name": "Chapel Street shop",
+            "landlord": "Elm City Properties",
+            "amount_due": 2400.0,
+            "next_due": "2026-09-02",
+            "days_until_due": 2,
+            "is_overdue": false,
+            "notes": null
+          }
+        ]
+      },
+      "database_crosscheck": {
+        "source": "SELECT monthly_rent, next_due FROM leases WHERE id=?",
+        "lease_id": 1,
+        "space_name": "Chapel Street shop",
+        "landlord": "Elm City Properties",
+        "amount_due": 2400.0,
+        "next_due": "2026-09-02",
+        "days_until_due": 2,
+        "is_overdue": false
+      },
+      "verification": {
+        "all_match": true,
+        "fields_checked": 7,
+        "fields": {
+          "lease_id": {
+            "expected_from_sql": 1,
+            "returned_by_tool": 1,
+            "match": true
+          },
+          "space_name": {
+            "expected_from_sql": "Chapel Street shop",
+            "returned_by_tool": "Chapel Street shop",
+            "match": true
+          },
+          "landlord": {
+            "expected_from_sql": "Elm City Properties",
+            "returned_by_tool": "Elm City Properties",
+            "match": true
+          },
+          "amount_due": {
+            "expected_from_sql": 2400.0,
+            "returned_by_tool": 2400.0,
+            "match": true
+          },
+          "next_due": {
+            "expected_from_sql": "2026-09-02",
+            "returned_by_tool": "2026-09-02",
+            "match": true
+          },
+          "days_until_due": {
+            "expected_from_sql": 2,
+            "returned_by_tool": 2,
+            "match": true
+          },
+          "is_overdue": {
+            "expected_from_sql": false,
+            "returned_by_tool": false,
+            "match": true
+          }
+        }
+      },
+      "is_error": false
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "campus-customs": {
+      "command": "C:/Users/ANAS/Desktop/Yale MBA Courses/MGT 409 01-05 (FA26) AI Foundation for Managers/AI Foundations/HW5/.venv/Scripts/python.exe",
+      "args": [
+        "-m",
+        "mcp_server.server"
+      ],
+      "env": {
+        "PYTHONPATH": "C:/Users/ANAS/Desktop/Yale MBA Courses/MGT 409 01-05 (FA26) AI Foundation for Managers/AI Foundations/HW5",
+        "WORKING_DB_PATH": "data/campus_customs_new.db",
+        "SEED_DB_PATH": "data/campus_customs.db"
+      }
+    }
+  }
+}

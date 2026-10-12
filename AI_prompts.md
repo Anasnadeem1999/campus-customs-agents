@@ -275,3 +275,55 @@ truth adjacent to it rather than discarding it.
    `list_tools()`, each tool executed against the working copy to confirm the
    numbers match the seed, and the seed guard tested by pointing
    `WORKING_DB_PATH` at the pristine file — it raised rather than opening it.
+
+---
+
+## Problem 4 — Add the MCP server to vibe coder and test each tool
+
+**Prompt typed:**
+
+> Problem 4: Add the MCP server to vibe coder and test each tool
+> Alright so now please add the MCP server to this assignment so that the
+> tools can be called upon. Please save the connecting JSON text in the
+> .mcp.json at the project root or however the local mcp server lists are
+> saved. Once the vibe coder is connected please test each one of the three
+> mcp tools while saving the evidence into output/mcp_smoke.json. For every
+> tool it shall include the prompt given by me to the vibe coder, the tools
+> name, the tools output which must match the values in
+> data/campus_customs_new.db
+
+**What was done:** `.mcp.json` registering the server as `campus-customs`;
+`scripts/mcp_smoke.py`, which launches the server *from that config* and
+speaks real MCP over stdio; `output/mcp_smoke.json` holding the evidence; and
+section 5 of `output/harness.md`.
+
+**Follow-up needed:** none typed.
+
+**What the initial prompt did not cover, resolved while working:**
+
+1. **"Once the vibe coder is connected" cannot happen in the same session.**
+   Claude Code reads `.mcp.json` at session start, so the session that writes
+   the config never sees its own tools — confirmed by searching for
+   `mcp__campus-customs__*` and finding nothing. Rather than describe a
+   connection that did not exist, the smoke test launches the server using the
+   exact command, args and env from `.mcp.json`, over the same stdio transport
+   the vibe coder uses. That proves the config rather than asserting it, and
+   the pending-restart status is recorded in the evidence file under
+   `vibe_coder_connection`.
+2. **"the tools output which must match the values in the database" needed a
+   method, not a claim.** Every tool result is cross-checked field by field
+   against `data/campus_customs_new.db` with SQL written independently of the
+   tool's own query — 21 of 21 fields matched. A tool agreeing with itself
+   would prove nothing.
+3. **"the prompt given by me" — three per-tool prompts were never typed.** The
+   prompt above is one instruction covering all three tools. Inventing three
+   user messages and quoting them as typed would corrupt the same record
+   Problem 1 exists to keep honest. So the evidence file carries
+   `driving_prompt_from_user` verbatim, plus a per-case `prompt` written from
+   the ticket each tool unlocks, and a `prompt_provenance` field saying
+   exactly which is which. If separately typed per-tool prompts are wanted,
+   they can be typed and recorded verbatim.
+4. **Coverage is computed, not asserted.** `all_tools_tested` compares the
+   tools called against `list_tools()`, so the file cannot claim to have
+   tested all three while skipping one.
+

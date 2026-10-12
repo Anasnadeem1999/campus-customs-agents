@@ -9,7 +9,8 @@ each new problem arrives rather than being planned out in advance.
 | 1 | Vibe coder prompts (`AI_prompts.md`) | Done |
 | 2 | Study the database; start `output/harness.md` | Done |
 | 3 | Build the MCP server (FastMCP, three tools) | Done |
-| 4 | *awaiting the next problem from the user* | — |
+| 4 | Connect the MCP server; smoke-test each tool | Done |
+| 5 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -87,3 +88,18 @@ Verified without running the server: all three tools register through
 shortfall 1, 103 → shortfall 12 with 8 available, apparel vendor
 `can_ship: false` blocked by $840, rent $2,400 due in 2 days); and pointing
 `WORKING_DB_PATH` at the seed raises `ShopDataError` instead of opening it.
+
+## 4 — Connect the MCP server; smoke-test each tool
+
+- `.mcp.json` registers the server as `campus-customs` (venv interpreter,
+  `-m mcp_server.server`, `PYTHONPATH` and both DB paths in `env`).
+- `scripts/mcp_smoke.py` reads that config, launches the server from it, and
+  speaks real MCP over stdio — initialize, `list_tools`, `call_tool`.
+- `output/mcp_smoke.json` records, per tool: the prompt, the tool name, the
+  arguments, the full output, and a field-by-field cross-check against the
+  working database using independently written SQL.
+- **21 of 21 fields matched; overall PASS.** No model calls.
+- The tools are not live in the session that wrote the config — Claude Code
+  reads `.mcp.json` at startup. Noted in the evidence under
+  `vibe_coder_connection`; a restart plus approval makes them callable.
+

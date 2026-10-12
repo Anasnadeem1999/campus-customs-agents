@@ -347,6 +347,72 @@ stays readable without the shop's actual shape being lost.
 
 ---
 
+## 5. Connecting and smoke-testing the server (Problem 4)
+
+`.mcp.json` at the project root registers the server under the key
+**`campus-customs`**, following the same shape the workspace already uses for
+its other local server: an absolute path to this project's venv interpreter,
+then the module to run.
+
+```json
+{
+  "mcpServers": {
+    "campus-customs": {
+      "command": ".../HW5/.venv/Scripts/python.exe",
+      "args": ["-m", "mcp_server.server"],
+      "env": {
+        "PYTHONPATH": ".../HW5",
+        "WORKING_DB_PATH": "data/campus_customs_new.db",
+        "SEED_DB_PATH": "data/campus_customs.db"
+      }
+    }
+  }
+}
+```
+
+`PYTHONPATH` is set rather than relying on a working directory, so the package
+imports no matter where the host launches it from. The two DB paths are passed
+explicitly so the working copy is named in the config itself, not just
+defaulted in code.
+
+### The evidence: `output/mcp_smoke.json`
+
+Produced by `scripts/mcp_smoke.py`, which **reads `.mcp.json` and launches the
+server from it** — same interpreter, same args, same env — then speaks real
+MCP over stdio: initialize, `list_tools`, `call_tool`. It imports nothing from
+`mcp_server`, so a config that would fail in the vibe coder fails here too.
+
+For each of the three tools the file records the prompt, the tool name, the
+arguments, the full tool output, and a **field-by-field cross-check against
+`data/campus_customs_new.db` using SQL written separately from the tool's own
+query**. A tool agreeing with itself proves nothing; agreeing with an
+independent `SELECT` is evidence.
+
+| Ticket | Tool | Fields checked vs SQL | Result |
+|---|---|---|---|
+| 101 | `check_stock_by_size` | 4 | PASS |
+| 103 | `find_restock_vendors` | 10 | PASS |
+| 102 | `check_rent_due` | 7 | PASS |
+
+**21 of 21 fields matched**, including the derived ones that are easiest to
+get wrong — `shortfall: 1`, `days_overdue: 3`, `eta_if_ordered_today:
+2026-09-05`, `days_until_due: 2`. `all_tools_tested` is computed by comparing
+the tools actually called against `list_tools()`, so the file cannot claim
+full coverage while silently skipping one. No model calls were made; this is
+transport and data, not inference.
+
+### Connection status, stated plainly
+
+The tools are **not** live in the session that wrote the config. Claude Code
+reads `.mcp.json` when a session starts, so `mcp__campus-customs__*` appears
+only after a restart and an approval of the project server. That limitation is
+recorded in the evidence file under `vibe_coder_connection` rather than
+papered over. What *is* proven is the config: the smoke test launches the
+server through it, over the same stdio transport the vibe coder uses, and all
+three tools answer correctly.
+
+---
+
 ## Appendix — verified data integrity
 
 Checked against the seed at Problem 2; no surprises to code around.
