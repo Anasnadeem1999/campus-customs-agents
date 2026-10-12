@@ -255,6 +255,87 @@ the working copy changes as tickets resolve.
 
 ---
 
+## 4. The MCP tools (Problem 3)
+
+Built with FastMCP in `mcp_server/server.py`, against the working copy only.
+Every agent on the team reaches the shop through these tools and nothing else,
+so no agent can quote a price, a stock level or a due date that did not come
+out of SQLite.
+
+| Tool | Tables read | Unlocks ticket |
+|---|---|---|
+| `check_stock_by_size` | `inventory` | **101**, **103** |
+| `find_restock_vendors` | `vendors`, `invoices`, `desk` | **101**, **103** |
+| `check_rent_due` | `leases`, `desk` | **102** |
+
+### `check_stock_by_size(sku, size, requested_qty=None)`
+
+**Reads:** `inventory` — the `(sku, size)` row, plus the SKU's other sizes.
+
+**Unlocks ticket 101.** Ticket 101 asks for `CC-TEE-WHITE` in size **S**, and S
+is the single size sitting at zero while M, L and XL hold 5, 3 and 2 — so a
+SKU-level stock check would report ten tees in the building and tell Tauhid
+Zaman yes when the correct answer is no.
+
+**Unlocks ticket 103.** Ticket 103 asks for 20 × `CC-HOOD-NAVY` in M against 8
+on hand, and this tool is what turns that request into the two numbers the
+rest of the work runs on — a shortfall of **12** to be reprinted, and **8**
+available right now for a partial offer.
+
+Verified against the working copy: ticket 101 → `qty_on_hand: 0`,
+`shortfall: 1`; ticket 103 → `qty_on_hand: 8`, `shortfall: 12`,
+`qty_available_now: 8`.
+
+### `find_restock_vendors(specialty_contains=None)`
+
+**Reads:** `vendors` (lead times), `invoices` (the shipping block), `desk` (to
+date the ETA).
+
+**Unlocks ticket 101.** Ticket 101's missing tee can only be closed by an
+apparel reprint, and this tool is the one that shows the real obstacle is not
+manufacturing but money — Bulldog Print Co, the only apparel vendor, is
+holding invoice 501 at **3 days overdue** and will ship nothing until it is
+cleared.
+
+**Unlocks ticket 103.** The 12 hoodies ticket 103 is short run into that same
+single-vendor gate, so this tool is what reveals that tickets 101 and 103 are
+not two restock problems but one unpaid bill.
+
+Verified: filtering on `"apparel"` returns exactly one vendor —
+`can_ship: false`, `blocked_amount: 840.0`, `days_overdue: 3`,
+`eta_if_ordered_today: 2026-09-05`.
+
+### `check_rent_due(lease_id=None)`
+
+**Reads:** `leases` (the obligation), `desk` (to measure urgency).
+
+**Unlocks ticket 102.** Ticket 102 is a landlord's email asserting that rent is
+due in two days, and this tool is the right one precisely because it does not
+take the email's word for it — it answers from lease 1 itself: **$2,400**, due
+**2026-09-02**, two days out from `desk.date_today`.
+
+Verified: `amount_due: 2400.0`, `days_until_due: 2`, `is_overdue: false`.
+
+### Design decisions worth recording
+
+- **The tools refuse to guess a vendor–SKU mapping.** The schema has no link
+  from a SKU to a vendor; only a free-text `specialty`. Rather than hardcode
+  "tees come from vendor 1", `find_restock_vendors` returns each specialty
+  verbatim and lets the agent judge. Inventing that mapping would be inventing
+  data.
+- **Read-only by default.** `db.connect()` opens the file `mode=ro` unless a
+  caller explicitly asks to write, so the three question-answering tools
+  cannot mutate the shop even by accident. The payment and ticket-update
+  tools in later problems will have to ask.
+- **The seed is guarded in code, not by convention.** Pointing
+  `WORKING_DB_PATH` at `data/campus_customs.db` raises `ShopDataError`
+  instead of opening it. Tested.
+- **A stocked-but-empty size is distinguished from a size never carried.**
+  `(CC-TEE-WHITE, S)` exists at qty 0, which is a restock; a size with no row
+  at all is a different conversation with the customer.
+
+---
+
 ## Appendix — verified data integrity
 
 Checked against the seed at Problem 2; no surprises to code around.

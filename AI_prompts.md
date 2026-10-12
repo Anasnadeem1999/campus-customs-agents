@@ -197,3 +197,61 @@ per-table format and the ticket study.
    ticket-linkage study the prompt also requested, the cross-ticket cash and
    vendor analysis, and a list of the figures agents must recompute from the
    database rather than recall.
+
+---
+
+## Problem 3 — Build the MCP server
+
+**Prompt typed:**
+
+> Problem 3: Build the MCP server
+> Now for this problem pls write a MCP server in the mcp/server using the fast
+> mcp. It is suppose to interact with data/campus_customs_new.db. We do not
+> need it to connect it or run it for this problem. Please note that every
+> agent in this homework is to use the tools that are in this mcp server, we
+> will be adding more tools within it later onwards. For the time being please
+> write three tools that we know we will be needing for the tickets in the
+> database. Please make sure that the names are clear and do not invent any
+> data, you should only be using information in the database.
+> In the output/harness.md please list each of the three mcp tools, where for
+> every tool it should include the table it reads, which of the ticket it
+> helps unlock for example 101 102 or 103 etc., and also one sentence on why
+> that specific tool is the right one for that specific ticket. Please avoid
+> vague lines such as "reads inventory" this will not score high for this
+> assignment, the tool is to be tied to the ticket. Please also add in a short
+> mcp_server/readme.md file which should explain what the mcp server is for,
+> which of the database file it uses, and also the three tools that it has.
+
+**What was done:** `mcp_server/server.py` (FastMCP, three tools),
+`mcp_server/db.py` (paths, seed guard, the shop's clock),
+`mcp_server/readme.md`, and a new section 4 in `output/harness.md` tying each
+tool to the tickets it unlocks.
+
+**Follow-up needed:** none typed. The prompt was unusually specific — it named
+the three harness ingredients per tool and explicitly ruled out the vague
+phrasing that would score badly.
+
+**What the initial prompt did not cover, resolved while working:**
+
+1. **Folder name.** The prompt says "in the mcp/server" but later asks for
+   `mcp_server/readme.md`. Read as `mcp_server/`, which also avoids a local
+   package named `mcp` shadowing the installed `mcp` SDK on import — a real
+   collision, not a style preference.
+2. **"the fast mcp" is version-sensitive.** Installing `mcp` pulled 2.x, where
+   `FastMCP` has been renamed `MCPServer` and `mcp.server.fastmcp` no longer
+   exists. Pinned `mcp>=1.2,<2` so the code genuinely uses FastMCP as the
+   prompt asks, and noted why in `requirements.txt`.
+3. **Which three tools.** The prompt left the choice open. Picked so that all
+   three tickets are covered and the two apparel tickets share the vendor
+   tool: stock-by-size (101, 103), restock vendors (101, 103), rent due (102).
+4. **"Do not invent any data" has a sharp edge in this schema.** There is no
+   SKU-to-vendor link anywhere in the database, only a free-text `specialty`.
+   A convenient `find_vendor_for_sku` tool would have had to hardcode that
+   mapping, i.e. invent it. `find_restock_vendors` instead returns each
+   specialty verbatim with an optional filter and leaves the judgement to the
+   agent.
+5. **Verification beyond the ask.** The prompt said the server need not run.
+   It was still import-checked, its three tools confirmed registered through
+   `list_tools()`, each tool executed against the working copy to confirm the
+   numbers match the seed, and the seed guard tested by pointing
+   `WORKING_DB_PATH` at the pristine file — it raised rather than opening it.

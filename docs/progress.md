@@ -8,7 +8,8 @@ each new problem arrives rather than being planned out in advance.
 | — | Setup: repo, data, reset script, model check | Done |
 | 1 | Vibe coder prompts (`AI_prompts.md`) | Done |
 | 2 | Study the database; start `output/harness.md` | Done |
-| 3 | *awaiting the next problem from the user* | — |
+| 3 | Build the MCP server (FastMCP, three tools) | Done |
+| 4 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -66,3 +67,20 @@ with a note on what the initial prompt was missing.
 - Cash is the binding constraint: $3,400 covers the $840 invoice and the
   $2,400 rent with **$160** left, so the $264 hoodie restock cannot be funded.
   The pay tool's insufficient-funds refusal sits on the main path.
+
+## 3 — Build the MCP server
+
+- `mcp_server/server.py` — FastMCP instance plus three read tools:
+  `check_stock_by_size`, `find_restock_vendors`, `check_rent_due`.
+- `mcp_server/db.py` — resolves the working copy, raises if asked to open the
+  seed, and reads the shop's clock from `desk.date_today`.
+- `mcp_server/readme.md` — purpose, database file, the three tools.
+- `output/harness.md` section 4 — each tool's tables, the tickets it unlocks,
+  and why it is the right tool for that ticket.
+- Pinned `mcp>=1.2,<2`: the 2.x SDK renamed `FastMCP` to `MCPServer`.
+
+Verified without running the server: all three tools register through
+`list_tools()`; each returns the right figures off the working copy (101 →
+shortfall 1, 103 → shortfall 12 with 8 available, apparel vendor
+`can_ship: false` blocked by $840, rent $2,400 due in 2 days); and pointing
+`WORKING_DB_PATH` at the seed raises `ShopDataError` instead of opening it.
