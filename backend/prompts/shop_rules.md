@@ -207,25 +207,32 @@ How to delegate well:
 Work is finished when the ticket itself has moved. Before you hand anything
 back, call `update_ticket` with the outcome:
 
-- `resolved` — **the thing the ticket asked for has actually happened**, or the
-  shop has definitively refused it and a draft saying so is on the board.
+- `resolved` — **the desk has nothing left to do on this ticket.** Every
+  action available to the shop has been taken: the money paid or the spend
+  refused, the order placed with a committed date, and the customer told.
 - `awaiting_approval` — a request is sitting with a human.
-- `blocked` — waiting on money, stock or a vendor. Name what it waits on.
+- `blocked` — **the shop itself cannot act.** It is waiting on money it does
+  not have, a decision nobody has made, or a vendor that will not deal with
+  it. Name what it waits on.
 
-**`resolved` is a high bar and investigating is not clearing.** Confirming a
-figure, agreeing a bill is genuinely owed, or working out what would need to
-happen is useful work, but it is not resolution — the ticket is still live and
-the shop still owes the action.
+**The test is whether the ticket still needs anything from *us*.** A customer
+order where the stock is bought, the order is placed with the vendor's own
+ETA, and the customer has been told what is happening is **resolved** — the
+remaining wait belongs to the vendor, not to the desk, and there is nothing a
+colleague could usefully do with it tomorrow. A request the shop has refused,
+with the refusal explained and a draft on the board saying so, is **resolved**
+too: a clean no is a finished answer.
 
-A rent notice is resolved when the rent is **paid**. Verifying that $2,400 is
-correctly due and stopping there leaves the landlord unpaid with the ticket
-closed, which is the worst of both: the work is not done and nobody is looking
-for it any more. If you have confirmed a payment is owed and nothing is paid
-yet, the outcome is `awaiting_approval` once you have raised the request, and
-raising it is part of the same turn — not a thing to leave for later.
+What is *not* resolved is work the shop could still do and has not. If the
+money has not been raised for approval, if the order has not been placed, if
+the customer has not been written to — the ticket is live, whatever else was
+learned about it.
 
-The same test applies everywhere: before you write `resolved`, say what
-concretely changed. If the only honest answer is "we now understand the
+**Investigating is not clearing.** Confirming a figure, agreeing a bill is
+genuinely owed, or working out what would need to happen is useful, but it
+leaves the shop owing the action. A rent notice is not resolved by verifying
+the rent; it is resolved by paying it. Before you write `resolved`, say what
+concretely changed — and if the only honest answer is "we now understand the
 problem", it is not resolved.
 
 Notes are appended, never overwritten — the customer's own words stay. Write

@@ -362,3 +362,17 @@ def test_an_already_paid_approval_reports_as_paid_not_as_unaffordable():
     assert "resolved" in ex["note"]
     # The misleading figure must not be what the agent is handed.
     assert "balance_after" not in ex
+
+
+def test_an_unknown_sku_is_refused_with_the_real_ones_named():
+    """A bare refusal just gets retried identically.
+
+    An agent that guesses a product code gets told which codes exist, so the
+    next attempt can be right rather than being the same attempt again.
+    """
+    with pytest.raises(server.ShopDataError) as exc:
+        server.check_stock_by_size(sku="CC-TEE-BLACK", size="M", requested_qty=1)
+    message = str(exc.value)
+    assert "does not carry it" in message
+    assert "CC-TEE-WHITE" in message and "CC-HOOD-NAVY" in message
+    assert "do not guess" in message

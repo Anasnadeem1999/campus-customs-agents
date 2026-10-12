@@ -892,18 +892,19 @@ Full reasoning, including what was deliberately left out, is in
 
 ---
 
-## 10. The full run (Problem 9)
+## 10. The full run (Problems 9 and 11)
 
-One run over all three tickets, from a database reset immediately beforehand.
+One run over all three tickets from a database reset immediately beforehand,
+with **every payment put to the owner as a question** rather than assumed.
 Opening balance **$3,400.00**, shop date **2026-08-31**.
 
-### Outcomes
+### Outcomes — all three resolved
 
 | Ticket | Final status | What happened |
 |---|---|---|
-| **101** Bulldog tee | `blocked` | Invoice 501 paid, lifting the vendor's shipping block; the one size-S tee ordered for $8, ETA **2026-09-05**. Blocked on that delivery — everything in the shop's power is done, but the tee is not on the shelf on 2026-08-31. |
+| **101** Bulldog tee | `resolved` | Invoice 501 paid, lifting the vendor's shipping block; the size-S tee ordered at its real $8 unit cost, ETA **2026-09-05**; Tauhid Zaman drafted a reply carrying that date. The desk has nothing left to do. |
 | **102** Rent due | `resolved` | Notice checked against lease 1 and found correct; $2,400 paid; lease rolled to 2026-10-02 so the month cannot be paid twice. |
-| **103** Bulk hoodies | `resolved` | Declined with a counter-offer. 8 of 20 on hand; the $264 restock refused against $160 uncommitted; $50/unit approved and a draft filed, unsent. |
+| **103** Bulk hoodies | `resolved` | A priced partial offer: 8 of 20 on hand at the owner-approved **$42** a unit, the $264 restock for the other 12 refused against $152 uncommitted, and a draft saying so on the board. |
 
 ### The money
 
@@ -916,61 +917,60 @@ Opening balance **$3,400.00**, shop date **2026-08-31**.
 | **Closing** | **−3,240.00** | **$160.00** |
 
 `$3,400.00 − $840.00 − $2,400.00 = $160.00`, and `cash_accounts.balance` for
-`checking` reads **$160.00**. Checked, not asserted —
-`scripts/build_resolved.py` exits non-zero if the two disagree, and
+`checking` reads **$160.00**. Checked rather than asserted:
+`scripts/build_resolved.py` exits non-zero if they disagree and
 `scripts/fill_desk_actuals.py` refuses to write the page at all.
 
 Three things deliberately did **not** move the balance: the $8 purchase order
 (a commitment; cash leaves when the vendor invoices), the $264 restock
-(refused, so it never became a payment), and the $50 price override (a price,
-not a payment).
+(refused, so never a payment), and the $42 price override (a price).
 
-### Human decisions
-
-Five approval requests, decided by a human outside anything an agent can reach:
+### Human decisions — five requests, five answered
 
 | # | What | Amount | Decision |
 |---|---|---:|---|
 | 1 | invoice payment, invoice 501 | $840.00 | approved → paid |
 | 2 | rent payment, lease 1 | $2,400.00 | approved → paid |
-| 3 | purchase order, 1 tee | $8.00 | approved → placed, no cash |
-| 4 | price override, ticket 103 | $50.00/unit | approved, no cash |
-| 5 | purchase order, 12 hoodies | $264.00 | **rejected** — $160 will not cover it |
+| 3 | purchase order, 1 tee | $1.00 | **rejected — wrong amount** |
+| 4 | price override, ticket 103 | $42.00/unit | approved |
+| 5 | purchase order, 1 tee (re-raised) | $8.00 | approved → placed |
 
-Request 5 is the seeded cash squeeze landing exactly where the data said it
-would, and being refused out loud rather than part-funded or quietly dropped.
+**Request 3 is the most interesting event in the run.** Accounting asked for
+the tee's purchase order at $1.00 when `pricing.unit_cost` for
+`CC-TEE-WHITE` is **$8.00** and the order is one unit — it had put the
+quantity in the amount field. The owner rejected it with that reason and the
+team re-raised correctly at $8.00.
+
+Nothing in the system would have caught it. `request_approval` validates
+invoice and rent amounts against the database, but a purchase-order amount has
+no record to compare against, so the tool had nothing to check. **The human
+gate was the only control that worked**, which is the strongest argument on
+this page for keeping it.
 
 ### Plan versus run
 
-The expected plans were written in Problem 6 **before** this run and were not
-edited afterwards. Side by side in `output/desk_tickets.html`:
+Expected plans were written in Problem 6 **before** the run and restored
+byte-for-byte from their original commit before the Actual sections were
+filled.
 
-- **Ticket 103 — 3 of 3.** The run followed the plan step for step, including
-  calling Inventory rather than Accounting first on a ticket typed
-  `price_override`, which the plan had flagged as the call most likely to be
-  got wrong.
-- **Ticket 102 — 1 of 2, and the miss was the plan's fault.** The expected
-  `Facilities → Accounting` hop did not happen; both agents read
-  `get_cash_position` themselves instead. Shop rule 7 says not to delegate what
-  a tool in front of you already answers, so the team was right and the plan
-  was wrong.
-- **Ticket 101 — 2 of 3, and the miss matters.** Customer Service was never
-  called, so **Tauhid Zaman was never written to**. The shop ordered his tee
-  and told him nothing. The clearest failure of the run, and only visible
-  because the plan existed to compare against.
+- **101 — 3 of 3**, plus the pricing error the human caught. Insisting on
+  Customer Service in the plan is what got Tauhid written to; earlier runs of
+  this board dropped that delegation and closed the ticket in silence.
+- **102 — 1 of 2**, and the plan was wrong. The expected
+  `Facilities → Accounting` hop has not happened in three consecutive runs;
+  both agents read `get_cash_position` themselves, which shop rule 7 tells
+  them to do.
+- **103 — 3 of 3**, and the "optional" price override was raised and approved,
+  turning a flat refusal into a real offer on the eight hoodies that exist.
 
 ### Provenance
 
-- **25 steps appended** to `output/audit_trail.json` across four run ids —
-  earlier runs were not overwritten, and the file now holds every run since
-  Problem 5.
+- **36 steps appended** to `output/audit_trail.json` across six run ids;
+  earlier runs untouched. The file holds every run since Problem 5.
 - **Every step resolved to `gpt-6-luna-2026-09-22`**, checked against what the
   gateway reported rather than what was requested.
 - Artefacts: `output/resolved_tickets.json`, `output/desk_tickets.html`
-  (Expected and Actual side by side, plus the Cash tab),
-  `output/resolved_board.html` (board screenshots, self-contained).
-
----
+  (Expected vs Actual, Cash, Reflection), `output/resolved_board.html`.
 
 ## 11. What this harness covers
 

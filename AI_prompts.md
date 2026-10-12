@@ -765,3 +765,51 @@ claims flagged for a decision, and approved unchanged.
 5. **I cannot submit to Canvas.** No access. The URL is in
    `output/github_url.txt` and has to be pasted into the assignment by hand -
    flagged rather than silently skipped.
+
+## Problem 12 - Full end-to-end audit and resubmission
+
+**Prompt, verbatim:**
+
+> Now we are suppose to rerun everything from start till end, making sure everything was run correctly, making any improvisations along the way as needed, let me know if anything is needed from me, or my input is needed anywhere, make iterations and make it pitch perfect, i want the professor wanting to give me 101 out of 100 here. i am pasting all my prompts to make you go through there, the updates are to be implemented and similarly updated version is to be updated in git hub for final submission as well.
+
+(The full original assignment text was pasted with it and re-read line by line
+against the repository.)
+
+**Follow-up prompts, verbatim:**
+
+> Resolved = the shop's work is done (Recommended)
+
+> Approve and pay / Approve and pay  (invoice 501 and the rent)
+
+> Reject it - wrong amount (Recommended)
+
+> Approve $42 for the 8 we actually hold
+
+> Approve and place the order  (the re-raised $8 purchase order)
+
+**What the audit found that earlier problems had missed:**
+
+1. **Two tickets could never resolve, because our own rule forbade it.** The
+   shop rules defined `resolved` as work physically completed, so "waiting on
+   a vendor" meant `blocked` forever - while the assignment says to run all
+   three *until each is resolved*. Put to the user as a judgement call; they
+   chose "the desk has nothing left to do", which is both defensible and what
+   the assignment asks.
+2. **A customer order was being closed with the customer never written to.**
+   The Boss dropped Customer Service on ticket 101 in two separate runs. That
+   is incomplete work regardless of status labels, and the Boss brief now
+   forbids closing any ticket raised by a named person without a draft.
+3. **Accounting was deciding on the owner's behalf** not to raise requests it
+   expected to be refused. Fixed in its brief; the result is that the $264
+   restock reached the owner this run and was refused explicitly, which is
+   what makes the cash squeeze visible on the Cash tab.
+4. **A layout and a port deviated from the brief** - `readme.md` where the
+   spec says `README.md`, and Vite on 5180 where the brief names 5173. Both
+   restored; the 5180 workaround was only ever needed because another project
+   held 5173 on this machine.
+5. **The run then caught an agent arithmetic error.** Accounting asked for a
+   purchase order at $1.00 against a real unit cost of $8.00. Rejecting it was
+   the right call and the team self-corrected. Worth recording because
+   `request_approval` cannot validate a purchase-order amount the way it
+   validates an invoice - there is no record to compare against - so this is a
+   genuine hole that only the human gate covers.

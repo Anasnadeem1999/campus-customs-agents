@@ -22,20 +22,23 @@ OUT = REPO_ROOT / "output/resolved_board.html"
 
 CAPTIONS = {
     101: (
-        "Ticket 101 selected. The card reads <strong>blocked</strong> in red: invoice 501 is "
-        "paid and the tee is on order, but it does not arrive until 2026-09-05. The feed shows "
-        "Inventory reporting qty 0 and the vendor block, with every figure it cited traced back "
-        "to the tool that returned it."
+        "Ticket 101 selected, <strong>resolved</strong> in green and struck through. The "
+        "summary shows Customer Service on the ticket &mdash; the delegation two earlier runs "
+        "dropped &mdash; so Tauhid Zaman has a draft carrying the real 2026-09-05 ETA. Below "
+        "it, Inventory reporting qty 0 and the invoice 501 block, with every figure traced "
+        "back to the tool that returned it."
     ),
     102: (
-        "Ticket 102 selected, <strong>resolved</strong> in green and struck through. The summary "
-        "at the top shows what each colleague did on the latest run; below it, Facilities "
-        "checking the landlord's notice against the lease itself rather than taking it on trust."
+        "Ticket 102 selected, <strong>resolved</strong>. The summary shows just two "
+        "colleagues, Facilities and the Boss, which is the whole team this ticket needed. "
+        "Facilities checked the landlord's notice against lease 1 itself rather than taking "
+        "it on trust."
     ),
     103: (
-        "Ticket 103 selected, <strong>resolved</strong> &mdash; declined with a counter-offer. "
-        "All four colleagues appear in the summary, including Customer Service, which drafted "
-        "the Yale AI Club a reply. The till reads $160.00 with $8 promised and $152 free."
+        "Ticket 103 selected, <strong>resolved</strong> as a priced partial offer. All four "
+        "colleagues appear. Inventory reports 8 of 20 on hand and the same invoice 501 block; "
+        "the owner approved $42 a unit for the 8 that exist and refused the $264 restock for "
+        "the 12 that do not. The till reads $160.00 with $8 promised and $152 free."
     ),
 }
 

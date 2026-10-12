@@ -33,62 +33,63 @@ AGENT_NAMES = {
 VERDICTS = {
     101: {
         "matched": [
-            "Boss called <strong>Inventory first</strong>, exactly as planned, and for the "
-            "reason planned: the stock answer reframed the ticket before any money was discussed.",
+            "Boss called <strong>Inventory first</strong>, as planned, and for the reason "
+            "planned: the stock answer reframed the ticket before any money was discussed.",
             "Boss &rarr; Accounting second, once Inventory reported the vendor block.",
+            "Boss &rarr; <strong>Customer Service third</strong>, and Tauhid was drafted a "
+            "reply carrying the real 2026-09-05 ETA. <em>This is the delegation the two "
+            "earlier runs dropped</em>; the ticket only reaches a genuine resolution with it.",
             "<strong>Facilities was not called</strong> &mdash; correctly, as predicted.",
         ],
         "diverged": [
-            "<strong>Customer Service was never called.</strong> The plan had it third, drafting "
-            "Tauhid a reply. It did not happen, so the one person actually waiting on this "
-            "ticket was never written to. The shop paid an invoice, ordered his tee and told "
-            "him nothing. This is the clearest miss of the run &mdash; and it repeated from the "
-            "previous run, so it is a pattern in how the Boss handles this ticket rather than "
-            "a one-off.",
+            "Accounting first asked for the purchase order at <strong>$1.00</strong> when "
+            "<code>pricing.unit_cost</code> for <code>CC-TEE-WHITE</code> is <strong>$8.00</strong> "
+            "and the order is one unit &mdash; it appears to have put the quantity in the "
+            "amount field. <strong>The owner rejected it</strong> with that reason and the "
+            "team re-raised at the correct $8.00, which was then approved. The plan did not "
+            "anticipate an arithmetic slip, but the human gate caught it, which is exactly "
+            "what the gate is for.",
         ],
-        "verdict": "2 of 3 planned delegations happened. The missing one was the customer.",
+        "verdict": "3 of 3 planned delegations, plus one agent error the human approval gate caught.",
     },
     102: {
         "matched": [
             "Boss called <strong>Facilities first</strong>, as planned, and Facilities did the "
-            "thing the plan existed for: it checked the landlord's claim against lease 1 rather "
-            "than taking the notice at face value.",
+            "thing the plan existed for: it checked the landlord's claim against lease 1 "
+            "rather than taking the notice at face value.",
             "<strong>Inventory and Customer Service were both left out</strong>, as predicted. "
             "No stock question, and the landlord is not a customer.",
         ],
         "diverged": [
-            "<strong>The Facilities &rarr; Accounting hop did not happen</strong>, again. Both "
-            "Facilities and the Boss called <code>get_cash_position</code> themselves instead. "
-            "<em>This is the team being right and the plan being wrong:</em> shop rule 7 says "
-            "not to delegate what a tool in front of you already answers, and asking a "
-            "colleague would have spent a model call to return the same number.",
+            "<strong>The Facilities &rarr; Accounting hop did not happen</strong> &mdash; the "
+            "third run in a row it has not. Both agents called <code>get_cash_position</code> "
+            "themselves instead. <em>The team is right and the plan was wrong:</em> shop rule "
+            "7 says not to delegate what a tool in front of you already answers, and asking a "
+            "colleague would have spent a model call to return the same number. Three runs "
+            "agreeing is no longer a quirk; it is the rule working.",
         ],
-        "verdict": "1 of 2 planned delegations happened, and skipping the other was the better call.",
+        "verdict": "1 of 2 planned delegations, and skipping the other was the better call.",
     },
     103: {
         "matched": [
             "Boss called <strong>Inventory first, not Accounting</strong> &mdash; the call the "
-            "plan flagged as the one most likely to be got wrong, since the ticket is typed "
+            "plan flagged as most likely to be got wrong, since the ticket is typed "
             "<code>price_override</code> and reads like a pricing question.",
             "Boss &rarr; Accounting second, with the 12-unit shortfall already in hand.",
-            "Boss &rarr; Customer Service third, and a draft was actually filed.",
+            "Boss &rarr; Customer Service third, and a draft offering the 8 real hoodies at "
+            "the approved $42 was filed.",
             "<strong>Facilities was not called</strong>, as predicted.",
         ],
         "diverged": [
-            "<strong>Accounting delegated upward to the Boss</strong> &mdash; an "
-            "<code>accounting &rarr; boss</code> hop the plan did not anticipate. This is the "
-            "fully-connected team doing something a hub-and-spoke one could not: a specialist "
-            "escalating a judgement call rather than answering beyond its remit.",
-            "<strong>No approval was raised for the restock at all.</strong> The plan expected "
-            "the $264 request to reach a human and be refused. Instead Accounting put the $104 "
-            "funding gap in figures and declined to ask, on the grounds that the shop cannot "
-            "fund it. Defensible &mdash; the shop rules say not to request what cannot be "
-            "funded &mdash; but it means the owner never saw the trade-off. A human might "
-            "reasonably want to make that call themselves.",
-            "The ticket ends <code>blocked</code> rather than resolved, because no price was "
-            "ever agreed. The plan allowed for this, calling the price override optional.",
+            "The plan called a <code>price_override</code> approval <em>optional</em>. It was "
+            "raised, and the owner approved <strong>$42 a unit</strong> &mdash; so the ticket "
+            "ends with a real price on the 8 hoodies the shop actually holds, rather than a "
+            "flat refusal. That is a better outcome than the plan allowed for.",
+            "The $264 restock was <strong>refused by the owner</strong> rather than silently "
+            "dropped, which is what the plan wanted and what makes the cash squeeze visible on "
+            "the Cash tab.",
         ],
-        "verdict": "3 of 3 planned delegations happened, plus one upward hop the plan missed.",
+        "verdict": "3 of 3 planned delegations, and the optional price approval paid off.",
     },
 }
 

@@ -25,75 +25,75 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 #: Steps at or below this number belong to earlier problems' runs. The trail
 #: appends forever, so this run is everything after that high-water mark.
-FIRST_STEP_OF_THIS_RUN = 51
+FIRST_STEP_OF_THIS_RUN = 86
 
 #: The balance the shop opened with, straight after `scripts/reset_db.py`.
 START = 3400.00
 
 CONTRIBUTIONS = {
     (101, "inventory"): (
-        "Found size S at qty 0 against a request for 1, identified Bulldog Print Co as the "
-        "only apparel vendor, and reported it could not ship while invoice 501 was open. "
-        "Placed the restock order once the invoice was paid and the order approved."
+        "Read the shelf: size S at qty 0 against a request for 1, and Bulldog Print Co the "
+        "only apparel vendor -- blocked from shipping while invoice 501 stood open. That "
+        "turned an out-of-stock ticket into a cash ticket."
     ),
     (101, "accounting"): (
         "Priced the blocker at $840, three days overdue, checked it against the $3,400 "
-        "balance, and raised approval 1 for the invoice payment."
+        "balance, raised approval 1, and paid it once the owner said yes."
+    ),
+    (101, "customer_service"): (
+        "Drafted Tauhid Zaman a reply carrying the real ETA of 2026-09-05 and what the shop "
+        "is doing about his tee. Filed, not sent."
     ),
     (101, "boss"): (
-        "Followed the ticket's own link to invoice 501, delegated the stock and the cash "
-        "questions separately, paid the invoice once the owner approved it, then requested "
-        "and placed the $8 purchase order for the single tee."
+        "Followed the ticket's own link to invoice 501, split the stock and cash questions "
+        "between Inventory and Accounting, placed the $8 order once the corrected approval "
+        "came back, and did not close until the customer had been written to."
     ),
     (102, "facilities"): (
-        "Checked the landlord's notice against lease 1 and confirmed $2,400 genuinely due "
-        "2026-09-02 -- two days out, not overdue. Paid the rent against the approved request "
-        "and closed the ticket."
+        "Checked the landlord's notice against lease 1 itself and confirmed $2,400 genuinely "
+        "due 2026-09-02 -- two days out, not overdue."
     ),
     (102, "boss"): (
         "Delegated verification to Facilities rather than taking the notice at face value, "
-        "raised approval 2 for the $2,400 once the lease confirmed it, and recorded the "
-        "outcome."
+        "raised approval 2, and paid the rent on the owner's approval."
     ),
     (103, "inventory"): (
         "Reported 8 size M hoodies on hand against 20 requested -- a shortfall of 12 -- and "
-        "confirmed the same apparel vendor blocked by the same invoice 501 as ticket 101."
+        "confirmed the same apparel vendor and the same invoice 501 that gated ticket 101."
     ),
     (103, "accounting"): (
-        "Quoted the deal: $22 unit cost against a $58 list, and $264 to restock the 12 "
-        "missing. Put the $104 funding gap in figures and escalated the call back up to the "
-        "Boss rather than requesting a commitment the shop could not meet."
+        "Quoted the deal from the pricing table: $22 unit cost against a $58 list, $42 "
+        "proposed leaving $20 a unit, and $264 to buy the missing 12. Put the funding gap in "
+        "figures and raised the price override for the owner to decide."
+    ),
+    (103, "customer_service"): (
+        "Drafted the Yale AI Club an offer of the 8 hoodies that actually exist at the "
+        "approved $42, saying plainly that the remaining 12 are not being promised."
     ),
     (103, "boss"): (
         "Reframed a discount ticket as a supply question, ranked the restock below the rent "
-        "and the invoice, and held the ticket at blocked with the gap stated in figures "
-        "rather than promising stock the shop could not buy."
-    ),
-    (103, "customer_service"): (
-        "Drafted the Yale AI Club a reply offering the 8 hoodies actually on the shelf and "
-        "saying plainly that the remaining 12 are not being promised. Filed, not sent."
+        "and the invoice, and closed it as a priced partial offer rather than parking it "
+        "against money that was not coming."
     ),
 }
 
 OUTCOMES = {
     101: (
-        "Invoice 501 was paid, which lifted Bulldog Print Co's shipping block, and the one "
-        "size-S tee was ordered for $8 with an ETA of 2026-09-05. The ticket is blocked on "
-        "that delivery: the shop has done everything within its power, but the tee does not "
-        "exist on the shelf on the shop's own date of 2026-08-31."
+        "Resolved. Invoice 501 was paid, which lifted Bulldog Print Co's shipping block; the "
+        "one size-S tee was ordered at its real $8 unit cost with an ETA of 2026-09-05; and "
+        "Tauhid Zaman was drafted a reply carrying that date. The desk has nothing further to "
+        "do -- the remaining wait belongs to the vendor."
     ),
     102: (
-        "The landlord's notice was checked against lease 1 and found correct -- $2,400 due "
-        "2026-09-02 -- and paid in full under human approval. The lease rolled forward to "
-        "2026-10-02 so the same month cannot be paid twice."
+        "Resolved. The landlord's notice was checked against lease 1 and found correct -- "
+        "$2,400 due 2026-09-02 -- and paid in full on the owner's approval. The lease rolled "
+        "forward to 2026-10-02 so the same month cannot be paid twice."
     ),
     103: (
-        "Blocked, with the refusal reasoned and a draft already written. 8 of the 20 size-M "
-        "hoodies are on hand; the 12-unit shortfall needs a $264 restock against $160 of "
-        "uncommitted cash, a gap of $104. The team deliberately did NOT raise a purchase-order "
-        "request it knew could not be funded, so no approval was ever put in front of a human "
-        "for it. A draft offering the Yale AI Club the 8 hoodies that actually exist sits on "
-        "the board, unsent."
+        "Resolved as a priced partial offer. 8 of the 20 size-M hoodies are on hand and the "
+        "owner approved $42 a unit for them. The 12-unit shortfall needed $264 against $152 "
+        "of uncommitted cash, so it was refused and is not being promised. A draft setting "
+        "out exactly that sits on the board, unsent."
     ),
 }
 
@@ -101,16 +101,16 @@ CASH_WHY = {
     101: (
         "Paid invoice 501 -- $840, three days overdue -- to unblock the only apparel vendor. "
         "The $8 purchase order is a commitment, not a payment: cash leaves when the vendor "
-        "invoices, so it does not appear in this balance."
+        "invoices, so it is not in this balance."
     ),
     102: (
         "Paid $2,400 rent on lease 1. Top spending priority, because losing the space ends "
         "every other ticket on the board."
     ),
     103: (
-        "No money moved, and none was ever asked for. The $264 restock is the third spend the "
-        "shop cannot fund on $160, and the team declined to request it rather than put an "
-        "unfundable commitment in front of the owner."
+        "No money moved. The $264 restock was the third spend, and $152 would not cover it, "
+        "so it was refused outright rather than part-funded. The $42 price the owner approved "
+        "is a price, not a payment."
     ),
 }
 
@@ -122,7 +122,7 @@ SUBJECTS = {
     103: "Bulk hoodie discount - Yale AI Club",
 }
 
-APPROVALS_BY_TICKET = {101: (1, 3), 102: (2,), 103: ()}
+APPROVALS_BY_TICKET = {101: (1, 3, 5), 102: (2,), 103: (4,)}
 
 
 def main() -> int:
@@ -244,8 +244,8 @@ def main() -> int:
             "note": (
                 "Only two payments left the shop. The $8 purchase order for ticket 101 is an "
                 "approved commitment that has not been invoiced, so it is not in this balance; "
-                "the $264 restock for ticket 103 was never requested, because the team would "
-                "not ask the owner to approve something $104 beyond the available cash."
+                "and the $264 restock for ticket 103 was refused by the owner, so it never "
+                "became a payment at all."
             ),
         },
         "tickets": tickets,

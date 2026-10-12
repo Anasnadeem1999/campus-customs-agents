@@ -290,14 +290,14 @@ output/
 
 ## The run this repository records
 
-Reset to $3,400, then all three tickets worked with every payment approved by
-a human on request.
+Reset to $3,400, then all three tickets worked with every payment put to the
+owner as a question.
 
 | Ticket | Final status | What happened |
 |---|---|---|
-| 101 Bulldog tee | `blocked` | Invoice 501 paid, vendor unblocked, tee ordered for $8, ETA 2026-09-05. Blocked on delivery. |
+| 101 Bulldog tee | `resolved` | Invoice 501 paid, vendor unblocked, tee ordered at its real $8 unit cost (ETA 2026-09-05), customer drafted a reply. |
 | 102 Rent due | `resolved` | Notice checked against the lease, $2,400 paid, lease rolled to 2026-10-02. |
-| 103 Bulk hoodies | `blocked` | 8 of 20 on hand; the $264 restock will not fit in $160. Draft offering the 8 filed, unsent. |
+| 103 Bulk hoodies | `resolved` | Priced partial offer — 8 of 20 at the approved $42, the $264 restock refused, draft filed. |
 
 ```
 $3,400.00  opening
@@ -307,7 +307,15 @@ $3,400.00  opening
   $160.00  closing, and cash_accounts.balance reads $160.00
 ```
 
-Ticket 101 cannot reach `resolved` with the tools built here: the tee arrives
-2026-09-05, there is no tool that receives stock, and no tool that advances
+Five approval requests were put to the owner and five were answered — including
+one **rejected**: Accounting asked for the tee's purchase order at $1.00 when
+`pricing.unit_cost` is $8.00 for one unit. The team re-raised at the correct
+figure. `request_approval` validates invoice and rent amounts against the
+database but has nothing to check a purchase-order amount against, so the human
+gate was the only control that caught it.
+
+Ticket 101 is `resolved` because the *desk* is finished — paid, ordered,
+customer told. The tee itself arrives 2026-09-05, and with these tools it never
+actually will: there is no tool that receives stock and none that advances
 `desk.date_today`. That limitation, and two others, are analysed in the
 Reflection tab of `output/desk_tickets.html`.

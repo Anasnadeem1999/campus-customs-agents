@@ -17,7 +17,8 @@ each new problem arrives rather than being planned out in advance.
 | 9 | Resolve the tickets: full run, cash ledger, artefacts | Done |
 | 10 | Reflection tab, approved by the user | Done |
 | 11 | Submit to GitHub (public repo, pushed) | Done |
-| 12 | *awaiting the next problem from the user* | — |
+| 12 | Full end-to-end audit, re-run and resubmission | Done |
+| 13 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -504,3 +505,62 @@ request pointing at a reopened invoice is a confusing half-state.
 
 **Submitting the URL to Canvas.** I have no Canvas access; the URL is in
 `output/github_url.txt` and needs pasting into the assignment by hand.
+
+## 12 - Full end-to-end audit and re-run
+
+Re-read the whole assignment against the repo, found five gaps, fixed them,
+re-ran the board clean and resubmitted.
+
+### Gaps found and fixed
+
+1. **`mcp_server/readme.md` should be `README.md`.** The spec layout names it
+   with capitals and case matters on GitHub. Renamed with `git mv`.
+2. **Vite was pinned to 5180 with `strictPort`.** That was a workaround for
+   another project holding 5173 on the dev machine. A grader's clone has 5173
+   free, which is the port the brief names, so it is restored - with
+   `strictPort` off so a busy port slides to 5174 rather than failing.
+3. **The `resolved` rule was stricter than the assignment's.** It treated
+   "waiting on a vendor" as `blocked`, so 101 could never resolve. Rewritten:
+   a ticket is resolved when **the desk has nothing left to do** - paid or
+   refused, ordered with a committed date, customer told. `blocked` is now
+   reserved for when the shop genuinely cannot act. Approved by the user.
+4. **The Boss skipped Customer Service on 101 in two earlier runs**, closing a
+   customer order with the customer never written to. The Boss brief now
+   requires a draft before any ticket raised by a named person can close.
+5. **Accounting self-censored requests it expected to be refused**, taking the
+   decision off the owner. Its brief now says to raise the request with the
+   gap in figures and let them answer.
+
+Also: **`check_stock_by_size` now names the real SKUs** when given one the
+shop does not carry. The old bare refusal was retried identically and burned
+the retry budget; the new one lets the next attempt be correct. Pinned by a
+test - **39 now passing**.
+
+### The re-run
+
+All three tickets `resolved`, every payment put to the owner as a question.
+
+| Ticket | Status | Cash |
+|---|---|---|
+| 101 | `resolved` | $3,400 -> $2,560 (invoice 501) |
+| 102 | `resolved` | $2,560 -> $160 (rent) |
+| 103 | `resolved` | $160 (restock refused) |
+
+`cash_accounts.balance` reads **$160.00**, matching.
+
+**Five approvals, one rejected.** Accounting asked for the tee's purchase
+order at **$1.00** when `pricing.unit_cost` is **$8.00** for one unit - the
+quantity had gone into the amount field. The owner rejected it with that
+reason and the team re-raised at $8.00. `request_approval` validates invoice
+and rent amounts against the database but has nothing to check a
+purchase-order amount against, so **the human gate was the only control that
+caught it** - the single best piece of evidence in the submission that the
+gate is not a formality.
+
+### Everything regenerated
+
+`resolved_tickets.json`, all five tabs of `desk_tickets.html` (Expected
+restored byte-for-byte from its original commit before refilling Actual),
+fresh board screenshots, `resolved_board.html`, harness section 10, and the
+README run summary. The Reflection was rewritten for the new outcomes and
+re-approved.

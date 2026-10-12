@@ -70,7 +70,20 @@ def check_stock_by_size(sku: str, size: str, requested_qty: int | None = None) -
         ).fetchall()
 
     if not siblings:
-        raise ShopDataError(f"No inventory rows exist for SKU {sku!r}.")
+        # The agent has asked about a SKU the shop does not carry -- usually a
+        # remembered or guessed code rather than one a tool returned. Refusing
+        # is right, but a bare refusal just gets retried identically, so name
+        # the SKUs that do exist and the next attempt can be correct.
+        with connect() as conn:
+            stocked = [r["sku"] for r in conn.execute(
+                "SELECT DISTINCT sku FROM inventory ORDER BY sku"
+            )]
+        raise ShopDataError(
+            f"No inventory rows exist for SKU {sku!r}, so this shop does not carry it. "
+            f"The SKUs that exist are: {', '.join(stocked)}. "
+            "Use one of those, or read the sku off the ticket with list_tickets -- "
+            "do not guess a product code."
+        )
 
     if row is None:
         # The SKU is real but this size is not stocked at all -- a different
