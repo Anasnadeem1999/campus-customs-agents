@@ -13,7 +13,8 @@ each new problem arrives rather than being planned out in advance.
 | 5 | Agent team (5 agents, PydanticAI) + 7 new MCP tools | Done |
 | 6 | Plan the three tickets (`output/desk_tickets.html`) | Done |
 | 7 | Backend routes (FastAPI, `backend/main.py`) | Done |
-| 8 | *awaiting the next problem from the user* | — |
+| 8 | Agent dashboard (React + Vite + TS) | Done |
+| 9 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -299,3 +300,40 @@ call, and tool arguments arrived as unparsed JSON strings. Left alone, the
 board would have shown a tool the MCP server does not have, and one opaque
 blob instead of which invoice was paid. Fixed at write time and filtered again
 at read time, because steps recorded before the fix are still in the trail.
+
+## 8 - Agent dashboard
+
+`frontend/` on React + Vite + TypeScript. A three-column operations desk:
+**the board** (three tickets), **the team at work** (live agent feed plus a
+per-agent summary), and **waiting on you** (approvals, then the team roster).
+Cash sits in the masthead because it constrains every ticket.
+
+Run it with `npm run dev` from `frontend/`. Design rationale is in
+`output/design.md`.
+
+**Verified by driving the UI, not curl:** clicked *Put the team on it* on
+ticket 102, watched agent cards rise into the feed, approved the $2,400 rent
+from the sidebar and saw the till fall **$3,400 -> $1,000**, then ran the team
+again and watched ticket 102 go green, faded and struck through - `RESOLVED`.
+
+### Ports
+
+The dashboard runs on **5180**, not 5173. Another project in this workspace
+holds 5173, and the first run served *that project's storefront* - the browser
+looked fine and was showing a different application entirely. `strictPort` now
+makes a clash fail loudly. The backend accepts any localhost origin, so 5173
+is permitted as the problem asks; it is just not the port in use.
+
+### Two defects found by looking at the page
+
+1. pydantic-ai's synthetic `final_result` output call was being drawn as an
+   MCP tool the agent had chosen.
+2. Agent output truncated by the audit trail is unparseable JSON and rendered
+   raw on screen; a textual field extractor now recovers the sentence.
+
+### Known session artifact
+
+The `uvicorn --reload` backend started earlier stopped noticing file changes,
+so it serves a stale module. The committed code is correct - verified against
+a freshly started backend and by `tests/test_routes.py`. Restart the backend
+to pick it up.

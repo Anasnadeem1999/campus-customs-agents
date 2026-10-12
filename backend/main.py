@@ -523,3 +523,4 @@ async def health() -> dict[str, Any]:
         "shop_date_today": cash["shop_date_today"],
         "checking_balance": cash["total_balance"],
     }
+

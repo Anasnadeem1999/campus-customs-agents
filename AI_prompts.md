@@ -588,3 +588,57 @@ tests against a real MCP server and the real database, no model, no network.
    arrived as unparsed JSON strings, so the feed showed one opaque blob rather
    than *which* invoice was paid. Both are fixed at write time and filtered
    again at read time, since steps recorded earlier are still in the trail.
+
+## Problem 8 - Agent dashboard
+
+**Prompt, verbatim:**
+
+> Problem 8: Agent dashboard
+> Okay so now we will be building the frontend dashboard frontend/ with the react+vite+typescript. The page should be calling the routes built in problem 7. Atleast at the minimum the board should be lisitng all three tickets, let us pick one ticket and start the agent team onit, also show each agent and what they are saying or doing while the ticket is running, also mark a ticket resolved when the run finishes, also show a short summary of what each agent did on that specific ticket, also allow any human to approve for pay or any purchase whenever asked, and also showing show the checking balance which should obviously be dropping after an approved purchase or payment. The dashboard should be looking good, please be creative the layout  and its feel , this should be thought of as a real  desk where people would be wanting to sit at hence pls put real thought into how it looks.
+>
+> Okay so now please tell the front end to talk to the back end at the  http://localhost:8000.  Please also at the backend allow the vite page origin  (which is usually http://localhost:5173) so that the browser is allowed to call these routes. Please start the board with the " npm run dev" this should open the react desk in the browser so that I can pick the tickets and watch the agents.  Please also write   the output/design.md with what is chosen for the dashboard look  which should include the layout, how the agents read differently , and how the resolved tickets and cash is showed up and also why also including the creative choices that make it feel special and also something that humans would actually enjoy using.
+
+**Preceding prompt, verbatim** (typed before the problem text arrived):
+
+> Please start the dashboard with npm run dev and judge the look to be satisfactory. please also write the reasons for the design choices in design.md.
+
+That one asked for a dashboard that did not exist yet - `frontend/` was empty
+and there was no `package.json` anywhere in the repository. Rather than
+silently building ahead of the numbered problem, which CLAUDE.md forbids, the
+situation was put back to the user, who chose to build it immediately. The
+Problem 8 text then arrived mid-build and supplied the real specification;
+design notes went to `output/design.md` as Problem 8 asks, not `docs/`.
+
+**What was built:** `frontend/` on React + Vite + TypeScript - a three-column
+operations desk calling the Problem 7 routes, plus `output/design.md`.
+
+**What the initial prompt did not cover, resolved while working:**
+
+1. **Port 5173 was already taken, and the failure was silent and dangerous.**
+   Another project in this workspace runs a dev server there, so the first
+   `npm run dev` served *that project's storefront*. The browser looked
+   entirely healthy while showing a different application. The dashboard now
+   runs on **5180** with `strictPort`, so a clash fails loudly. The backend's
+   CORS already accepts any localhost origin, so 5173 is permitted exactly as
+   the prompt asks - it is simply not the port in use.
+2. **No dev proxy, deliberately.** A Vite proxy would make the browser's
+   request same-origin and hide whether CORS is right. The frontend calls
+   `http://localhost:8000` directly so the cross-origin request is genuine and
+   the backend's allowance is exercised in development.
+3. **Two defects only visible by looking at the page.** pydantic-ai routes
+   structured output through a synthetic `final_result` tool call, which was
+   being drawn as though it were an MCP tool the agent had chosen; and agent
+   output truncated by the audit trail is unparseable JSON, which rendered as
+   a raw object on screen. Both fixed - the second with a textual field
+   extractor that ends the sentence with an ellipsis.
+4. **"mark a ticket resolved when the run finishes" needed a definition.**
+   Resolution is detected from the *ticket's* status rather than the run's, so
+   the board stays correct even if a poll is missed. Approving a payment does
+   not by itself resolve the ticket - the team has to finish it - so after an
+   approval the card returns to `Put the team on it`, and the run that follows
+   closes it out. That is the human-in-the-loop design working as intended
+   rather than a gap.
+5. **A stale backend process could not be reloaded.** The `uvicorn --reload`
+   server started earlier in the session stopped noticing file changes, so the
+   fixes above were verified against a freshly started backend and by the test
+   suite. The committed code is correct; a restart picks it up.

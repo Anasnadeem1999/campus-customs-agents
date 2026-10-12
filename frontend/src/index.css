@@ -1,0 +1,244 @@
+/*
+  The desk.
+
+  Warm paper rather than the usual slate-grey SaaS dashboard: this is a small
+  shop on Chapel Street, not a trading floor, and the surface should feel like
+  something you would put a coffee down next to. Yale navy carries the
+  identity; everything else stays quiet so the agents' colours are the only
+  strong hues on the page.
+*/
+
+:root {
+  --yale: #00356b;
+  --yale-deep: #002548;
+  --ink: #1c1d1f;
+  --muted: #6b7280;
+  --paper: #f6f4ef;      /* warm, not grey */
+  --card: #fffdf9;
+  --line: #e4e0d7;
+  --good: #0f7b3f;
+  --bad: #a01b26;
+  --warn: #8a5a00;
+  --shadow: 0 1px 2px rgba(28, 29, 31, .06), 0 8px 24px rgba(28, 29, 31, .05);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 15px/1.55 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.desk { display: flex; flex-direction: column; height: 100%; }
+
+/* ── masthead ─────────────────────────────────────────────────── */
+
+.masthead {
+  display: flex; justify-content: space-between; align-items: center; gap: 24px;
+  background: linear-gradient(180deg, var(--yale) 0%, var(--yale-deep) 100%);
+  color: #fff; padding: 14px 24px; flex: 0 0 auto;
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.crest {
+  width: 42px; height: 42px; border-radius: 10px; flex: 0 0 auto;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+  font-weight: 800; letter-spacing: .5px;
+}
+.masthead h1 { margin: 0; font-size: 19px; letter-spacing: .2px; }
+.sub { margin: 0; font-size: 13px; opacity: .8; }
+
+.header-right { display: flex; align-items: center; gap: 16px; }
+
+/* The till. The one number that matters on every ticket, so it is the
+   largest thing in the header and never scrolls away. */
+.till {
+  text-align: right; padding: 6px 16px; border-radius: 10px;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.16);
+  transition: background .4s ease, box-shadow .4s ease;
+}
+.till-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .8px; opacity: .75; }
+.till-amount { display: block; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.till-note { display: block; font-size: 11.5px; opacity: .8; }
+/* Flashes only when the balance actually changes, so the eye is drawn to
+   money moving rather than to the poll ticking over. */
+.till.flash { background: rgba(255, 214, 120, .34); box-shadow: 0 0 0 3px rgba(255, 214, 120, .3); }
+
+button {
+  font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid transparent;
+  padding: 8px 14px; font-weight: 600; transition: filter .15s ease, transform .05s ease;
+}
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { opacity: .55; cursor: not-allowed; }
+button.ghost { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
+button.ghost:hover:not(:disabled) { background: rgba(255,255,255,.2); }
+
+.offline {
+  background: #fdf0d5; color: var(--warn); padding: 10px 24px;
+  border-bottom: 1px solid #efd9a8; font-size: 14px;
+}
+.offline code { background: rgba(0,0,0,.06); padding: 1px 6px; border-radius: 4px; }
+
+/* ── three columns, in the order the work flows ───────────────── */
+
+.columns {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: 300px 1fr 330px; gap: 20px;
+  padding: 20px 24px; overflow: hidden;
+}
+.col { min-height: 0; overflow-y: auto; padding-right: 4px; }
+.col-title {
+  font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted); margin: 0 0 12px; font-weight: 700;
+  position: sticky; top: 0; background: var(--paper); padding: 2px 0 8px; z-index: 2;
+}
+.count {
+  background: var(--bad); color: #fff; border-radius: 999px;
+  padding: 1px 8px; font-size: 11px; margin-left: 6px;
+}
+.empty { color: var(--muted); font-size: 14px; background: var(--card);
+  border: 1px dashed var(--line); border-radius: 12px; padding: 18px; }
+
+/* ── tickets ──────────────────────────────────────────────────── */
+
+.ticket {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--shadow);
+  cursor: pointer; transition: border-color .15s ease, transform .12s ease;
+  border-left: 4px solid var(--line);
+}
+.ticket:hover { transform: translateY(-1px); }
+.ticket.selected { border-left-color: var(--yale); }
+/* Resolved work recedes rather than disappearing -- it is still part of the
+   day, just no longer asking for attention. */
+.ticket.resolved { opacity: .62; border-left-color: var(--good); }
+.ticket.resolved h3 { text-decoration: line-through; text-decoration-color: var(--line); }
+.ticket.running { border-left-color: var(--warn); }
+
+.ticket-top { display: flex; justify-content: space-between; align-items: center; }
+.ticket-id { font-weight: 700; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.ticket h3 { margin: 6px 0 2px; font-size: 16px; }
+.requester { margin: 0; font-size: 13px; color: var(--muted); }
+.ask { margin: 6px 0 12px; font-size: 13.5px; }
+.ask code { background: #f0ece3; padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+
+button.run { width: 100%; background: var(--yale); color: #fff; }
+button.run:hover:not(:disabled) { filter: brightness(1.12); }
+
+.chip {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  padding: 3px 9px; border-radius: 999px; background: #eee; color: var(--muted);
+}
+.chip.s-resolved { background: #e3f3e9; color: var(--good); }
+.chip.s-blocked { background: #fbe6e8; color: var(--bad); }
+.chip.s-awaiting_approval { background: #fdf0d5; color: var(--warn); }
+.chip.working { background: var(--warn); color: #fff; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .45 } }
+
+/* ── the feed ─────────────────────────────────────────────────── */
+
+.summary {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 16px; box-shadow: var(--shadow);
+}
+.summary h4 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--muted); }
+.summary-row { display: flex; align-items: center; gap: 10px; margin: 7px 0; font-size: 13.5px; }
+
+/* One event per card, with the agent's colour as a spine down the left edge.
+   You can follow who is speaking by colour alone, without reading a name. */
+.event {
+  background: var(--card); border: 1px solid var(--line); border-left: 4px solid;
+  border-radius: 12px; padding: 13px 16px; margin-bottom: 11px; box-shadow: var(--shadow);
+  animation: rise .28s ease;
+}
+@keyframes rise { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+
+.event-head { display: flex; align-items: center; gap: 10px; }
+.who { display: flex; align-items: baseline; gap: 8px; flex: 1; }
+.asked-by { font-size: 12px; color: var(--muted); }
+.step-no { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.monogram {
+  width: 30px; height: 30px; border-radius: 8px; flex: 0 0 auto;
+  display: grid; place-items: center; font-size: 11.5px; font-weight: 800; letter-spacing: .4px;
+}
+
+.says { margin: 9px 0 0; font-size: 14px; }
+.err { margin: 9px 0 0; font-size: 13.5px; color: var(--bad); }
+
+.tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.tool {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px; background: #f0ece3; color: #4a4639;
+  padding: 2px 8px; border-radius: 5px;
+}
+.tool-err { background: #fbe6e8; color: var(--bad); }
+
+/* Cited figures: every number an agent used, with the tool it came from in
+   the tooltip. Makes "no invented numbers" visible rather than a claim. */
+.figures { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.figure {
+  font-size: 11.5px; background: #eef3f9; color: var(--yale);
+  padding: 2px 8px; border-radius: 5px; cursor: help;
+}
+.figure b { font-variant-numeric: tabular-nums; }
+
+.blocked { margin: 9px 0 0; font-size: 13px; color: var(--warn);
+  background: #fdf6e7; padding: 7px 10px; border-radius: 7px; }
+
+.event-foot {
+  display: flex; gap: 12px; margin-top: 10px; padding-top: 8px;
+  border-top: 1px dashed var(--line); font-size: 11.5px; color: var(--muted);
+}
+.event-foot .ok { color: var(--good); }
+.event-foot .notok { color: var(--bad); font-weight: 700; }
+
+/* ── waiting on you ───────────────────────────────────────────── */
+
+.approval {
+  background: var(--card); border: 1px solid #efd9a8; border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--shadow);
+  border-top: 3px solid var(--warn);
+}
+.approval-top { display: flex; justify-content: space-between; align-items: baseline; }
+.kind { font-size: 11.5px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); font-weight: 700; }
+.amount { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.why { margin: 9px 0; font-size: 13.5px; }
+.leaves { margin: 0; font-size: 12.5px; color: var(--muted); }
+.tight { color: var(--bad); }
+.asked-by-line { margin: 4px 0 12px; font-size: 12px; color: var(--muted); }
+
+.decide { display: flex; gap: 8px; }
+button.yes { flex: 1; background: var(--good); color: #fff; }
+button.no { background: transparent; color: var(--bad); border-color: #e8c9cc; }
+button.yes:hover:not(:disabled) { filter: brightness(1.1); }
+
+.roster { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+.roster h4 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--muted); }
+.roster-row { display: flex; gap: 10px; margin-bottom: 11px; align-items: flex-start; }
+.roster-row p { margin: 1px 0 0; font-size: 12px; }
+.muted { color: var(--muted); }
+
+/* ── toasts ───────────────────────────────────────────────────── */
+
+.toasts { position: fixed; bottom: 20px; right: 20px; display: flex;
+  flex-direction: column; gap: 8px; z-index: 50; max-width: 420px; }
+.toast {
+  background: var(--ink); color: #fff; padding: 11px 16px; border-radius: 10px;
+  font-size: 13.5px; box-shadow: 0 10px 30px rgba(0,0,0,.2); animation: rise .2s ease;
+}
+.toast.bad { background: var(--bad); }
+.toast.good { background: #14532d; }
+
+/* Narrow screens: stack rather than squeeze three columns into nothing. */
+@media (max-width: 1100px) {
+  .columns { grid-template-columns: 1fr; overflow: auto; }
+  .col { overflow: visible; }
+}
