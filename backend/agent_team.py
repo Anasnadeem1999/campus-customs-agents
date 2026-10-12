@@ -32,6 +32,7 @@ something; one that gets an exception produces nothing.
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -96,6 +97,11 @@ TOOL_RETRIES = 3
 #: a failed step, and the run carries on with the next ticket rather than
 #: taking the whole board down with it.
 STEP_TIMEOUT_SECONDS = 240
+
+#: pydantic-ai routes an agent's structured output through a synthetic tool
+#: call. It is not an MCP tool and the agent did not choose it, so it is
+#: filtered out of the recorded tool list.
+OUTPUT_TOOL_NAMES = {"final_result"}
 
 ROLE_FILES: dict[AgentName, str] = {
     "boss": "boss.md",
@@ -193,10 +199,26 @@ def _extract_tool_calls(result: Any) -> list[ToolCallRecord]:
     for message in result.all_messages():
         for part in getattr(message, "parts", []):
             if isinstance(part, ToolCallPart):
+                if part.tool_name in OUTPUT_TOOL_NAMES:
+                    # pydantic-ai's own structured-output call, not something
+                    # the agent chose to do. Listing it as a tool the agent
+                    # "used" would put a tool on the dashboard that does not
+                    # exist on the MCP server, and the agent's conclusion is
+                    # already recorded separately as its output.
+                    continue
                 key = part.tool_call_id or f"{part.tool_name}-{len(order)}"
                 args = part.args
                 if isinstance(args, str):
-                    args = {"raw": args}
+                    # The provider sends arguments as a JSON string. Parsing
+                    # here means the audit trail and the dashboard both get
+                    # real fields instead of one opaque blob, so a reviewer
+                    # can see *which invoice* was paid, not just that one was.
+                    try:
+                        args = json.loads(args)
+                    except (json.JSONDecodeError, TypeError):
+                        args = {"raw": args}
+                if not isinstance(args, dict):
+                    args = {"value": args}
                 calls[key] = ToolCallRecord(
                     tool=part.tool_name,
                     arguments=args or {},

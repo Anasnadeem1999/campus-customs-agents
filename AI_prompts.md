@@ -534,3 +534,57 @@ every specialist everywhere would cost.
    Called out explicitly and left *optional*: agreeing a price for stock the
    shop cannot fund is premature, so its absence is not counted against a run.
    Flagged for the user rather than silently decided.
+
+## Problem 7 - Backend routes
+
+**Prompt, verbatim:**
+
+> Problem 7: Backend routes
+> Now for this part we will be working on backend, because the reach frontend dashboard needs a backend that it can call. In the backend/main.py, please use the fastapi and add the routes that do the following stuff, firstly it returns the three tickets and whether each is open or resolved, takes a ticket id and runs the agent team on that ticket, also returns the recent agent event including what each agent is saying and which tools they are using so that the board can be refreshed, and also approving a payment or purchase after any human clicks the approve ( as the agents only prepare the pay, this route is something that actually changes the cash, also returns the current check balance in the cash_accounts and also resets the database to the original values when we want to try any fresh run.
+> Also please using the backend/ folder please start the server with the "uvicorn main:app --reload --port 8000" this will turn onto the back end at call "http://localhost:8000"  so that the frontend dashboard can call on to these routes.  Also in the output/harness.md, please also list each routes in a one liner (what is the url and what it does).
+
+No follow-up prompt was needed. The six routes asked for were unambiguous, and
+the two judgement calls that came up are recorded below rather than guessed at
+silently.
+
+**What was built:** `backend/main.py` with ten routes (the six requested, plus
+run-status, reject, and health), `backend/shop.py` so the routes reach the shop
+through the same MCP server the agents use, and `tests/test_routes.py` - 12
+tests against a real MCP server and the real database, no model, no network.
+
+**What the initial prompt did not cover, resolved while working:**
+
+1. **`uvicorn main:app` from `backend/` breaks the package imports.** That
+   command imports the file as top-level `main`, not `backend.main`, so
+   `from backend.models import ...` fails outright. The repository root is
+   inserted into `sys.path` before any project import, which makes the
+   assignment's command and `python -m backend.main` both work.
+2. **A run takes minutes, which is far too long to hold an HTTP request
+   open.** The browser would time out long before the team finished. So
+   `POST /api/tickets/{id}/run` starts the work and returns a `run_id`
+   immediately, and the board follows along by polling `/api/events` with the
+   highest step it has already drawn - which is also what stops it
+   double-drawing an event. A `?wait=true` flag is there for scripts.
+3. **"approving ... actually changes the cash" needed the gate kept intact.**
+   The route approves by writing to the board directly, deliberately *not*
+   through MCP, because the MCP server has no approving verb and an agent must
+   not be able to reach it. Execution then goes back through the MCP payment
+   tools so every refusal still applies, and a refusal surfaces as HTTP 409
+   with the tool's own reason rather than being swallowed into a success.
+4. **Not every approval kind moves money.** A purchase order moves no cash and
+   needs the SKU, size and quantity the agent chose; a price override has no
+   cash in it at all. Both are approved without being executed unless the
+   details are supplied, and the response says which happened instead of
+   claiming a payment that did not occur.
+5. **Whether a reset should wipe the audit trail.** It does not, by default.
+   The trail is history rather than state, and Problem 5 required it to
+   accumulate across runs; a reset concerns the shop's data, not the record of
+   what the agents did to it. A `?clear_audit=true` flag exists for when a
+   genuinely clean slate is wanted.
+6. **Two things in the event feed would have misled the dashboard.**
+   pydantic-ai routes structured output through a synthetic `final_result`
+   tool call, which is not an MCP tool and not something the agent chose -
+   showing it would put a non-existent tool on the board. And tool arguments
+   arrived as unparsed JSON strings, so the feed showed one opaque blob rather
+   than *which* invoice was paid. Both are fixed at write time and filtered
+   again at read time, since steps recorded earlier are still in the trail.

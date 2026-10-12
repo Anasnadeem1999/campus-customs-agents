@@ -12,7 +12,8 @@ each new problem arrives rather than being planned out in advance.
 | 4 | Connect the MCP server; smoke-test each tool | Done |
 | 5 | Agent team (5 agents, PydanticAI) + 7 new MCP tools | Done |
 | 6 | Plan the three tickets (`output/desk_tickets.html`) | Done |
-| 7 | *awaiting the next problem from the user* | — |
+| 7 | Backend routes (FastAPI, `backend/main.py`) | Done |
+| 8 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -253,3 +254,48 @@ disk, so the plan could have been copied from them for a flattering
 comparison. It is written from what the tickets warrant instead, and is
 expected to diverge. The expected section is frozen from here - editing it
 after a run would make the comparison worthless.
+
+## 7 - Backend routes
+
+`backend/main.py`, FastAPI, started the way the assignment specifies:
+
+```bash
+cd backend
+uvicorn main:app --reload --port 8000
+```
+
+Ten routes - the six asked for, plus run-status, reject and health. All listed
+one line each in `output/harness.md` section 8.
+
+**No route opens SQLite.** `backend/shop.py` reaches the shop through the same
+`campus-customs` MCP server, launched from the same committed `.mcp.json` the
+agents use, so the dashboard and the team see one database through one door.
+The only exception is `POST /api/reset`, which runs the reset script - a file
+copy rather than a question about the shop.
+
+**The approve route is the only thing in the backend that spends money.** It
+writes the approval to the board directly, deliberately not through MCP, since
+the MCP server has no approving verb and an agent must not reach it. Execution
+then goes back through the MCP payment tools, so a refusal returns HTTP 409
+carrying the tool's own reason instead of a quiet success.
+
+### Verified live
+
+- `POST /api/reset` -> cash back to $3,400, all three tickets `open`.
+- `POST /api/tickets/102/run` -> `run_id` returned at once, team worked it in
+  the background and raised a $2,400 rent approval.
+- `POST /api/approvals/1/approve` -> **cash $3,400 -> $1,000**, `payments` row
+  stamped `Anas Nadeem`, lease rolled 2026-09-02 -> 2026-10-02.
+- Refusals: re-approving a paid request 409, unknown approval 404, blank
+  approver 422, unknown ticket 404, payment the balance cannot cover 409 with
+  nothing written.
+
+`tests/test_routes.py` pins all of it. **34 tests passing** across the suite.
+
+### One thing fixed in the event feed
+
+pydantic-ai routes structured output through a synthetic `final_result` tool
+call, and tool arguments arrived as unparsed JSON strings. Left alone, the
+board would have shown a tool the MCP server does not have, and one opaque
+blob instead of which invoice was paid. Fixed at write time and filtered again
+at read time, because steps recorded before the fix are still in the trail.

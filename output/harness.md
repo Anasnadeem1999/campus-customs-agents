@@ -745,6 +745,90 @@ since the assignment requires one model throughout.
 
 ---
 
+---
+
+## 8. Backend routes (Problem 7)
+
+`backend/main.py`, FastAPI. Started from the `backend/` folder exactly as the
+assignment specifies, which serves the API at `http://localhost:8000`:
+
+```bash
+cd backend
+uvicorn main:app --reload --port 8000
+```
+
+### Every route, one line each
+
+| Method | URL | What it does |
+|---|---|---|
+| `GET` | `/api/tickets` | Returns all three tickets with each one's status and whether it is open or resolved. |
+| `POST` | `/api/tickets/{id}/run` | Runs the agent team on that ticket; returns a `run_id` at once and works it in the background. |
+| `GET` | `/api/runs/{run_id}` | Reports how one agent run is going — running, finished or failed. |
+| `GET` | `/api/events` | The board's refresh feed: recent agent steps, what each agent said and which MCP tools it called. |
+| `GET` | `/api/approvals` | Lists what the agents have asked a human to approve, filterable by status. |
+| `POST` | `/api/approvals/{id}/approve` | **The human's click, and the only thing in the backend that moves cash** — approves, then carries the payment out. |
+| `POST` | `/api/approvals/{id}/reject` | Says no, recording who refused it. |
+| `GET` | `/api/cash` | Returns the current checking balance, plus what is already approved but unpaid. |
+| `POST` | `/api/reset` | Resets the working database to the pristine seed for a fresh run. |
+| `GET` | `/api/health` | Confirms the backend is up and can reach the MCP server. |
+
+### Why `main:app` needs a `sys.path` insert
+
+`uvicorn main:app` run from `backend/` imports this file as the top-level
+module `main`, not as `backend.main`, so `from backend.models import ...`
+would fail outright. The repository root is inserted into `sys.path` before
+any project import, which makes both entry points work — the assignment's
+command and `python -m backend.main` — with neither as a special case.
+
+### The one route that spends money
+
+Everywhere else agents prepare and humans decide. `POST
+/api/approvals/{id}/approve` is where the deciding happens, so it is the only
+route that causes cash to leave the shop. It does two things in order:
+
+1. **Approves**, by writing to the approval board directly — deliberately
+   *not* through MCP, because the MCP server has no approving verb and an
+   agent must not be able to reach this even if a prompt told it to. Same
+   action as `scripts/approve.py`, exposed for the dashboard's button.
+2. **Executes**, through the MCP payment tools, so every rule still applies.
+   A refusal — insufficient cash, approval already spent, amount no longer
+   matching the bill — comes back as HTTP 409 with the tool's own reason,
+   rather than being swallowed into a success.
+
+Purchase orders are approved but not placed unless the SKU, size and quantity
+are supplied, because placing one moves no cash. Price overrides are approved
+and nothing is executed — there is no cash in them.
+
+### Everything else reads through MCP
+
+No route opens SQLite. `backend/shop.py` launches the same `campus-customs`
+server from the same committed `.mcp.json` the agents use, so the dashboard
+and the team see one database through one door. The single exception is
+`POST /api/reset`, which runs `scripts/reset_db.py` — a file copy of the
+database rather than a question about the shop.
+
+`POST /api/reset` keeps the audit trail by default. The trail is history
+rather than state, and a reset concerns the shop's data, not the record of
+what the agents did to it.
+
+### Verified live
+
+Started with the assignment's own command and exercised end to end:
+
+- `POST /api/reset` → cash back to **$3,400**, all three tickets `open`.
+- `POST /api/tickets/102/run` → returned a `run_id` immediately; the team
+  raised a $2,400 rent approval in the background.
+- `POST /api/approvals/1/approve` → **cash $3,400 → $1,000**, `payments` row
+  stamped `Anas Nadeem`, lease rolled 2026-09-02 → 2026-10-02.
+- Refusals all behave: re-approving a paid request **409**, unknown approval
+  **404**, blank approver **422**, unknown ticket **404**, and a payment the
+  balance cannot cover **409 with nothing written**.
+
+`tests/test_routes.py` pins this — 12 tests against a real MCP server and the
+real database, with no model and no network.
+
+---
+
 ## Appendix — verified data integrity
 
 Checked against the seed at Problem 2; no surprises to code around.

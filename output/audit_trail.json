@@ -373,6 +373,20 @@
         }
       ],
       "model_check_failures": 0
+    },
+    {
+      "run_id": "run-a31eff97",
+      "started_at": "2026-10-12T03:59:13.958660+00:00",
+      "shop_date_today": "read from desk.date_today by the tools",
+      "model_requested": "gpt-6-luna",
+      "tickets_in_scope": [
+        102
+      ],
+      "database": "data/campus_customs_new.db",
+      "reset_before_run": false,
+      "note": "Appended to output/audit_trail.json. Earlier runs are never overwritten -- the file is the shop's history, not the last run's.",
+      "finished_at": "2026-10-12T03:59:39.676827+00:00",
+      "outcome": "completed"
     }
   ],
   "steps": [
@@ -2093,6 +2107,224 @@
       "started_at": "2026-10-12T03:47:11.151778+00:00",
       "finished_at": "2026-10-12T03:47:38.803556+00:00",
       "duration_seconds": 27.652,
+      "error": null
+    },
+    {
+      "step": 20,
+      "run_id": "run-a31eff97",
+      "ticket_id": 102,
+      "agent": "facilities",
+      "delegated_by": "boss",
+      "task": "Ticket 102, lease 1: rent of $2,400 is due 2026-09-02 (2 days from shop date 2026-08-31), per check_rent_due. Please confirm the lease/rent context and any relevant priority or issue before I seek payment approval.",
+      "tool_calls": [
+        {
+          "tool": "campus-customs_check_rent_due",
+          "arguments": {
+            "raw": "{\"lease_id\": 1}"
+          },
+          "result_summary": "{\"shop_date_today\": \"2026-08-31\", \"lease_count\": 1, \"leases\": [{\"lease_id\": 1, \"space_name\": \"Chapel Street shop\", \"landlord\": \"Elm City Properties\", \"amount_due\": 2400.0, \"next_due\": \"2026-09-02\", \"days_until_due\": 2, \"is_overdue\": false, \"notes\": null}]}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_list_tickets",
+          "arguments": {
+            "raw": "{\"status\": null}"
+          },
+          "result_summary": "{\"shop_date_today\": \"2026-08-31\", \"filter_status\": null, \"ticket_count\": 3, \"tickets\": [{\"id\": 101, \"type\": \"customer_order\", \"requester\": \"Tauhid Zaman\", \"subject\": \"Bulldog tee\", \"sku\": \"CC-TEE-WHITE\", \"size\": \"S\", \"qty\": 1, \"lease_id\": null, \"invoice_id\": 501, \"status\": \"open\", \"notes\": \"Needs a tee in size S.\", \"created_at\": \"2026-08-31T09:15:00-04:00\"}, {\"id\": 102, \"type\": \"rent_notice\", \"requester\": \"Elm City Properties\", \"subject\": \"Rent due\", \"sku\": null, \"size\": null, \"qty\": null, \"lease_id\": 1, \"invoice_id\": null, \"status\": \"open\", \"notes\": \"Email: shop rent due in 2 days.\", \"created_at\": \"2026-08-31T11:05:00-04:00\"}, {\"id\": 103, \"type\": \"price_override\", \"requester\": \"Yale AI Club\", \"subject\": \"Bulk hoodie discount\", \"sku\": \"CC-HOOD-NAVY\", \"size\": \"M\", \"qty\": 20, \"lease_id\": null, \"invoice_id\": null, \"status\": \"open\", \"notes\": \"Student org wants 20 hoodies, size M, asking for a bulk discount.\", \"created_at\": \"2026-08-31T16:55:00-04:00\"}]}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_get_cash_position",
+          "arguments": {
+            "raw": "{}"
+          },
+          "result_summary": "{\"shop_date_today\": \"2026-08-31\", \"accounts\": [{\"name\": \"checking\", \"balance\": 3400.0, \"as_of\": \"2026-08-31\"}], \"total_balance\": 3400.0, \"approved_not_yet_paid\": 0.0, \"approved_not_yet_paid_detail\": [], \"uncommitted\": 3400.0, \"executing_approval\": null, \"how_to_read_this\": \"uncommitted = what you may promise to something NEW. total_balance = what is actually there, and the figure an already-approved payment is judged against.\"}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_list_approvals",
+          "arguments": {
+            "raw": "{}"
+          },
+          "result_summary": "{\"filter_status\": null, \"approval_count\": 0, \"approvals\": []}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_update_ticket",
+          "arguments": {
+            "raw": "{\"ticket_id\":102,\"status\":\"awaiting_approval\",\"append_note\":\"Lease 1 confirms Chapel Street shop rent of $2,400 due 2026-09-02 (2 days from shop date 2026-08-31), not overdue; requested payment approval is still needed.\"}"
+          },
+          "result_summary": "{\"ticket_id\": 102, \"status_before\": \"open\", \"status_after\": \"awaiting_approval\", \"notes_after\": \"Email: shop rent due in 2 days.\\n[2026-08-31] Lease 1 confirms Chapel Street shop rent of $2,400 due 2026-09-02 (2 days from shop date 2026-08-31), not overdue; requested payment approval is still needed.\", \"shop_date_today\": \"2026-08-31\"}",
+          "is_error": false
+        },
+        {
+          "tool": "final_result",
+          "arguments": {
+            "raw": "{\"answer\":\"Lease 1 is the Chapel Street shop lease with Elm City Properties. The lease confirms rent of $2,400 due 2026-09-02, two days from the shop date 2026-08-31; it is not overdue, and the ticket\u2019s notice matches the lease. Cash is $3,400 with $3,400 uncommitted and no approved-but-unpaid commitments; no existing approvals are on the board. Rent is the shop\u2019s top spending priority because keeping the premises is essential. Ticket 102 is marked awaiting approval; the payment request has not yet been raised, so approval is the next required step.\",\"figures\":[{\"label\":\"rent due\",\"value\":\"2400.00\",\"from_tool\":\"campus-customs_check_rent_due\"},{\"label\":\"rent due date\",\"value\":\"2026-09-02\",\"from_tool\":\"campus-customs_check_rent_due\"},{\"label\":\"days until due\",\"value\":\"2\",\"from_tool\":\"campus-customs_check_rent_due\"},{\"label\":\"shop date\",\"value\":\"2026-08-31\",\"from_tool\":\"campus-customs_check_rent_due\"},{\"label\":\"cash balance\",\"value\":\"3400.00\",\"from_tool\":\"campus-customs_get_cash_position\"},{\"label\":\"uncommitted cash\",\"value\":\"3400.00\",\"from_tool\":\"campus-customs_get_cash_position\"},{\"label\":\"approved-but-unpaid commitments\",\"value\":\"0.00\",\"from_tool\":\"campus-customs_get_cash_position\"}],\"blocked_on\":\"Rent payment is not yet approved.\",\"needs_human\":\"A rent_payment approval for lease 1 is needed before payment. No request has been raised yet.\"}"
+          },
+          "result_summary": "Final result processed.",
+          "is_error": false
+        }
+      ],
+      "output": "{\"answer\": \"Lease 1 is the Chapel Street shop lease with Elm City Properties. The lease confirms rent of $2,400 due 2026-09-02, two days from the shop date 2026-08-31; it is not overdue, and the ticket\\u2019s notice matches the lease. Cash is $3,400 with $3,400 uncommitted and no approved-but-unpaid commitments; no existing approvals are on the board. Rent is the shop\\u2019s top spending priority because keeping the premises is essential. Ticket 102 is marked awaiting approval; the payment request has not yet been raised, so approval is the next required step.\", \"figures\": [{\"label\": \"rent due\", \"value\": \"2400.00\", \"from_tool\": \"campus-customs_check_rent_due\"}, {\"label\": \"rent due date\", \"value\": \"2026-09-02\", \"from_tool\": \"campus-customs_check_rent_due\"}, {\"label\": \"days until due\", \"value\": \"2\", \"from_tool\": \"campus-customs_check_rent_due\"}, {\"label\": \"shop date\", \"value\": \"2026-08-31\", \"from_tool\": \"campus-customs_check_rent_due\"}, {\"label\": \"cash balance\", \"value\": \"3400.00\", \"from_tool\": \"campus-customs_get_cash_position\"}, {\"label\": \"uncommitted cash\", \"value\": \"3400.00\", \"from_tool\": \"campus-customs_get_cash_position\"}, {\"label\": \"approved-but-unpaid commitments\", \"value\": \"... [trimmed 220 chars]",
+      "blocked_on": "Rent payment is not yet approved.",
+      "needs_human": "A rent_payment approval for lease 1 is needed before payment. No request has been raised yet.",
+      "model": {
+        "requested": "gpt-6-luna",
+        "resolved": "gpt-6-luna-2026-09-22",
+        "ok": true,
+        "note": null
+      },
+      "usage": {
+        "requests": 3,
+        "input_tokens": 23912,
+        "output_tokens": 528,
+        "total_tokens": 24440
+      },
+      "started_at": "2026-10-12T03:59:18.407703+00:00",
+      "finished_at": "2026-10-12T03:59:26.088201+00:00",
+      "duration_seconds": 7.68,
+      "error": null
+    },
+    {
+      "step": 21,
+      "run_id": "run-a31eff97",
+      "ticket_id": 102,
+      "agent": "boss",
+      "delegated_by": null,
+      "task": "Ticket 102 (rent_notice) from Elm City Properties: Rent due.\nTicket fields -- sku: None, size: None, qty: None, lease_id: 1, invoice_id: None, status: open.\nCustomer's note: Email: shop rent due in 2 days.\n\nWork this ticket to a resolution. Read the shop's own figures with the tools, delegate to whoever owns each part, and finish by updating the ticket.\n\nStart by calling list_approvals. This ticket may have been worked before and stopped at the approval gate: if there is already an approved, unspent request for it, a human has said yes and your job is to act on it now -- pay it and finish the ticket. Only raise a new approval request if none exists for this job.\n\nIf the shop cannot do what is asked, say so plainly and say what it would take.",
+      "tool_calls": [
+        {
+          "tool": "campus-customs_list_approvals",
+          "arguments": {
+            "raw": "{\"status\":\"approved\"}"
+          },
+          "result_summary": "{\"filter_status\": \"approved\", \"approval_count\": 0, \"approvals\": []}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_list_tickets",
+          "arguments": {
+            "raw": "{\"status\": \"open\"}"
+          },
+          "result_summary": "{\"shop_date_today\": \"2026-08-31\", \"filter_status\": \"open\", \"ticket_count\": 3, \"tickets\": [{\"id\": 101, \"type\": \"customer_order\", \"requester\": \"Tauhid Zaman\", \"subject\": \"Bulldog tee\", \"sku\": \"CC-TEE-WHITE\", \"size\": \"S\", \"qty\": 1, \"lease_id\": null, \"invoice_id\": 501, \"status\": \"open\", \"notes\": \"Needs a tee in size S.\", \"created_at\": \"2026-08-31T09:15:00-04:00\"}, {\"id\": 102, \"type\": \"rent_notice\", \"requester\": \"Elm City Properties\", \"subject\": \"Rent due\", \"sku\": null, \"size\": null, \"qty\": null, \"lease_id\": 1, \"invoice_id\": null, \"status\": \"open\", \"notes\": \"Email: shop rent due in 2 days.\", \"created_at\": \"2026-08-31T11:05:00-04:00\"}, {\"id\": 103, \"type\": \"price_override\", \"requester\": \"Yale AI Club\", \"subject\": \"Bulk hoodie discount\", \"sku\": \"CC-HOOD-NAVY\", \"size\": \"M\", \"qty\": 20, \"lease_id\": null, \"invoice_id\": null, \"status\": \"open\", \"notes\": \"Student org wants 20 hoodies, size M, asking for a bulk discount.\", \"created_at\": \"2026-08-31T16:55:00-04:00\"}]}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_check_rent_due",
+          "arguments": {
+            "raw": "{\"lease_id\": 1}"
+          },
+          "result_summary": "{\"shop_date_today\": \"2026-08-31\", \"lease_count\": 1, \"leases\": [{\"lease_id\": 1, \"space_name\": \"Chapel Street shop\", \"landlord\": \"Elm City Properties\", \"amount_due\": 2400.0, \"next_due\": \"2026-09-02\", \"days_until_due\": 2, \"is_overdue\": false, \"notes\": null}]}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_get_cash_position",
+          "arguments": {
+            "raw": "{}"
+          },
+          "result_summary": "{\"shop_date_today\": \"2026-08-31\", \"accounts\": [{\"name\": \"checking\", \"balance\": 3400.0, \"as_of\": \"2026-08-31\"}], \"total_balance\": 3400.0, \"approved_not_yet_paid\": 0.0, \"approved_not_yet_paid_detail\": [], \"uncommitted\": 3400.0, \"executing_approval\": null, \"how_to_read_this\": \"uncommitted = what you may promise to something NEW. total_balance = what is actually there, and the figure an already-approved payment is judged against.\"}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_list_approvals",
+          "arguments": {
+            "raw": "{}"
+          },
+          "result_summary": "{\"filter_status\": null, \"approval_count\": 0, \"approvals\": []}",
+          "is_error": false
+        },
+        {
+          "tool": "ask_facilities",
+          "arguments": {
+            "raw": "{\"question\":\"Ticket 102, lease 1: rent of $2,400 is due 2026-09-02 (2 days from shop date 2026-08-31), per check_rent_due. Please confirm the lease/rent context and any relevant priority or issue before I seek payment approval.\"}"
+          },
+          "result_summary": "Lease 1 is the Chapel Street shop lease with Elm City Properties. The lease confirms rent of $2,400 due 2026-09-02, two days from the shop date 2026-08-31; it is not overdue, and the ticket\u2019s notice matches the lease. Cash is $3,400 with $3,400 uncommitted and no approved-but-unpaid commitments; no existing approvals are on the board. Rent is the shop\u2019s top spending priority because keeping the premises is essential. Ticket 102 is marked awaiting approval; the payment request has not yet been raised, so approval is the next required step.\nNeeds a human: A rent_payment approval for lease 1 is needed before payment. No request has been raised yet.\nFigures: rent due=2400.00 (via campus-customs_check_rent_due); rent due date=2026-09-02 (via campus-customs_check_rent_due); days until due=2 (via campus-customs_check_rent_due); shop date=2026-08-31 (via campus-customs_check_rent_due); cash balance=3400.00 (via campus-customs_get_cash_position); uncommitted cash=3400.00 (via campus-customs_get_cash_position); approved-but-unpaid commitments=0.00 (via campus-customs_get_cash_position)\nBlocked on: Rent payment is not yet approved.",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_list_approvals",
+          "arguments": {
+            "raw": "{\"status\":\"pending\"}"
+          },
+          "result_summary": "{\"filter_status\": \"pending\", \"approval_count\": 0, \"approvals\": []}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_list_approvals",
+          "arguments": {
+            "raw": "{\"status\":\"rejected\"}"
+          },
+          "result_summary": "{\"filter_status\": \"rejected\", \"approval_count\": 0, \"approvals\": []}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_get_cash_position",
+          "arguments": {
+            "raw": "{}"
+          },
+          "result_summary": "{\"shop_date_today\": \"2026-08-31\", \"accounts\": [{\"name\": \"checking\", \"balance\": 3400.0, \"as_of\": \"2026-08-31\"}], \"total_balance\": 3400.0, \"approved_not_yet_paid\": 0.0, \"approved_not_yet_paid_detail\": [], \"uncommitted\": 3400.0, \"executing_approval\": null, \"how_to_read_this\": \"uncommitted = what you may promise to something NEW. total_balance = what is actually there, and the figure an already-approved payment is judged against.\"}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_list_approvals",
+          "arguments": {
+            "raw": "{}"
+          },
+          "result_summary": "{\"filter_status\": null, \"approval_count\": 0, \"approvals\": []}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_request_approval",
+          "arguments": {
+            "raw": "{\"kind\":\"rent_payment\",\"amount\":2400,\"reason\":\"Pay $2,400 rent for lease 1 by its 2026-09-02 due date to keep the Chapel Street shop premises; refusing risks the space the business needs to operate. The checking balance is $3,400 with no other approved commitments, so payment leaves $1,000; approval is needed before rent can be paid.\",\"requested_by\":\"boss\",\"ref_id\":1,\"detail\":\"Ticket 102, Elm City Properties, Chapel Street shop lease.\"}"
+          },
+          "result_summary": "{\"approval_id\": 1, \"status\": \"pending\", \"kind\": \"rent_payment\", \"ref_id\": 1, \"amount\": 2400.0, \"next_step\": \"A human must approve this before it can be acted on. No agent can. Human runs: python scripts/approve.py --id 1 --by \\\"<name>\\\"\", \"cash_check\": {\"total_balance\": 3400.0, \"already_approved_unpaid\": 0.0, \"uncommitted\": 3400.0, \"would_leave_uncommitted\": 1000.0, \"fits_within_uncommitted\": true}, \"checks\": {\"next_due\": \"2026-09-02\"}}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_update_ticket",
+          "arguments": {
+            "raw": "{\"ticket_id\": 102, \"status\": \"awaiting_approval\", \"append_note\": \"Rent of $2,400 for lease 1 is due 2026-09-02; requested approval #1, pending human decision. Payment has not been made.\"}"
+          },
+          "result_summary": "{\"ticket_id\": 102, \"status_before\": \"awaiting_approval\", \"status_after\": \"awaiting_approval\", \"notes_after\": \"Email: shop rent due in 2 days.\\n[2026-08-31] Lease 1 confirms Chapel Street shop rent of $2,400 due 2026-09-02 (2 days from shop date 2026-08-31), not overdue; requested payment approval is still needed.\\n[2026-08-31] Rent of $2,400 for lease 1 is due 2026-09-02; requested approval #1, pending human decision. Payment has not been made.\", \"shop_date_today\": \"2026-08-31\"}",
+          "is_error": false
+        },
+        {
+          "tool": "campus-customs_get_cash_position",
+          "arguments": {
+            "raw": "{}"
+          },
+          "result_summary": "{\"shop_date_today\": \"2026-08-31\", \"accounts\": [{\"name\": \"checking\", \"balance\": 3400.0, \"as_of\": \"2026-08-31\"}], \"total_balance\": 3400.0, \"approved_not_yet_paid\": 0.0, \"approved_not_yet_paid_detail\": [], \"uncommitted\": 3400.0, \"executing_approval\": null, \"how_to_read_this\": \"uncommitted = what you may promise to something NEW. total_balance = what is actually there, and the figure an already-approved payment is judged against.\"}",
+          "is_error": false
+        },
+        {
+          "tool": "final_result",
+          "arguments": {
+            "raw": "{\"ticket_id\":102,\"outcome\":\"awaiting_approval\",\"decision\":\"Rent is not paid; approval request #1 is pending with a human.\",\"reasoning\":\"Lease 1 rent of $2,400 is due 2026-09-02, two days from the shop date 2026-08-31. Rent is the top priority to keep the premises. Checking holds $3,400 with no approved commitments; paying would leave $1,000. The request is raised and cannot be paid until a human approves it.\",\"figures\":[{\"label\":\"rent due\",\"value\":\"2400.00\",\"from_tool\":\"campus-customs_check_rent_due\"},{\"label\":\"rent due date\",\"value\":\"2026-09-02\",\"from_tool\":\"campus-customs_check_rent_due\"},{\"label\":\"days until due\",\"value\":\"2\",\"from_tool\":\"campus-customs_check_rent_due\"},{\"label\":\"shop date\",\"value\":\"2026-08-31\",\"from_tool\":\"campus-customs_check_rent_due\"},{\"label\":\"cash balance\",\"value\":\"3400.00\",\"from_tool\":\"campus-customs_get_cash_position\"},{\"label\":\"uncommitted cash\",\"value\":\"3400.00\",\"from_tool\":\"campus-customs_get_cash_position\"},{\"label\":\"approval request amount\",\"value\":\"2400.00\",\"from_tool\":\"campus-customs_request_approval\"},{\"label\":\"cash left if paid\",\"value\":\"1000.00\",\"from_tool\":\"campus-customs_request_approval\"}],\"blocked_on\":\"Human approval of rent_payment request #1; rent has not been paid.\",\"approvals_raised\":[1],\"delegated_to\":[\"Facilities\"]}"
+          },
+          "result_summary": "Final result processed.",
+          "is_error": false
+        }
+      ],
+      "output": "{\"ticket_id\": 102, \"outcome\": \"awaiting_approval\", \"decision\": \"Rent is not paid; approval request #1 is pending with a human.\", \"reasoning\": \"Lease 1 rent of $2,400 is due 2026-09-02, two days from the shop date 2026-08-31. Rent is the top priority to keep the premises. Checking holds $3,400 with no approved commitments; paying would leave $1,000. The request is raised and cannot be paid until a human approves it.\", \"figures\": [{\"label\": \"rent due\", \"value\": \"2400.00\", \"from_tool\": \"campus-customs_check_rent_due\"}, {\"label\": \"rent due date\", \"value\": \"2026-09-02\", \"from_tool\": \"campus-customs_check_rent_due\"}, {\"label\": \"days until due\", \"value\": \"2\", \"from_tool\": \"campus-customs_check_rent_due\"}, {\"label\": \"shop date\", \"value\": \"2026-08-31\", \"from_tool\": \"campus-customs_check_rent_due\"}, {\"label\": \"cash balance\", \"value\": \"3400.00\", \"from_tool\": \"campus-customs_get_cash_position\"}, {\"label\": \"uncommitted cash\", \"value\": \"3400.00\", \"from_tool\": \"campus-customs_get_cash_position\"}, {\"label\": \"approval request amount\", \"value\": \"2400.00\", \"from_tool\": \"campus-customs_request_approval\"}, {\"label\": \"cash left if paid\", \"value\": \"1000.00\", \"from_tool\": \"campus-customs_request_approval\"... [trimmed 191 chars]",
+      "blocked_on": "Human approval of rent_payment request #1; rent has not been paid.",
+      "needs_human": null,
+      "model": {
+        "requested": "gpt-6-luna",
+        "resolved": "gpt-6-luna-2026-09-22",
+        "ok": true,
+        "note": null
+      },
+      "usage": {
+        "requests": 9,
+        "input_tokens": 78720,
+        "output_tokens": 877,
+        "total_tokens": 79597
+      },
+      "started_at": "2026-10-12T03:59:14.029875+00:00",
+      "finished_at": "2026-10-12T03:59:39.671179+00:00",
+      "duration_seconds": 25.641,
       "error": null
     }
   ]
