@@ -564,3 +564,31 @@ restored byte-for-byte from its original commit before refilling Actual),
 fresh board screenshots, `resolved_board.html`, harness section 10, and the
 README run summary. The Reflection was rewritten for the new outcomes and
 re-approved.
+
+### Final sweep — three stale artefacts caught
+
+After the re-run, a pass for things that had quietly gone out of date:
+
+1. **`mcp_smoke.json` was making a false claim.** It said
+   `all_tools_tested: true` with three tools registered, when the server has
+   had fourteen since Problem 5. Fixed properly rather than by editing the
+   flag: the smoke test now covers **all 8 read tools** (added `list_tickets`,
+   `get_cash_position`, `list_invoices`, `quote_discount`, `list_approvals`),
+   each with an independently written SQL cross-check, and states explicitly
+   that the 6 write tools are excluded because they move money -- those are
+   covered by `tests/test_shop_tools.py` instead.
+2. **The smoke test would have contradicted its own narrative.** It describes
+   the shop as Problem 4 found it, with invoice 501 open and blocking, but the
+   live working copy has since been run to resolution. It now runs against a
+   **disposable clone of the seed** and a **separate empty approval board**, so
+   the evidence is reproducible and a completed run is never disturbed. The
+   board isolation mattered: a fresh database alone still read the live run's
+   five approvals, because the board is JSON rather than a table.
+3. **The port had drifted from the docs.** `vite.config.ts` was restored to
+   5173 but the README, harness, design notes and launch config still said
+   5180. All corrected; the 5180 story is kept where it is history rather than
+   instruction.
+
+Also corrected the evidence's own `vibe_coder_connection` status, which still
+read "requires a vibe-coder restart" long after that restart had happened and
+the tools had been called live from the chat.

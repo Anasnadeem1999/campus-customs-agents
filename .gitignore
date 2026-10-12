@@ -35,3 +35,7 @@ Thumbs.db
 # Frontend build output and dependencies
 frontend/node_modules/
 frontend/dist/
+
+# Disposable fixtures the MCP smoke test clones from the seed.
+output/.smoke_db.sqlite
+output/.smoke_board/

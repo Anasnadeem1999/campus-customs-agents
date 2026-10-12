@@ -148,10 +148,10 @@ cd frontend
 npm run dev
 ```
 
-Opens at **http://localhost:5180** and calls the backend at
-`http://localhost:8000` directly. (Port 5180 rather than Vite's 5173, because
-5173 was occupied on the development machine; the backend accepts any
-localhost origin, so either works.)
+Opens at **http://localhost:5173** and calls the backend at
+`http://localhost:8000` directly. If 5173 is already in use, Vite moves to
+5174 and prints the port it bound; the backend accepts any localhost origin,
+so either works without touching CORS.
 
 ---
 

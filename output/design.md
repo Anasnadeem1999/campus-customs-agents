@@ -300,9 +300,12 @@ is.
 
 ### A note on ports
 
-The dashboard runs on **5180**, not Vite's default 5173. Another project in
-this workspace already holds 5173, and the first run of this dashboard served
-*that project's storefront* — the browser looked perfectly fine and was showing
-an entirely different application. `strictPort` now makes a clash fail loudly
-instead of sliding somewhere else quietly. The backend accepts any localhost
-origin, so the port number itself does not matter to CORS.
+The dashboard runs on **5173**, Vite's default and the port the brief names.
+
+It did not always. Another project in this workspace holds 5173, and the first
+run of this dashboard served *that project's storefront* — the browser looked
+perfectly fine and was showing an entirely different application. It was moved
+to 5180 to get clear of that while building. A clean clone has 5173 free, so
+the default is restored, with `strictPort` off so a busy port slides to 5174
+and prints where it landed rather than failing outright. The backend accepts
+any localhost origin, so the number itself does not matter to CORS.

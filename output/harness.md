@@ -836,7 +836,7 @@ real database, with no model and no network.
 `frontend/` — React + Vite + TypeScript. Start it from that folder:
 
 ```bash
-npm run dev          # http://localhost:5180
+npm run dev          # http://localhost:5173
 ```
 
 It calls the backend directly at `http://localhost:8000`. There is no dev
@@ -844,10 +844,14 @@ proxy, deliberately: a proxy would make the request same-origin and hide
 whether CORS is configured correctly, so the browser makes a genuine
 cross-origin request and the backend's allowance is exercised every time.
 
-**Port 5180, not Vite's default 5173.** Another project in this workspace
-already holds 5173, and the first run of this dashboard served *that project's
-storefront* — the browser looked perfectly healthy while showing an entirely
-different application. `strictPort` now makes a clash fail loudly.
+**Port 5173**, Vite's default and the one the brief names, with `strictPort`
+off so a machine already using it slides to 5174 rather than failing.
+
+During development another project in this workspace held 5173, and the first
+run of this dashboard served *that project's storefront* — the browser looked
+perfectly healthy while showing an entirely different application. The
+dashboard was moved to 5180 to get clear of it. A fresh clone has 5173 free,
+so the default is restored.
 
 ### Layout
 
