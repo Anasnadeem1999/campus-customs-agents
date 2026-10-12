@@ -15,7 +15,8 @@ each new problem arrives rather than being planned out in advance.
 | 7 | Backend routes (FastAPI, `backend/main.py`) | Done |
 | 8 | Agent dashboard (React + Vite + TS) | Done |
 | 9 | Resolve the tickets: full run, cash ledger, artefacts | Done |
-| 10 | *awaiting the next problem from the user* | — |
+| 10 | Reflection tab, approved by the user | Done |
+| 11 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -416,3 +417,49 @@ result - the run ends at $160 with two payments written, and that state *is*
 the deliverable. The session fixture now copies whatever it finds and puts it
 back, so tests can be run before or after a run without invalidating it.
 **38 tests passing**, and the shop is unchanged afterwards.
+
+## 10 - Reflection
+
+The Reflection tab of `output/desk_tickets.html` is filled and **approved by
+the user**, written in the first person because it is the owner's reflection.
+All five tabs on that page are now complete.
+
+Every claim points at the Ticket or Cash tabs of the same page, or at a real
+figure from `output/audit_trail.json`. The token costs are measured, not
+estimated.
+
+### The five questions
+
+1. **Rating each ticket.** 102 best - 4 turns, 171,259 tokens, the only one
+   resolved, and it earned the mark by checking the landlord's claim against
+   lease 1 rather than trusting the notice. 101 second: the sharpest move of
+   the run (turning "out of stock" into "an $840 bill is in the way") undone
+   by never calling Customer Service, so the shop spent $848 on Tauhid's
+   behalf and told him nothing. 103 last - 918,275 tokens, **57% of the run**,
+   no money moved, and Accounting declined to put the $264 decision to the
+   owner at all.
+2. **Plan versus run.** 101: the plan was right. 102: the team was right, and
+   the plan had assumed a delegation where a tool call would do. 103: 3 of 3
+   plus an unplanned `accounting -> boss` escalation. The plan's real strength
+   was predicting **who not to call** - every predicted absence held.
+3. **One agent instead of five?** Yes, for this board. 102's whole job is a
+   three-tool chain, yet two agents asked `get_cash_position` the same
+   question; 103 burned 918k tokens to reach a conclusion one tool call
+   returns. The expertise is in the prompt files, not the models, and 101's
+   miss was a *handoff* failure a single agent could not have made. Verdict:
+   **keep the five prompts, collapse the five agents** - the team shape pays
+   off at thirty tickets, not three.
+4. **Three it could solve now:** the Crest Mug at qty 0 (Elm City Gifts is
+   unblocked and $3.50 fits in $160); the rent we just rolled to 2026-10-02;
+   a part-fillable order on hoodie size S, where 4 are on hand.
+5. **Three it cannot:** stock actually arriving (no `receive_purchase_order`,
+   no way to move `desk.date_today`, so 101 is stuck forever - proven twice);
+   money coming in (the 8 hoodies at $50 are $400, four times the $104 gap
+   that stopped 103); and Tauhid ever hearing back (no `approve_draft` gate,
+   no channel). Each is paired with the tools and agents it would need.
+
+The closing observation: none of the three gaps is a reasoning gap. The team
+can work out that stock should arrive, that selling hoodies brings money in,
+and that Tauhid is waiting. It cannot *act* on any of it, because the shop is
+reached only through the MCP server and those verbs do not exist there - the
+safety design working as intended, and exactly where the next problems live.

@@ -684,3 +684,43 @@ No follow-up prompt was needed.
    for the word "refused", which flagged every successful `list_approvals`
    red, because agents routinely write "if refused" in an approval reason. It
    now uses the SDK's own outcome field.
+
+## Problem 10 - Reflection
+
+**Prompt, verbatim:**
+
+> Problem 10: Reflection
+> Now please open the output/desk_tickets.html and with me fill in the reflection tab. This should be genuine reflection which I need your help with, I will approve what you write as this is to come from me. This should include how would I evaluate the performance of the agents on each ticket and why, and how for each ticket how did the actual compared to the expected plans writted earlier, and what would have been the simpler as one agent with tools and also why, and describing of the three new problems campus customs might face that this agent team could solve with the tools we built, and describing the three new problems campus cusotms might face that this agent team could not solve with the tools we have built and explaining the tools and agent that would be needed to solve them.
+> Also please tie every avser to this app and the three tickets we ran, please use the tickets tabs and cash tabs on the same page as our evidence and please please please be mindful that generic ai essays without the campus customs details will be scoring low.
+> Please also write the reflection answers , tied to the real tickets, delegations, tools and cash changes.
+
+**Follow-up prompt, verbatim:**
+
+> I approve it
+
+The reflection was drafted, put to the user in full with the two sharpest
+claims flagged for a decision, and approved unchanged.
+
+**What the initial prompt did not cover, resolved while working:**
+
+1. **"generic ai essays will be scoring low" needed enforcing, not intending.**
+   The fill script is checked by asserting that a list of Campus Customs
+   anchors actually appears in the finished tab - `918,275`, `171,259`,
+   `invoice 501`, `CC-MUG-CREST`, `Tauhid`, `$264`, `$104`, `2026-10-02`,
+   `Elm City Gifts`, `accounting -> boss`, `$848`. The reflection cannot be
+   written generically and still pass.
+2. **"this is to come from me" is a voice decision.** Written first person
+   throughout, and two claims that criticise work I built were flagged
+   explicitly before approval rather than slipped in: that the five agents
+   should be collapsed to one, and that Accounting took a decision off the
+   owner on ticket 103.
+3. **Token costs were measured, not guessed.** Pulled per ticket from the
+   audit trail - 101 at 528,061, 102 at 171,259, 103 at 918,275 - because the
+   "would one agent be simpler" answer is worth nothing without the arithmetic
+   behind it. That 103 cost 57% of the run while moving no money is the single
+   most useful number on the page.
+4. **The "could not solve" answers are demonstrated, not imagined.** Ticket
+   101 is still `blocked` and provably cannot finish: there is no
+   `receive_purchase_order` tool and no way to advance `desk.date_today`, so
+   `CC-TEE-WHITE`/S stays at qty 0 forever. That was proven by running the
+   ticket twice and getting the same answer, not asserted.
