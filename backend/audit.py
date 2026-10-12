@@ -79,12 +79,23 @@ def start_run(record: RunRecord) -> None:
         _save(data)
 
 
-def append_step(step: AuditStep) -> None:
-    """Append one agent step. Called after every agent turn, success or not."""
+def append_step(step: AuditStep) -> AuditStep:
+    """Append one agent step. Called after every agent turn, success or not.
+
+    **The step number is assigned here, under the lock, and whatever the caller
+    put in `step.step` is overwritten.** It used to be read by the caller via
+    `next_step_number()` before the write, which left a window: two agents
+    finishing at once both read the same count and both wrote that number. The
+    trail then carried two different events claiming to be step 23 — which
+    breaks the dashboard's paging, and quietly ruins the one property an audit
+    trail has to have, that a step can be referred to unambiguously.
+    """
     with _LOCK:
         data = _load()
-        data["steps"].append(step.model_dump())
+        numbered = step.model_copy(update={"step": len(data["steps"]) + 1})
+        data["steps"].append(numbered.model_dump())
         _save(data)
+    return numbered
 
 
 def finish_run(run_id: str, **summary: Any) -> None:
@@ -99,7 +110,12 @@ def finish_run(run_id: str, **summary: Any) -> None:
 
 
 def next_step_number() -> int:
-    """Step numbers continue across runs, so a step number is unique forever."""
+    """A provisional step number, for callers building an `AuditStep`.
+
+    Only ever a placeholder: `append_step` assigns the real number under the
+    lock. Do not rely on this value — between reading it and writing, another
+    agent may well have taken it.
+    """
     return len(_load()["steps"]) + 1
 
 

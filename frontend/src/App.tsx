@@ -31,6 +31,11 @@ export default function App() {
   // Tracked in a ref rather than state: the poller reads it on every tick and
   // putting it in state would restart the interval on each poll.
   const sinceRef = useRef(0)
+  // One poll makes four requests, which can easily outlast the two-second
+  // interval. Without this guard a second poll starts with the same `since`
+  // as the first and both append the same events, which React reports as
+  // duplicate keys and the reader sees as the team saying everything twice.
+  const inFlight = useRef(false)
   const prevCash = useRef<number | null>(null)
   const [cashFlash, setCashFlash] = useState(false)
 
@@ -41,6 +46,8 @@ export default function App() {
   }, [])
 
   const poll = useCallback(async () => {
+    if (inFlight.current) return
+    inFlight.current = true
     try {
       const [t, c, a, e] = await Promise.all([
         api.tickets(),
@@ -63,11 +70,21 @@ export default function App() {
       setApprovals(a.approvals)
 
       if (e.events.length) {
-        sinceRef.current = e.latest_step
-        setEvents((prev) => [...prev, ...e.events])
+        sinceRef.current = Math.max(sinceRef.current, e.latest_step)
+        setEvents((prev) => {
+          // Merge on step number rather than trusting `since` alone. The
+          // backend reset route rewinds the trail, and a stale response can
+          // still land after a newer one -- in both cases the step number is
+          // the only reliable identity an event has.
+          const seen = new Set(prev.map((x) => x.step))
+          const fresh = e.events.filter((x) => !seen.has(x.step))
+          return fresh.length ? [...prev, ...fresh] : prev
+        })
       }
     } catch {
       setOffline(true)
+    } finally {
+      inFlight.current = false
     }
   }, [])
 

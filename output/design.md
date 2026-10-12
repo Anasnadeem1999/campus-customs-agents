@@ -260,10 +260,43 @@ The whole loop was driven through the UI, not through curl:
 4. Clicked **Put the team on it** again — the team paid out the rest of the
    work and ticket 102 went **green, faded and struck through: RESOLVED**.
 
-Two defects were found and fixed by looking at the page rather than the code:
-pydantic-ai's synthetic `final_result` call was being drawn as though it were
-an MCP tool the agent had chosen, and truncated agent output was rendering as
-raw JSON instead of prose.
+**Four defects were found by looking at the page rather than the code**, and
+two of them were not cosmetic at all:
+
+1. pydantic-ai's synthetic `final_result` call was being drawn as though it
+   were an MCP tool the agent had chosen — a tool on the board that the server
+   does not have.
+2. Agent output truncated by the audit trail is unparseable JSON and was
+   rendering as a raw object. A textual field extractor now recovers the
+   sentence and ends it with an ellipsis.
+3. **The board was double-drawing events.** One poll makes four requests,
+   which easily outlasts the two-second interval, so a second poll began with
+   the same `since` as the first and both appended the same events. Fixed with
+   an in-flight guard, and by merging on step number rather than trusting
+   `since` alone — a stale response can still land after a newer one.
+4. **The audit trail was handing out duplicate step numbers.** Chasing (3)
+   surfaced a real backend defect: `next_step_number()` was read by the caller
+   *before* the write, so two agents finishing at once both claimed the same
+   number. The trail then carried two different events both numbered 23. That
+   breaks the dashboard's paging and quietly ruins the one property an audit
+   trail must have — that a step can be referred to unambiguously. The number
+   is now assigned inside `append_step`, under the lock, and a concurrency
+   test pins it.
+
+Only the first two were visible as *appearance*. The other two were a correct
+backend and a correct frontend disagreeing in a way that no unit test was
+asking about, and the page was the only place they showed.
+
+### A note on running the tests
+
+The suite exercises the real MCP server against the real working database,
+because a payment rule tested only against a mock is not tested. The cost is
+that `pytest` genuinely spends the shop's money, and it used to leave the
+working copy mid-payment: cash at $160, two payments written, invoice 501
+paid — but all three tickets still `open`. Opening the desk after a test run
+then showed a shop that had never existed. The suite now restores the shop on
+the way out, so the dashboard and the tests cannot disagree about what day it
+is.
 
 ### A note on ports
 

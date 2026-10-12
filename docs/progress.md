@@ -331,9 +331,29 @@ is permitted as the problem asks; it is just not the port in use.
 2. Agent output truncated by the audit trail is unparseable JSON and rendered
    raw on screen; a textual field extractor now recovers the sentence.
 
-### Known session artifact
+### Both servers started and checked
 
-The `uvicorn --reload` backend started earlier stopped noticing file changes,
-so it serves a stale module. The committed code is correct - verified against
-a freshly started backend and by `tests/test_routes.py`. Restart the backend
-to pick it up.
+Backend started from `backend/` with `uvicorn main:app --reload --port 8000`;
+every route answered (`health`, `reset`, `tickets`, `cash`, `approvals`,
+`events`). Dashboard on `npm run dev` at **5180**. Front end calls
+`http://localhost:8000` directly, so CORS is genuinely exercised.
+
+### Two more defects, found by watching the page
+
+3. **The board double-drew events.** One poll makes four requests and can
+   outlast the two-second interval, so a second poll started with the same
+   `since` and both appended the same events. Fixed with an in-flight guard
+   and by merging on step number rather than trusting `since`.
+4. **The audit trail handed out duplicate step numbers.** Chasing (3) found a
+   real backend defect: `next_step_number()` was read outside the lock, so two
+   agents finishing together both claimed the same number. An audit trail whose
+   identifiers collide cannot be used to refer to anything. The number is now
+   assigned inside `append_step` under the lock, pinned by a 24-thread test.
+
+### The tests no longer leave the shop mid-payment
+
+The suite runs against the real database on purpose. It used to finish with
+cash at $160, two payments written and invoice 501 paid, while all three
+tickets still read `open` — so opening the desk after `pytest` showed a shop
+that had never existed. A session fixture now restores the working copy on the
+way out. **38 tests passing.**
