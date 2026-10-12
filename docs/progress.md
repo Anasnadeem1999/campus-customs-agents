@@ -16,7 +16,8 @@ each new problem arrives rather than being planned out in advance.
 | 8 | Agent dashboard (React + Vite + TS) | Done |
 | 9 | Resolve the tickets: full run, cash ledger, artefacts | Done |
 | 10 | Reflection tab, approved by the user | Done |
-| 11 | *awaiting the next problem from the user* | — |
+| 11 | Submit to GitHub (public repo, pushed) | Done |
+| 12 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -463,3 +464,43 @@ can work out that stock should arrive, that selling hoodies brings money in,
 and that Tauhid is waiting. It cannot *act* on any of it, because the shop is
 reached only through the MCP server and those verbs do not exist there - the
 safety design working as intended, and exactly where the next problems live.
+
+## 11 - Submit to GitHub
+
+**https://github.com/Anasnadeem1999/campus-customs-agents** - public, default
+branch `main`, 76 files. Also written to `output/github_url.txt`.
+
+### Checked before publishing
+
+- `.env` has **never** been committed on any branch in any commit
+  (`git log --all -- .env` is empty).
+- The real `PORTKEY_API_KEY` value appears in **no tracked file** - checked by
+  reading the key from the local `.env` and searching every tracked file for
+  it as bytes, rather than trusting the ignore rule.
+- `.env.example` ships placeholders only.
+- `node_modules/` and `.venv/` are absent from the remote.
+- Every file in the required layout is present on `origin/main`, verified
+  against the remote tree rather than the local working copy.
+
+### Both database files are committed, deliberately
+
+`data/campus_customs_new.db` was gitignored, which was right while it was
+purely a regenerated artifact. For submission it ships too, so a grader can
+clone, start the dashboard and see the finished board with no setup. It is
+committed **as the three-ticket run left it** - $160, two payments, invoice
+501 paid - which keeps it consistent with the figures in
+`resolved_tickets.json` and the Cash tab. `scripts/reset_db.py` re-clones the
+seed for a clean run, and the seed itself is still never written to.
+
+### README
+
+Covers the four things the problem asked for: copying the seed over the
+working copy, starting the MCP server, starting the FastAPI backend from
+`backend/`, and starting the React board - plus the reset to run before a full
+three-ticket pass, including clearing the approval board, since an approved
+request pointing at a reopened invoice is a confusing half-state.
+
+### Not done by me
+
+**Submitting the URL to Canvas.** I have no Canvas access; the URL is in
+`output/github_url.txt` and needs pasting into the assignment by hand.

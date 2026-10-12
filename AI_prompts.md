@@ -724,3 +724,44 @@ claims flagged for a decision, and approved unchanged.
    `receive_purchase_order` tool and no way to advance `desk.date_today`, so
    `CC-TEE-WHITE`/S stays at qty 0 forever. That was proven by running the
    ticket twice and getting the same answer, not asserted.
+
+## Problem 11 - Submit to GitHub
+
+**Prompt, verbatim:**
+
+> Problem 11: Submit to GitHub
+> Now we need to push the code to the public GitHub repository so that the graders can easily clone it. Please make sure that we submit the repo URL to canvas, and also put it in the output/github_url.txt.
+>
+> PLEASE DO NOT PUSH the real env. to the github repo. Please do include both of the database files under data/ which includes the original and the working copy the grader can run the application  easily. Please note that the expected file layout should look like this. [layout omitted here; reproduced in README.md]
+> Please also note that the readme should clearlu explain the copy original db to the working copy when a clean run is needed, starting of mcp server, starting of fast api backend, and starting of the react board, and reseting of the db before a full three ticket run.
+> Please also check that .env is git-ignored and both database files are included.
+> please also sign in to GitHub, create the public repo and push.
+> please kindly put the URL in output/github_url.txt which is to be later submitted to canvas.
+
+**Follow-up prompt, verbatim** (answering which name the repo should take):
+
+> campus-customs-agents
+
+**What the initial prompt did not cover, resolved while working:**
+
+1. **"include both of the database files" contradicted an existing rule.**
+   `data/campus_customs_new.db` was gitignored from the setup problem onward.
+   The ignore rule was removed with a comment explaining why both now ship.
+   The working copy is committed **as the run left it** - $160, two payments -
+   so it stays consistent with `resolved_tickets.json` and the Cash tab rather
+   than shipping a state no artefact describes.
+2. **"check that .env is git-ignored" is the weaker of two checks.** An ignore
+   rule only protects files that were never committed before it existed. So
+   the history was searched for `.env` on every branch (`git log --all`), and
+   the real key was read from the local `.env` and searched for as bytes
+   across every tracked file. Both came back empty. The ignore rule alone
+   would not have proven that.
+3. **The push failed first time on the branch name.** The repository's branch
+   was `master` while `gh repo create` set the remote default to `main`.
+   Renamed with `git branch -M main` and pushed.
+4. **The layout was verified against the remote, not the working copy.** Every
+   required path was checked with `git ls-tree origin/main`, because what
+   matters is what a grader actually clones, not what exists locally.
+5. **I cannot submit to Canvas.** No access. The URL is in
+   `output/github_url.txt` and has to be pasted into the assignment by hand -
+   flagged rather than silently skipped.
