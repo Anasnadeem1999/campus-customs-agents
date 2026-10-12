@@ -297,9 +297,10 @@ manufacturing but money — Bulldog Print Co, the only apparel vendor, is
 holding invoice 501 at **3 days overdue** and will ship nothing until it is
 cleared.
 
-**Unlocks ticket 103.** The 12 hoodies ticket 103 is short run into that same
-single-vendor gate, so this tool is what reveals that tickets 101 and 103 are
-not two restock problems but one unpaid bill.
+**Unlocks ticket 103.** Ticket 103's 12-hoodie shortfall runs into that very
+same gate, because Bulldog Print Co is the only vendor who can reprint them
+either — which is how this tool reveals that 101 and 103 are not two restock
+problems but one unpaid bill.
 
 Verified: filtering on `"apparel"` returns exactly one vendor —
 `can_ship: false`, `blocked_amount: 840.0`, `days_overdue: 3`,
