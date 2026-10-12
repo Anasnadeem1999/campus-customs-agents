@@ -12,8 +12,13 @@ what the team is allowed to see and do, and a guarantee that no agent can
 invent a price, a stock level or a due date, because the only numbers
 available are the ones a tool read out of SQLite.
 
-Built with **FastMCP** (`mcp.server.fastmcp.FastMCP`, pinned to `mcp<2` — v2
-renamed the class to `MCPServer`).
+Built with **`MCPServer`** (`mcp.server.mcpserver.MCPServer`), on `mcp>=2`.
+
+The earlier pin to `mcp<2` had to go in Problem 5: pydantic-ai's MCP client
+requires the v2 SDK, and the agents and the server have to agree on a version.
+The migration was small — v2 renamed `FastMCP` to `MCPServer` and switched the
+wire-shaped `serverInfo`/`structuredContent` fields to snake_case — and the
+Problem 4 smoke test still passes 21 of 21 field checks afterwards.
 
 ## Which database it uses
 
@@ -31,56 +36,93 @@ Recreate the working copy at any time:
 python scripts/reset_db.py
 ```
 
-Connections are **read-only by default**. The three tools below only answer
-questions; the tools that spend money or change a ticket arrive in later
-problems and must ask for a writable handle explicitly, so a read path can
-never mutate the shop by accident.
+Connections are **read-only by default**. A tool that changes anything has to
+ask for a writable handle explicitly, through `db.writing()`, which wraps the
+whole change in one all-or-nothing transaction — so a read path cannot mutate
+the shop by accident, and a payment cannot half-happen.
 
 The shop's "today" is `desk.date_today` (**2026-08-31**), not the wall clock.
 Every overdue test and delivery estimate below is measured from that field.
 
-## The three tools
+## The fourteen tools
 
-| Tool | Reads | Answers |
+Three read tools came from Problem 3. Problem 5 added seven more, plus the
+approval board the agent team needs to work a ticket to resolution. Every one
+of them reads or writes `data/campus_customs_new.db` and nothing else.
+
+| Tool | Tables | Answers / does |
 |---|---|---|
 | `check_stock_by_size` | `inventory` | Can we fill this order from the shelf, and if not, by how much are we short? |
 | `find_restock_vendors` | `vendors`, `invoices`, `desk` | Who can make up the gap, when would it land, and will they even ship? |
 | `check_rent_due` | `leases`, `desk` | What is owed on the shop's space, and how soon? |
+| `list_tickets` | `tickets`, `desk` | What has the shop been asked to deal with? |
+| `get_cash_position` | `cash_accounts`, `desk` *(+ the approval board)* | What is in the bank, what is already promised, and what may still be committed? |
+| `list_invoices` | `invoices`, `vendors`, `desk` | What do we owe each vendor, and how late is it? |
+| `quote_discount` | `pricing`, `inventory`, `desk` | What does this bulk price do to the margin, and can the order even be filled? |
+| `request_approval` | `invoices`, `leases`, `vendors`, `tickets`, `cash_accounts`, `desk` | Ask a human to approve a spend. Validates against the live record; moves no money. |
+| `list_approvals` | *(approval board only)* | What has been asked for, and what did the human decide? |
+| `pay_invoice` | `invoices`, `payments`, `cash_accounts`, `desk` | Settle a vendor bill against a signed approval, lifting that vendor's shipping block. |
+| `pay_rent` | `leases`, `payments`, `cash_accounts`, `desk` | Pay rent against a signed approval and roll the lease to its next due date. |
+| `update_ticket` | `tickets`, `desk` | Record the outcome and move the ticket along the board. |
+| `draft_customer_message` | `tickets`, `desk` *(+ the board)* | Write a reply and file it. **Nothing is sent.** |
+| `place_purchase_order` | `vendors`, `invoices`, `desk` *(+ the board)* | Order a restock, refusing while the vendor holds an unpaid bill. |
 
-### `check_stock_by_size(sku, size, requested_qty=None)`
+### The approval gate, and the verb that is missing
 
-Stock is keyed by **(sku, size)**, so "do we have the Bulldog tee?" has no
-answer — only "do we have it in S?" does. Returns the on-hand quantity and
-aisle for that exact size, the quantities for the SKU's other sizes (so a
-different size can be offered), and, when `requested_qty` is given, whether
-the order fills from stock and the exact shortfall.
+Spending is the one thing on this server that cannot be done by an agent
+alone, and the guarantee is structural rather than a line in a prompt:
 
-Distinguishes a size that is **stocked but at zero** from one the shop does
-not carry at all — different problems with different answers.
+- `request_approval` writes a **pending** request. It validates against the
+  live database first — the invoice must exist and still be open, and the
+  amount must equal what is actually owed — so a request that could never be
+  paid is refused when it is made, not discovered later.
+- **No tool on this server approves anything.** The verb lives in
+  `scripts/approve.py`, outside the MCP server, where no agent can reach it.
+  An agent cannot approve its own spending because the action does not exist
+  in its world. `tests/test_shop_tools.py::test_no_mcp_tool_can_approve`
+  fails the build if an approving tool is ever added here.
+- `pay_invoice` and `pay_rent` refuse — writing nothing at all — when the
+  approval is missing, still pending, already spent, or for a different
+  record, and when the balance will not cover the payment.
 
-### `find_restock_vendors(specialty_contains=None)`
+### What a payment moves, and why it is one transaction
 
-For each vendor: lead time, the date an order placed today would arrive
-(`desk.date_today + vendors.lead_days`), and whether it will ship.
+A payment changes three things together: the cash balance, a new `payments`
+row carrying the approver's name and `desk.date_today`, and the invoice status
+or the lease's next due date. All three happen inside one `BEGIN IMMEDIATE`
+transaction, so the books can never show cash gone with the bill still open.
+`BEGIN IMMEDIATE` also takes the write lock up front, so two payments racing
+for the same thin balance cannot both read it and both decide they fit.
 
-A vendor holding any invoice whose status is not `paid` ships nothing new, so
-`can_ship` is `false` and the blocking invoices are itemised with their
-amounts and days overdue — which turns "we're out of stock" into the
-actionable "we're out of stock *and here is the bill standing in the way*".
+### Two numbers for cash, and which one to use
 
-The database does not record which vendor supplies which SKU. The tool
-therefore **does not guess** at that mapping: it returns each `specialty`
-verbatim and leaves the match to the agent, with an optional case-insensitive
-filter for narrowing.
+`get_cash_position` returns `total_balance`, `approved_not_yet_paid` and
+`uncommitted`, and the right one depends on the question:
 
-### `check_rent_due(lease_id=None)`
+- **Planning something new** → `uncommitted`. Planning against the raw balance
+  is how two approved payments overdraw one account.
+- **Executing an approval that already exists** → **not** `uncommitted`. That
+  approval's amount is already inside `approved_not_yet_paid`, so
+  `uncommitted` has subtracted the very money about to be spent. Pass
+  `for_approval_id` and read `executing_approval.can_execute_now`.
 
-Answers a rent notice from the lease itself rather than from the figure quoted
-in the notice: landlord, monthly rent, next due date, and days until due
-measured from `desk.date_today` (negative, with `is_overdue`, once past).
+This is not hypothetical: a live run read `uncommitted` while holding two
+approvals and concluded they were in conflict, when $3,400 covered both the
+$840 invoice and the $2,400 rent. The `for_approval_id` argument and a
+regression test exist because of that run.
 
-Reports only. It moves no money — payment requires human approval and a
-separate tool.
+### What the tools deliberately will not do
+
+- **Send anything.** There is no send or email tool, and the test suite asserts
+  that none appears. `draft_customer_message` and `place_purchase_order` file
+  their output on the board for a human; no customer or vendor is contacted.
+- **Guess which vendor makes which SKU.** The schema does not record it, so
+  `find_restock_vendors` returns each `specialty` verbatim and leaves the match
+  to the agent, as a judgement it has to state out loud.
+- **Add tables to the shop's database.** Approval requests, drafts and purchase
+  orders have no home in the nine-table schema, so they live in
+  `output/board/` as append-only JSON. No shop fact is stored there — only the
+  shop's *intent*: who asked for what, who approved it, whether it is spent.
 
 ## Running it
 
@@ -94,13 +136,21 @@ python -m mcp_server.server     # stdio transport
 
 ```
 mcp_server/
-  server.py   FastMCP instance and the three tool definitions
-  db.py       path resolution, the seed guard, and the shop's clock
+  server.py   the MCPServer instance and all fourteen tool definitions
+  db.py       path resolution, the seed guard, the shop's clock, transactions
+  board.py    approval requests, drafts and POs -- the records the 9-table
+              schema cannot hold. No shop facts live here.
   readme.md   this file
 ```
 
-## Still to come
+## Checking it still holds
 
-Later problems add tools for payments (human-approved, refusing any spend that
-would drive cash negative), purchase orders, customer-message drafts, and
-ticket status updates. They register in `server.py` alongside these three.
+```bash
+python -m pytest tests/test_shop_tools.py -q   # 17 tests, no model, no network
+python scripts/mcp_smoke.py                    # every tool over real MCP stdio
+```
+
+The test suite is where the rules are actually enforced. It calls the tool
+functions directly and asserts every refusal — no approval, pending approval,
+reused approval, redirected approval, insufficient funds, blocked vendor,
+seed database — because a rule an agent can talk its way past is not a rule.

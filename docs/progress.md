@@ -10,7 +10,8 @@ each new problem arrives rather than being planned out in advance.
 | 2 | Study the database; start `output/harness.md` | Done |
 | 3 | Build the MCP server (FastMCP, three tools) | Done |
 | 4 | Connect the MCP server; smoke-test each tool | Done |
-| 5 | *awaiting the next problem from the user* | — |
+| 5 | Agent team (5 agents, PydanticAI) + 7 new MCP tools | Done |
+| 6 | *awaiting the next problem from the user* | — |
 
 ## Setup — repo, data, reset script, model check
 
@@ -120,3 +121,62 @@ chat with the harness's own arguments. Each payload is structurally identical
 to the stored `tool_output` for its case — checked by equality, not by eye.
 `output/mcp_smoke.json` → `vibe_coder_connection` carries the live payloads and
 now reads `confirmed live in the vibe coder`.
+
+## 5 — The agent team, and the tools it needs
+
+**Five agents, fully connected**, each with its own prompt file under
+`backend/prompts/` and all loading the shared `shop_rules.md` first. Boss,
+Inventory, Accounting, Facilities, Customer Service; any agent may ask any
+other, and the delegation is real — Customer Service can ask Accounting without
+routing through the Boss.
+
+**Seven new MCP tools, 14 in total.** `list_tickets`, `get_cash_position`,
+`list_invoices`, `quote_discount`, `request_approval`, `list_approvals`,
+`pay_invoice`, `pay_rent`, `update_ticket`, `draft_customer_message`,
+`place_purchase_order`. All nine tables are now reachable, and nothing in
+`backend/` touches SQLite — the shop is reached only through MCP.
+
+**The approval gate is structural, not a prompt instruction.** `request_approval`
+lets an agent ask; nothing on the MCP server approves. The verb lives in
+`scripts/approve.py`, outside anything an agent can reach, and a test fails the
+build if an approving tool is ever added.
+
+**`output/audit_trail.json` appends.** Run headers and steps in separate lists
+joined by `run_id`. Each step carries the agent, who delegated to it, the task,
+every tool call *with its arguments* and result, the conclusion, the resolved
+model, tokens and timings. Failures are appended too.
+
+### Verified against the live gateway
+
+- Full human-in-the-loop cycle on ticket 102: team raised a $2,400 approval and
+  stopped → approved → resume run paid it. Cash $3,400 → $1,000, `payments` row
+  stamped `Anas Nadeem` and `2026-08-31`, lease rolled to 2026-10-02.
+- Invoice path likewise: approval → payment → cash $3,400 → $2,560, invoice 501
+  `paid`, which lifts Bulldog Print Co's shipping block.
+- `tests/test_shop_tools.py` — **17 passing**, no model, no network. Every
+  refusal: no approval, pending, reused, redirected, wrong amount, insufficient
+  funds, blocked vendor, seed database, no send tool.
+
+### Five things the live runs forced
+
+1. **`mcp<2` pin removed.** pydantic-ai's MCP client needs v2, so the server
+   moved to `MCPServer` and the Problem 4 smoke script was updated for v2's
+   snake_case fields. Still 21 of 21.
+2. **`reasoning_effort="none"` is mandatory.** The gateway refuses function
+   tools outright otherwise; every agent calls tools, so nothing ran at all.
+   Still resolves to `gpt-6-luna-2026-09-22`.
+3. **`awaiting_approval` tickets were invisible to resume runs** — the team
+   parked a ticket at the gate and the run meant to finish it could not see it.
+4. **`uncommitted` double-counted an approval against itself**, so the team
+   called two approvals a conflict and paid neither when $3,400 covered both.
+   `get_cash_position(for_approval_id=...)` now answers it; regression test added.
+5. **An agent turn could hang with no bound.** Token and request limits do not
+   bound time; a turn sat for ten minutes with no error. Per-turn wall-clock
+   timeout added, written to the trail as a failed step.
+
+### Open
+
+The last full board run was stopped mid-flight after the hang, so the final
+end-to-end audit trail across all three tickets wants one more clean cycle now
+that the timeout is in. The shop rules and the five agent prompts are written
+and awaiting the user's approval.

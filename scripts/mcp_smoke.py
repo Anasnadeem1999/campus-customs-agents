@@ -209,8 +209,8 @@ def compare(tool_output: dict[str, Any], expected: dict[str, Any], tool: str) ->
 
 def unwrap(result: Any) -> dict[str, Any]:
     """Pull the JSON payload out of an MCP tool result."""
-    if getattr(result, "structuredContent", None):
-        payload = result.structuredContent
+    if getattr(result, "structured_content", None):
+        payload = result.structured_content
         # FastMCP wraps a bare dict return under "result".
         return payload.get("result", payload)
     return json.loads(result.content[0].text)
@@ -242,7 +242,7 @@ async def main() -> int:
                         "tool_output": output,
                         "database_crosscheck": expected,
                         "verification": verdict,
-                        "is_error": bool(getattr(called, "isError", False)),
+                        "is_error": bool(getattr(called, "is_error", False)),
                     }
                 )
 
@@ -255,9 +255,9 @@ async def main() -> int:
         "launched_from": ".mcp.json",
         "server_name": SERVER_NAME,
         "server_info": {
-            "name": init.serverInfo.name,
-            "version": init.serverInfo.version,
-            "protocol_version": init.protocolVersion,
+            "name": init.server_info.name,
+            "version": init.server_info.version,
+            "protocol_version": init.protocol_version,
         },
         "database_under_test": str(WORKING_DB.relative_to(REPO_ROOT)).replace("\\", "/"),
         "model_calls_made": 0,
@@ -316,7 +316,7 @@ async def main() -> int:
     EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
     EVIDENCE.write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
 
-    print(f"server   : {init.serverInfo.name} v{init.serverInfo.version}")
+    print(f"server   : {init.server_info.name} v{init.server_info.version}")
     print(f"registered: {registered}")
     for r in results:
         mark = "PASS" if r["verification"]["all_match"] else "FAIL"

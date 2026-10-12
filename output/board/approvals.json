@@ -1,0 +1,81 @@
+[
+  {
+    "id": 1,
+    "kind": "invoice_payment",
+    "ref_id": 501,
+    "amount": 840.0,
+    "reason": "Pay overdue invoice 501 ($840, 3 days overdue) to lift Bulldog Print Co\u2019s shipping block on ticket 101\u2019s size-S tee reprint; refusing leaves the customer\u2019s requested size unavailable and the vendor unable to ship. Payment leaves $2,560 from the $3,400 balance, while the one-unit restock cost is $8 and the tee\u2019s tool-reported list price is $28.",
+    "detail": "Ticket 101 needs 1 CC-TEE-WHITE size S; the size is out of stock. Bulldog Print Co is the likely apparel reprint vendor; ETA 2026-09-05 after order, once invoice is paid. Purchase-order approval and order still needed.",
+    "requested_by": "boss",
+    "requested_on_shop_date": "2026-08-31",
+    "status": "approved",
+    "approved_by": "Anas Nadeem",
+    "approved_at": "2026-08-31",
+    "consumed_by_payment_id": 1,
+    "spends_cash": true,
+    "checks_at_request_time": {
+      "invoice_status": "open"
+    },
+    "cash_at_request_time": {
+      "total_balance": 3400.0,
+      "already_approved_unpaid": 0.0,
+      "uncommitted": 3400.0,
+      "would_leave_uncommitted": 2560.0,
+      "fits_within_uncommitted": true
+    }
+  },
+  {
+    "id": 2,
+    "kind": "rent_payment",
+    "ref_id": 1,
+    "amount": 2400.0,
+    "reason": "Pay lease 1 rent of $2,400 due 2026-09-02 to keep the Chapel Street shop premises secure; refusing risks the lease and the shop's ability to trade. The live cash position shows $3,400 with $0 already approved-unpaid, so this request leaves $1,000 if granted; invoice approval 1 for $840 is still pending and, if also approved, leaves only $160 after both commitments are paid.",
+    "detail": "Lease records Elm City Properties as landlord; due in 2 days from shop date 2026-08-31. No lease discrepancy reported.",
+    "requested_by": "facilities",
+    "requested_on_shop_date": "2026-08-31",
+    "status": "approved",
+    "approved_by": "Anas Nadeem",
+    "approved_at": "2026-08-31",
+    "consumed_by_payment_id": 2,
+    "spends_cash": true,
+    "checks_at_request_time": {
+      "next_due": "2026-09-02"
+    },
+    "cash_at_request_time": {
+      "total_balance": 3400.0,
+      "already_approved_unpaid": 0.0,
+      "uncommitted": 3400.0,
+      "would_leave_uncommitted": 1000.0,
+      "fits_within_uncommitted": true
+    }
+  },
+  {
+    "id": 3,
+    "kind": "purchase_order",
+    "ref_id": 1,
+    "amount": 8.0,
+    "reason": "Approve a $8 purchase order to Bulldog Print Co for one CC-TEE-WHITE size S tee, the shortfall on Tauhid Zaman\u2019s ticket 101. Paying overdue invoice 501 has cleared the vendor\u2019s shipping block; without this distinct PO approval we still cannot place the restock, and the customer\u2019s requested size remains unavailable. The $2,560 balance includes $2,400 already approved for rent, leaving $160 uncommitted; this PO would leave $152 uncommitted. If ordered today after approval, vendor lead time is 5 days and ETA is 2026-09-05.",
+    "detail": "Ticket 101; vendor 1 Bulldog Print Co, apparel reprint. One unit CC-TEE-WHITE size S; unit restock cost $8. Invoice 501 was paid under approval 1 on 2026-08-31; rent approval 2 remains unspent and committed.",
+    "requested_by": "boss",
+    "requested_on_shop_date": "2026-08-31",
+    "status": "pending",
+    "approved_by": null,
+    "approved_at": null,
+    "consumed_by_payment_id": null,
+    "spends_cash": true,
+    "checks_at_request_time": {
+      "vendor_name": "Bulldog Print Co",
+      "lead_days": 5,
+      "eta_if_ordered_today": "2026-09-05",
+      "vendor_can_ship": true,
+      "vendor_blocked_by_invoices": []
+    },
+    "cash_at_request_time": {
+      "total_balance": 2560.0,
+      "already_approved_unpaid": 2400.0,
+      "uncommitted": 160.0,
+      "would_leave_uncommitted": 152.0,
+      "fits_within_uncommitted": true
+    }
+  }
+]

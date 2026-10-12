@@ -1,8 +1,8 @@
 fastapi>=0.115
 uvicorn[standard]>=0.32
 pydantic>=2.9
-pydantic-ai-slim[openai]>=0.0.49
-mcp>=1.2,<2        # FastMCP lives at mcp.server.fastmcp in v1; v2 renamed it to MCPServer
+pydantic-ai-slim[openai,mcp]>=2.55
+mcp>=2,<3          # v2 renamed FastMCP to MCPServer; pydantic-ai's MCP client requires v2
 openai>=1.60
 python-dotenv>=1.0
 httpx>=0.27

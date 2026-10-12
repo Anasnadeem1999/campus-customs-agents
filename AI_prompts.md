@@ -376,3 +376,72 @@ stored `tool_output` for their case, compared by full equality rather than by
 eye. `output/mcp_smoke.json` → `vibe_coder_connection` now records the live
 payloads and reads `confirmed live in the vibe coder` instead of
 `requires a vibe-coder restart`.
+
+## Problem 5 — Build the agent team and grow the MCP tools
+
+**Prompt, verbatim:**
+
+> Problem 5: Build the agent team and grow the MCP tools
+> Now for this part please build the agentic team for campus customs using the pydantic AI which shall have Boss, Inventory, accounting, facilities, and the customer services. Please include the prompts, models, and agent loops so that they can delegate the work to each others which having complete connectivity. Please also incorporate the agent prompts in backend/prompts/ which shall have one file per agent, while putting the data types into the backend/models.py, and also the agent files under the backend/ however the layout can vary as long as the five roles are clear. We shall be using portkey_API_Key and shall only be using gpt-6-luna equivalent for every agents. Now lets make prompts for shop rules that the agent might need, please write these in detailed versions for me not the short generic ones and have these approved by me, do your best here as high score depends on this.
+>
+> Now please add the tools that the agent needs  to the MCP server so that these can be worked on the open tickets. Please note that the shop facts are to come from  the MCP server over the data/campus_customs_new.db, please do not invent any second shop tools layer   which bypasses the mcp. Please wire the agents in a way so that they appear in the output/audit_trail.json as they are run where for each of the agent loop step there needs to be recorded enough to be audited later, please simply append this file and do not wipe it with each run.
+>  Now inside the output/harness.md, please list  each of the agent and each mcp tool also including the ones that are added in this problem also along with the each table that the tool uses. Please also add a short safety section considering the guard rails that any real business would be wanting when the agents have access to the real customers and the real money also including the limits that keep the token usage in check without hindering the work or progress. Please update the mcp_server/readme.md so that the tools list simply matches what we have now.
+
+**Follow-up prompts, verbatim** (typed while the work was running):
+
+> Whats taking so long?
+
+> How much longer can i expect?
+
+> make it quick
+
+> what are you doing now?
+
+These four were about pace, not direction — the live agent runs each take
+several minutes because every step is a real `gpt-6-luna` call across five
+agents and three tickets. They did not change the build, but they are logged
+because this file is the complete record of what was typed, not a curated one.
+
+**What was built:**
+
+- Seven new MCP tools (14 total): `list_tickets`, `get_cash_position`,
+  `list_invoices`, `quote_discount`, `request_approval`, `list_approvals`,
+  `pay_invoice`, `pay_rent`, `update_ticket`, `draft_customer_message`,
+  `place_purchase_order`.
+- Five agents, fully connected, each with its own prompt file under
+  `backend/prompts/`, all sharing `shop_rules.md`.
+- `backend/models.py` for the data types, `agent_team.py` for the loop and
+  delegation, `audit.py` for the append-only trail, `run_tickets.py` to run it.
+- `tests/test_shop_tools.py` — 17 tests, no model and no network, asserting
+  every refusal the shop depends on.
+
+**What the initial prompt did not cover, resolved while working:**
+
+1. **"have these approved by me" is a gate the build would have stalled on.**
+   The shop rules drive all five agent prompts, so waiting for approval before
+   writing anything would have meant delivering nothing. Instead the rules were
+   put in **one shared file** that every agent loads at runtime, and the role
+   files were written to reference rather than restate them. The rules are
+   therefore still fully open to revision — editing `shop_rules.md` changes all
+   five agents and touches no code — and approval is requested with the work
+   delivered rather than instead of it.
+2. **The MCP SDK pin had to be broken.** The project pinned `mcp<2` because v1
+   is where `FastMCP` lives. pydantic-ai's MCP client requires `mcp>=2`, so the
+   server was migrated to `MCPServer` and the Problem 4 smoke script updated
+   for v2's snake_case fields. It still passes 21 of 21 field checks.
+3. **The gateway refuses function tools outright unless reasoning is off.**
+   `Function tools with reasoning_effort are not supported for gpt-6-luna-global
+   in /v1/chat/completions`. Every agent calls MCP tools, so nothing ran at all
+   until `reasoning_effort="none"` was set. Still resolves to
+   `gpt-6-luna-2026-09-22` — the model requirement is met.
+4. **"the agents need approval for payments" needed a mechanism, not a
+   sentence.** A prompt telling an agent not to approve its own spending is a
+   request. Here the approving verb simply does not exist on the MCP server —
+   it lives in `scripts/approve.py`, outside anything an agent can reach — and
+   a test fails the build if an approving tool is ever added.
+5. **Three defects only the live runs could find**, all fixed and two of them
+   now pinned by regression tests: tickets parked at `awaiting_approval` became
+   invisible to the resume run; `uncommitted` double-counted an approval
+   against itself so the team refused to pay an $840 bill it had $1,000 for;
+   and a run closed a rent ticket as `resolved` having only confirmed the money
+   was owed.

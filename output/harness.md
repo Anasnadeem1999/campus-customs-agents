@@ -490,6 +490,244 @@ confirming the three read tools changed nothing.
 
 ---
 
+---
+
+## 6. The agent team (Problem 5)
+
+Five agents, **fully connected** — any agent may delegate to any other. The
+connectivity is literal, not nominal: Customer Service can ask Accounting
+directly without routing through the Boss, and Inventory can ask the Boss.
+Each agent is built the same way — the shop rules, then its own role brief,
+then the MCP toolset, then one `ask_<colleague>` tool per other member.
+
+| Agent | Owns | Prompt file | Delegates to |
+|---|---|---|---|
+| **Boss** | Reads each ticket, decides who works it, ranks priorities across tickets, makes the final call | `backend/prompts/boss.md` | all four |
+| **Inventory** | Stock by SKU **and size**, shortfalls, which vendor can restock and when | `backend/prompts/inventory.md` | all four |
+| **Accounting** | Cash, invoices, margins; prepares payments and POs for approval | `backend/prompts/accounting.md` | all four |
+| **Facilities** | The lease, rent, the landlord, the premises | `backend/prompts/facilities.md` | all four |
+| **Customer Service** | Drafts what a customer will read | `backend/prompts/customer_service.md` | all four |
+
+Every agent runs on **`gpt-6-luna`** through the Portkey gateway, and the
+*resolved* model name is checked on every single step (section 6.4).
+
+### 6.1 Where the prompts live
+
+`backend/prompts/shop_rules.md` is loaded first by all five agents, then the
+role file. Order is deliberate: the rules outrank the role, and the rules say
+so. Keeping the rules in one shared file means a change to shop policy is one
+edit, not five, and the role briefs stay about the role.
+
+The rules cover: the shop's clock, facts-from-tools-only, the approval gate,
+the vendor block, how to rank spending when cash is short, never contacting
+anyone, how to delegate, telling the truth when the answer is no, finishing the
+ticket, keeping turns cheap, and the model policy.
+
+### 6.2 Every tool, and the tables behind it
+
+Fourteen tools: the three from Problem 3, seven added in Problem 5, plus
+`list_approvals`, `list_tickets` and `get_cash_position` that the team needs to
+see its own board.
+
+| Tool | Problem | Tables read | Tables written |
+|---|---|---|---|
+| `check_stock_by_size` | 3 | `inventory` | — |
+| `find_restock_vendors` | 3 | `vendors`, `invoices`, `desk` | — |
+| `check_rent_due` | 3 | `leases`, `desk` | — |
+| `list_tickets` | 5 | `tickets`, `desk` | — |
+| `get_cash_position` | 5 | `cash_accounts`, `desk` | — |
+| `list_invoices` | 5 | `invoices`, `vendors`, `desk` | — |
+| `quote_discount` | 5 | `pricing`, `inventory`, `desk` | — |
+| `request_approval` | 5 | `invoices`, `leases`, `vendors`, `tickets`, `cash_accounts`, `desk` | — *(board only)* |
+| `list_approvals` | 5 | — *(board only)* | — |
+| `pay_invoice` | 5 | `invoices`, `cash_accounts`, `desk` | `invoices`, `payments`, `cash_accounts` |
+| `pay_rent` | 5 | `leases`, `cash_accounts`, `desk` | `leases`, `payments`, `cash_accounts` |
+| `update_ticket` | 5 | `tickets`, `desk` | `tickets` |
+| `draft_customer_message` | 5 | `tickets`, `desk` | — *(board only)* |
+| `place_purchase_order` | 5 | `vendors`, `invoices`, `desk` | — *(board only)* |
+
+All nine tables are now reachable. The four that only a Problem 5 tool touches
+— `pricing`, `payments`, `cash_accounts`, `tickets` — are exactly the ones a
+team that *resolves* tickets needs and a team that only *reports* did not.
+
+**Approval requests, drafts and purchase orders are not in the database.** The
+nine-table schema has no room for them, and adding tables to the assignment's
+own input would be editing the question. They live in `output/board/` as
+append-only JSON. Nothing in there is a shop fact — no price, balance or
+quantity — only the shop's intent: who asked for what, who approved it, and
+whether it has been spent.
+
+### 6.3 The audit trail
+
+`output/audit_trail.json`, **appended, never wiped**. Two lists joined by
+`run_id`: `runs` (one header per run, written before any agent is invoked, so a
+crashed run still leaves a record that it was attempted) and `steps`.
+
+One step is one agent turn, and carries enough to audit the decision without
+the transcript:
+
+`step` · `run_id` · `ticket_id` · `agent` · `delegated_by` · `task` ·
+`tool_calls` (name, **arguments**, returned payload, error flag) · `output` ·
+`blocked_on` · `needs_human` · `model` (requested, **resolved**, ok) · `usage`
+(tokens) · `started_at` · `finished_at` · `duration_seconds` · `error`
+
+`delegated_by` is what makes the delegation graph readable after the fact: a
+step with `delegated_by: "boss"` is the Boss asking, and `null` means the run
+itself invoked that agent. Recording the tool **arguments** alongside the
+result is what makes the trail auditable rather than merely descriptive — a
+reviewer can replay the exact call and check whether the agent's conclusion
+followed from what it actually got back.
+
+Failures are appended too. A step that threw is written with its error rather
+than dropped, because the run where something went wrong is the run you most
+want the record of.
+
+### 6.4 The model check, on every step
+
+The gateway does **not** error on an unknown model name — it silently answers
+as `gpt-5.6-luna`. So the requested name proves nothing. Every step reads the
+model the gateway says it actually used, compares it against `gpt-6-luna` as a
+strict prefix (the dated suffix `gpt-6-luna-2026-09-22` is allowed; a different
+family is not), and records both. Any step failing the check makes the whole
+run **void**, reported loudly and last so it cannot be missed.
+
+**One gateway constraint had to be worked around.** Asked for function tools
+with reasoning left on, the gateway refuses the entire call:
+
+> `azure-openai error: Function tools with reasoning_effort are not supported
+> for gpt-6-luna-global in /v1/chat/completions. To use function tools, use
+> /v1/responses or set reasoning_effort to 'none'.`
+
+Every agent here calls MCP tools, so every agent hit it. Setting
+`reasoning_effort="none"` fixes it and still resolves to `gpt-6-luna-2026-09-22`
+— verified live. The model requirement is met; nothing is substituted.
+
+### 6.5 The human-in-the-loop cycle, demonstrated
+
+```bash
+python -m backend.run_tickets                 # resets, works the board, stops at the gate
+python scripts/approve.py --list              # read what the team asked for
+python scripts/approve.py --id 1 --by "Anas Nadeem"
+python -m backend.run_tickets --no-reset      # team acts on the approval and finishes
+```
+
+Verified end to end on ticket 102: the team raised a $2,400 rent approval and
+stopped; after approval the resume run paid it, and the database moved exactly
+as constraint 6 requires — cash $3,400 → $1,000, a `payments` row stamped
+`approved_by: "Anas Nadeem"` and `paid_at: 2026-08-31` (the shop's clock, not
+the wall clock), and the lease rolled from 2026-09-02 to 2026-10-02 so the same
+month cannot be paid twice.
+
+### 6.6 Three defects the live runs found
+
+Worth recording, because none of them would have shown up in a test that
+mocked the model:
+
+1. **Tickets parked at `awaiting_approval` vanished from the resume run.** The
+   runner read only `status="open"`, so the moment the team correctly parked a
+   ticket at the approval gate, the run that was supposed to finish it could no
+   longer see it. Fixed by treating `open`, `awaiting_approval` and `blocked`
+   as unfinished work.
+2. **`uncommitted` double-counted an approval against itself.** With both the
+   $840 invoice and the $2,400 rent approved against $3,400, `uncommitted`
+   reads $160 — so the team concluded the two approvals were in conflict and
+   paid neither, when the balance covered both. `get_cash_position` now takes
+   `for_approval_id` and answers the execution question directly, and a
+   regression test pins it.
+3. **Investigating was being mistaken for resolving.** A run closed the rent
+   ticket as `resolved` having only confirmed the amount was genuinely owed —
+   landlord unpaid, ticket shut, nobody looking for it. The rules now set an
+   explicit bar: `resolved` means the thing asked for actually happened.
+
+---
+
+## 7. Safety and guard rails
+
+What a real business would want in place before letting agents near its
+customers and its bank account — and what is actually implemented here.
+
+### 7.1 Money
+
+| Guard rail | How it is enforced |
+|---|---|
+| **No agent can approve spending** | The verb does not exist on the MCP server. Approval lives in `scripts/approve.py`, outside anything an agent can call. A test fails the build if an approving tool ever appears. |
+| **Every payment names a human** | `payments.approved_by` is written from the approval record, so the books say who authorised it. |
+| **The balance cannot go negative** | The pay tools compare against the live balance and refuse, writing nothing. |
+| **A payment is all-or-nothing** | Cash, the `payments` row and the invoice/lease status move in one `BEGIN IMMEDIATE` transaction. No state where cash is gone and the bill is still open. |
+| **One approval, one payment** | A consumed approval is dead. Stops the same bill being paid twice across resume runs. |
+| **An approval cannot be redirected** | Kind and `ref_id` must both match. Rent money approved is rent money. |
+| **The amount must match the real bill** | Checked against the database at request time *and* again at payment time, in case the record moved in between. |
+| **Committed money is visibly gone** | `get_cash_position` separates what is in the bank from what is already promised, so two agents cannot each spend the same dollar. |
+| **Races cannot both win** | `BEGIN IMMEDIATE` takes the write lock before reading the balance. |
+
+What a real business would add beyond this homework: per-agent and per-day
+spending ceilings, dual approval above a threshold, a vendor allow-list so
+money can only go to known counterparties, and alerting on any refusal — a
+refused payment is a signal, not just a non-event.
+
+### 7.2 Customers and the outside world
+
+- **There is no send tool, and the test suite asserts none appears.** Drafts
+  are filed for a human; no customer is emailed, no vendor contacted.
+- Drafts must carry only figures a tool returned this run, and must say
+  "pending approval" where a human has not yet decided.
+- Ticket notes are **appended, never overwritten**, so the customer's own words
+  and the decision history both survive.
+- Real-world additions: PII minimisation in prompts and logs, a review queue
+  before any outbound send, and retention limits on the audit trail.
+
+### 7.3 Data
+
+- The seed database is never opened. `db.connect()` raises rather than touching
+  it even if the environment variable is pointed there by mistake.
+- Reads are read-only by default; writing is explicit and transactional.
+- Agents cannot reach SQLite at all — only MCP tools, so the tool list *is* the
+  permission list.
+- The gateway key is read from `.env`, never logged, never committed.
+
+### 7.4 Keeping the agents honest
+
+- No shop figure may be stated that did not come from a tool this run. The
+  `FigureCited` output type makes an agent name the tool behind each number, so
+  a fabricated figure is visible rather than buried in prose.
+- Model identity is verified on every call, not assumed from what was asked for.
+- Every step is on disk with its tool arguments, so a decision can be replayed.
+
+### 7.5 Token and cost limits — tight enough to matter, loose enough to work
+
+A fully connected team is a loop waiting to happen: A asks B, B asks A, and
+neither thinks it is doing anything wrong. Four limits bound the cost, and each
+is set from what the seeded tickets actually need rather than guessed.
+
+| Limit | Value | Why that number |
+|---|---|---|
+| Delegation depth | **3** | The deepest real chain here is Boss → Inventory → Accounting. A fourth hop is a loop, not work. |
+| Agent turns per ticket | **14** | Observed runs finish a ticket in 2–4 turns. 14 leaves headroom for a hard ticket and still stops a spiral. |
+| Requests per agent turn | **12** | Enough for a genuine chain of tool calls and a considered answer. |
+| Tokens per agent turn | **120,000** | A hard ceiling on any single runaway turn. |
+| Tool retries | **3** | The tools refuse with *actionable* text, so an agent can usually correct its arguments. The default of 1 turned a recoverable correction into a dead run. |
+| Wall-clock per agent turn | **240s** | Tokens and requests do not bound *time*. A run was seen sitting on one turn for ten minutes with no new step and no error — indistinguishable from slow progress. The turn is abandoned, the timeout is written to the trail, and the run moves to the next ticket instead of taking the board down. |
+
+**The limits return a usable message rather than an exception wherever they
+can.** An agent told "you are too deep — answer from what you have and say
+what you could not find out" still produces a result; one that gets an
+exception produces nothing, and the ticket is lost. That is the difference
+between a limit that controls cost and one that destroys work.
+
+The prompts pull in the same direction: call a tool once per fact per turn and
+reuse the result, ask for the subset you need rather than filtering a full
+table in your head, think in proportion to the stakes, and stop when the
+question is answered. Section 10 of the shop rules also gives the agent its own
+stopping rule — more than a dozen steps on one ticket, or the same tool called
+three times with identical arguments, means hand back what you have.
+
+Real-world additions: a per-run cost ceiling in dollars rather than tokens,
+caching of read-only tool results within a run, and a smaller model for the
+routine lookups with `gpt-6-luna` reserved for judgement — not available here,
+since the assignment requires one model throughout.
+
+---
+
 ## Appendix — verified data integrity
 
 Checked against the seed at Problem 2; no surprises to code around.

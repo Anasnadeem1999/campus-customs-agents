@@ -11,6 +11,8 @@ from __future__ import annotations
 import datetime as dt
 import os
 import sqlite3
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -69,3 +71,40 @@ def shop_today(conn: sqlite3.Connection) -> dt.date:
 def days_between(start: dt.date, end: dt.date) -> int:
     """Whole days from `start` to `end`; negative when `end` is in the past."""
     return (end - start).days
+
+
+@contextmanager
+def writing() -> Iterator[sqlite3.Connection]:
+    """A writable handle wrapped in one all-or-nothing transaction.
+
+    Constraint 6 says a payment moves three things together -- the cash
+    balance, the `payments` row, and the invoice or lease status. Partway is
+    the one outcome the shop's books must never show: cash gone with the
+    invoice still open, or an invoice marked paid out of thin air. So every
+    write tool runs inside this block, and anything raised on the way through
+    rolls the whole thing back.
+
+    `BEGIN IMMEDIATE` takes the write lock up front rather than on the first
+    UPDATE, so two payments racing for the same thin balance cannot both read
+    $3,400 and both decide they fit.
+    """
+    conn = connect(read_only=False)
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        yield conn
+        conn.commit()
+    except BaseException:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
+def money(value: float) -> float:
+    """Round to cents.
+
+    Balances are REAL in this schema, so repeated arithmetic drifts into
+    fractions of a cent and a balance meant to land on 0.00 reads as
+    -0.000000001 -- which would trip the never-negative check for no reason.
+    """
+    return round(float(value) + 0.0, 2)
