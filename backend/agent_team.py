@@ -69,7 +69,14 @@ MAX_STEPS_PER_TICKET = 14
 
 #: Per-agent-turn ceilings. Generous enough that a real chain of tool calls
 #: finishes; tight enough that a loop cannot run up a bill unnoticed.
-AGENT_USAGE_LIMITS = UsageLimits(request_limit=12, total_tokens_limit=120_000)
+#:
+#: The token figure is measured, not guessed. A Boss turn working ticket 101 --
+#: the hardest of the three, with two delegations and a payment -- came in at
+#: 120,980 tokens and was killed by a 120,000 ceiling after doing nearly all
+#: the work. A limit that stops a turn just before it finishes costs the whole
+#: turn and buys nothing, so the ceiling is set well clear of the real maximum
+#: and left to catch genuine runaways.
+AGENT_USAGE_LIMITS = UsageLimits(request_limit=12, total_tokens_limit=250_000)
 
 #: Retries allowed per tool call. The default of 1 is too tight here: this
 #: server's tools refuse loudly and on purpose -- wrong amount, vendor blocked,
@@ -141,6 +148,36 @@ class Deps:
     state: RunState
     depth: int = 0
     asked_by: AgentName | None = None
+
+
+def render_reply(reply: ColleagueReply | TicketResolution) -> str:
+    """Turn a colleague's answer into text for the agent that asked.
+
+    Two shapes arrive here, because "fully connected" includes asking the
+    Boss, and the Boss answers with a `TicketResolution` rather than a
+    `ColleagueReply`. Reading `.answer` off one of those raised an
+    AttributeError mid-run and lost the whole turn -- so the two shapes are
+    handled explicitly rather than assumed to be interchangeable.
+    """
+    parts: list[str] = []
+    if isinstance(reply, TicketResolution):
+        parts.append(reply.decision)
+        if reply.reasoning:
+            parts.append(f"Reasoning: {reply.reasoning}")
+        parts.append(f"Outcome on ticket {reply.ticket_id}: {reply.outcome}")
+        if reply.approvals_raised:
+            parts.append(f"Approvals raised: {reply.approvals_raised}")
+    else:
+        parts.append(reply.answer)
+        if reply.needs_human:
+            parts.append(f"Needs a human: {reply.needs_human}")
+
+    if reply.figures:
+        cited = "; ".join(f"{f.label}={f.value} (via {f.from_tool})" for f in reply.figures)
+        parts.append(f"Figures: {cited}")
+    if reply.blocked_on:
+        parts.append(f"Blocked on: {reply.blocked_on}")
+    return "\n".join(parts)
 
 
 def _extract_tool_calls(result: Any) -> list[ToolCallRecord]:
@@ -249,15 +286,7 @@ class AgentTeam:
             )
             if reply is None:
                 return f"[{colleague} could not answer] Proceed without it and say so."
-            parts = [reply.answer]
-            if reply.figures:
-                cited = "; ".join(f"{f.label}={f.value} (via {f.from_tool})" for f in reply.figures)
-                parts.append(f"Figures: {cited}")
-            if reply.blocked_on:
-                parts.append(f"Blocked on: {reply.blocked_on}")
-            if reply.needs_human:
-                parts.append(f"Needs a human: {reply.needs_human}")
-            return "\n".join(parts)
+            return render_reply(reply)
 
         ask.__name__ = f"ask_{colleague}"
         ask.__doc__ = (

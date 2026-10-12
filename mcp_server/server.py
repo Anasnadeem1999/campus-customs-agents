@@ -318,22 +318,47 @@ def get_cash_position(for_approval_id: int | None = None) -> dict[str, Any]:
         target = board.get_approval(for_approval_id)
         amount = money(float(target.get("amount") or 0))
         already_counted = any(int(a["id"]) == int(for_approval_id) for a in committed)
-        executing = {
-            "approval_id": for_approval_id,
-            "kind": target.get("kind"),
-            "status": target.get("status"),
-            "amount": amount,
-            "already_counted_in_approved_not_yet_paid": already_counted,
-            # The real test the pay tools apply. Cash set aside for this
-            # approval is cash available *to this approval*.
-            "can_execute_now": total >= amount and target.get("status") == "approved"
-            and target.get("consumed_by_payment_id") is None,
-            "balance_after": money(total - amount),
-            "note": (
-                "Judge this payment against total_balance, not uncommitted -- "
-                "uncommitted has already subtracted this very amount."
-            ),
-        }
+        paid_on = target.get("consumed_by_payment_id")
+
+        if paid_on is not None:
+            # The single most confusing state for an agent picking up a ticket:
+            # the payment is done, so the cash is gone, so a naive balance test
+            # reports "insufficient funds" and the agent concludes the bill is
+            # unpayable -- when in fact it is already paid. Answer the real
+            # question before the arithmetic can mislead.
+            executing = {
+                "approval_id": for_approval_id,
+                "kind": target.get("kind"),
+                "status": target.get("status"),
+                "amount": amount,
+                "already_paid": True,
+                "paid_by_payment_id": paid_on,
+                "can_execute_now": False,
+                "why_not": "ALREADY PAID",
+                "note": (
+                    f"This was already paid on payment {paid_on}. Nothing further is "
+                    "owed and nothing needs approving. Do NOT read the low balance as "
+                    "the bill being unaffordable -- the balance is low *because* this "
+                    "was paid. The work is done: mark the ticket resolved."
+                ),
+            }
+        else:
+            executing = {
+                "approval_id": for_approval_id,
+                "kind": target.get("kind"),
+                "status": target.get("status"),
+                "amount": amount,
+                "already_paid": False,
+                "already_counted_in_approved_not_yet_paid": already_counted,
+                # The real test the pay tools apply. Cash set aside for this
+                # approval is cash available *to this approval*.
+                "can_execute_now": total >= amount and target.get("status") == "approved",
+                "balance_after": money(total - amount),
+                "note": (
+                    "Judge this payment against total_balance, not uncommitted -- "
+                    "uncommitted has already subtracted this very amount."
+                ),
+            }
 
     return {
         "shop_date_today": today.isoformat(),

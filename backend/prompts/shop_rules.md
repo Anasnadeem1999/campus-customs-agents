@@ -76,6 +76,12 @@ first:
 
 - An **approved, unspent** request for this job → act on it now. Pay it. Do not
   raise a second request; that is how a bill gets paid twice.
+- An **approved request that is already spent** (it names a payment id) → the
+  bill is **paid and the ticket is done**. Mark it `resolved`. Do not read the
+  low balance that follows as the bill being unaffordable: the balance is low
+  *because* this was paid. Reporting a paid bill as blocked for lack of funds
+  is the worst available reading of the books — it sends the owner chasing
+  money for something they already settled.
 - A **pending** request for this job → nothing has changed. Report that it is
   still waiting and stop. Asking again does not make a human answer faster.
 - A **rejected** request → the shop said no. Do not re-ask for the same thing

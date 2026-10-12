@@ -174,9 +174,45 @@ model, tokens and timings. Failures are appended too.
    bound time; a turn sat for ten minutes with no error. Per-turn wall-clock
    timeout added, written to the trail as a failed step.
 
+### The full cycle, verified end to end
+
+Shop rules and the five agent prompts **approved by the user**, then one clean
+cycle run from a reset database:
+
+| Ticket | Outcome | What actually happened |
+|---|---|---|
+| 101 | `blocked` | Invoice 501 paid under approval 1, lifting the vendor's shipping block. Blocked pending a purchase-order approval for the size-S tee. |
+| 102 | `resolved` | Rent paid in full under approval 2. |
+| 103 | `blocked` | 8 of 20 hoodies on hand; the $264 restock cannot be funded from $160 uncommitted. Customer draft filed, not sent. |
+
+Database after the run — the seeded squeeze, exactly as predicted:
+
+- cash **$3,400 → $160** ($840 + $2,400 = $3,240 out)
+- invoice 501 `paid`; lease rolled 2026-09-02 → 2026-10-02
+- two `payments` rows, both `approved_by: "Anas Nadeem"`, both `paid_at: 2026-08-31`
+- the third spend, the $264 restock, is correctly refused for want of cash
+
+Audit trail: **19 steps across 2 runs, appended not wiped**, 146 tool calls
+recorded with their arguments, all five agents exercised, every step resolving
+to `gpt-6-luna-2026-09-22`, 827,321 tokens total.
+
+### Two more defects the final runs found
+
+6. **Asking the Boss crashed the asker.** The Boss returns a
+   `TicketResolution` and everyone else a `ColleagueReply`; the delegation
+   path read `.answer` off both and raised `AttributeError`, losing the turn.
+   In a fully connected team, asking the Boss is ordinary — now handled
+   explicitly and covered by `tests/test_agent_wiring.py`.
+7. **A paid bill was reported as unaffordable.** Once the rent was paid, $160
+   remained, so a balance check against the $2,400 approval said "insufficient
+   funds" and the team called a settled ticket blocked — which would send the
+   owner chasing money they had already spent. `get_cash_position` now answers
+   `already_paid` before the arithmetic can mislead.
+
+Also raised the per-turn token ceiling from 120,000 to 250,000: a real Boss
+turn on ticket 101 measured 120,980 and was killed just short of finishing,
+which costs the whole turn and buys nothing.
+
 ### Open
 
-The last full board run was stopped mid-flight after the hang, so the final
-end-to-end audit trail across all three tickets wants one more clean cycle now
-that the timeout is in. The shop rules and the five agent prompts are written
-and awaiting the user's approval.
+Nothing outstanding on Problem 5. Awaiting the next problem.

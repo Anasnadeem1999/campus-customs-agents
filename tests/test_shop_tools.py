@@ -328,3 +328,37 @@ def test_paying_an_approval_is_judged_against_the_balance_not_uncommitted():
     server.pay_invoice(invoice_id=501, approval_id=inv["approval_id"])
     server.pay_rent(lease_id=1, approval_id=rent["approval_id"])
     assert balance() == 160.0
+
+
+def test_an_already_paid_approval_reports_as_paid_not_as_unaffordable():
+    """Regression: a settled bill must not read as a cash shortage.
+
+    After the invoice and the rent are both paid, $160 is left. Asking about
+    the $2,400 rent approval then gives `total_balance < amount`, and a live
+    run read exactly that as "the approved payment could not be executed
+    because the available balance is now insufficient" -- reporting a paid
+    bill as blocked, which would send the owner chasing money they already
+    spent. The already-paid case has to be answered before the arithmetic.
+    """
+    inv = server.request_approval(
+        kind="invoice_payment", amount=840.0, ref_id=501,
+        reason="Unblock.", requested_by="accounting",
+    )
+    rent = server.request_approval(
+        kind="rent_payment", amount=2400.0, ref_id=1,
+        reason="Rent.", requested_by="facilities",
+    )
+    approve(inv["approval_id"])
+    approve(rent["approval_id"])
+    server.pay_invoice(invoice_id=501, approval_id=inv["approval_id"])
+    paid = server.pay_rent(lease_id=1, approval_id=rent["approval_id"])
+    assert balance() == 160.0
+
+    pos = server.get_cash_position(for_approval_id=rent["approval_id"])
+    ex = pos["executing_approval"]
+    assert ex["already_paid"] is True
+    assert ex["paid_by_payment_id"] == paid["payment_id"]
+    assert ex["why_not"] == "ALREADY PAID"
+    assert "resolved" in ex["note"]
+    # The misleading figure must not be what the agent is handed.
+    assert "balance_after" not in ex

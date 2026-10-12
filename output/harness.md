@@ -611,12 +611,29 @@ python scripts/approve.py --id 1 --by "Anas Nadeem"
 python -m backend.run_tickets --no-reset      # team acts on the approval and finishes
 ```
 
-Verified end to end on ticket 102: the team raised a $2,400 rent approval and
-stopped; after approval the resume run paid it, and the database moved exactly
-as constraint 6 requires — cash $3,400 → $1,000, a `payments` row stamped
+**Verified end to end over the whole board**, from a reset database: the team
+worked all three tickets, raised two approvals and stopped; both were approved;
+the resume run paid both and finished what it could.
+
+| Ticket | Outcome | What happened |
+|---|---|---|
+| 101 | `blocked` | Invoice 501 paid, lifting the vendor's shipping block. Waiting on a purchase-order approval. |
+| 102 | `resolved` | Rent paid in full. |
+| 103 | `blocked` | 8 of 20 on hand; the $264 restock will not fit in $160. Draft filed, not sent. |
+
+The database moved exactly as constraints 6 and 7 require — cash **$3,400 →
+$160**, invoice 501 `paid`, the lease rolled 2026-09-02 → 2026-10-02 so the
+same month cannot be paid twice, and two `payments` rows each stamped
 `approved_by: "Anas Nadeem"` and `paid_at: 2026-08-31` (the shop's clock, not
-the wall clock), and the lease rolled from 2026-09-02 to 2026-10-02 so the same
-month cannot be paid twice.
+the wall clock).
+
+That $160 is the seeded squeeze landing: $840 + $2,400 = $3,240 against $3,400,
+so the third spend — the $264 hoodie restock — is refused for want of cash, and
+the team says so in figures rather than quietly dropping it.
+
+Audit trail from that cycle: **19 steps across 2 runs, appended not wiped**,
+146 tool calls recorded with their arguments, all five agents exercised, every
+step resolving to `gpt-6-luna-2026-09-22`.
 
 ### 6.6 Three defects the live runs found
 
@@ -704,7 +721,7 @@ is set from what the seeded tickets actually need rather than guessed.
 | Delegation depth | **3** | The deepest real chain here is Boss → Inventory → Accounting. A fourth hop is a loop, not work. |
 | Agent turns per ticket | **14** | Observed runs finish a ticket in 2–4 turns. 14 leaves headroom for a hard ticket and still stops a spiral. |
 | Requests per agent turn | **12** | Enough for a genuine chain of tool calls and a considered answer. |
-| Tokens per agent turn | **120,000** | A hard ceiling on any single runaway turn. |
+| Tokens per agent turn | **250,000** | Measured, not guessed: a real Boss turn on ticket 101 came in at 120,980 and a 120,000 ceiling killed it just short of finishing. A limit that stops a turn before it completes costs the whole turn and buys nothing, so this sits well clear of the real maximum and catches genuine runaways. |
 | Tool retries | **3** | The tools refuse with *actionable* text, so an agent can usually correct its arguments. The default of 1 turned a recoverable correction into a dead run. |
 | Wall-clock per agent turn | **240s** | Tokens and requests do not bound *time*. A run was seen sitting on one turn for ten minutes with no new step and no error — indistinguishable from slow progress. The turn is abandoned, the timeout is written to the trail, and the run moves to the next ticket instead of taking the board down. |
 

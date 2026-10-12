@@ -445,3 +445,34 @@ because this file is the complete record of what was typed, not a curated one.
    against itself so the team refused to pay an $840 bill it had $1,000 for;
    and a run closed a rent ticket as `resolved` having only confirmed the money
    was owed.
+
+**Further follow-up prompts, verbatim:**
+
+> Also can we please have the five agent prompts ready, in detail and also have the shop rules (thoughtful ones pls) that the each agent needs.
+
+> Also i need the problem 5 completed before we move to next
+
+> approved
+
+The first asked to see the six prompt files, which were already written — they
+were sent for review rather than rewritten. The second confirmed Problem 5 was
+to be finished rather than parked; the final cycle was already in progress when
+it arrived. The third is the approval the original prompt asked for
+("have these approved by me"), given on the shop rules and the five role
+briefs as written. Nothing in them was changed after approval except the two
+rules that the final runs proved were missing — the already-paid state and the
+Boss-reply shape — both recorded below.
+
+**Two further defects the final runs found**, after the ones listed above:
+
+6. **Asking the Boss crashed the asker.** The Boss returns a `TicketResolution`
+   and every other agent a `ColleagueReply`; the delegation path read
+   `.answer` off both. In a fully connected team, asking the Boss is ordinary.
+7. **A paid bill read as unaffordable.** With the rent paid, $160 remained, so
+   a balance check against the $2,400 approval said "insufficient funds" and
+   the team reported a settled ticket as blocked.
+
+**Final state, verified:** all three tickets worked from a reset database,
+cash $3,400 → $160, invoice and rent both paid with the approver named in the
+books, the $264 restock correctly refused, 19 audit steps appended across two
+runs, every step on `gpt-6-luna-2026-09-22`, 22 tests passing.
