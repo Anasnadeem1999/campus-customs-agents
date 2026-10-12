@@ -262,45 +262,40 @@ Every agent on the team reaches the shop through these tools and nothing else,
 so no agent can quote a price, a stock level or a due date that did not come
 out of SQLite.
 
-| Tool | Tables read | Unlocks ticket |
+One tool, one ticket — the three tools cover the three open tickets exactly.
+
+| Tool | Table it reads | Ticket it unlocks |
 |---|---|---|
-| `check_stock_by_size` | `inventory` | **101**, **103** |
-| `find_restock_vendors` | `vendors`, `invoices`, `desk` | **101**, **103** |
-| `check_rent_due` | `leases`, `desk` | **102** |
+| `check_stock_by_size` | `inventory` | **101** — customer order, Bulldog tee |
+| `find_restock_vendors` | `vendors`, `invoices`, `desk` | **103** — bulk hoodie request |
+| `check_rent_due` | `leases`, `desk` | **102** — rent notice |
 
 ### `check_stock_by_size(sku, size, requested_qty=None)`
 
 **Reads:** `inventory` — the `(sku, size)` row, plus the SKU's other sizes.
 
-**Unlocks ticket 101.** Ticket 101 asks for `CC-TEE-WHITE` in size **S**, and S
-is the single size sitting at zero while M, L and XL hold 5, 3 and 2 — so a
-SKU-level stock check would report ten tees in the building and tell Tauhid
-Zaman yes when the correct answer is no.
+**Unlocks ticket 101.**
 
-**Unlocks ticket 103.** Ticket 103 asks for 20 × `CC-HOOD-NAVY` in M against 8
-on hand, and this tool is what turns that request into the two numbers the
-rest of the work runs on — a shortfall of **12** to be reprinted, and **8**
-available right now for a partial offer.
+> Ticket 101 asks for `CC-TEE-WHITE` in size **S**, and S is the single size
+> sitting at zero while M, L and XL hold 5, 3 and 2 — so a SKU-level stock
+> check would report ten tees in the building and tell Tauhid Zaman yes when
+> the correct answer is no.
 
-Verified against the working copy: ticket 101 → `qty_on_hand: 0`,
-`shortfall: 1`; ticket 103 → `qty_on_hand: 8`, `shortfall: 12`,
-`qty_available_now: 8`.
+Verified against the working copy: `qty_on_hand: 0`, `shortfall: 1`,
+`other_sizes: {S:0, M:5, L:3, XL:2}`.
 
 ### `find_restock_vendors(specialty_contains=None)`
 
 **Reads:** `vendors` (lead times), `invoices` (the shipping block), `desk` (to
 date the ETA).
 
-**Unlocks ticket 101.** Ticket 101's missing tee can only be closed by an
-apparel reprint, and this tool is the one that shows the real obstacle is not
-manufacturing but money — Bulldog Print Co, the only apparel vendor, is
-holding invoice 501 at **3 days overdue** and will ship nothing until it is
-cleared.
+**Unlocks ticket 103.**
 
-**Unlocks ticket 103.** Ticket 103's 12-hoodie shortfall runs into that very
-same gate, because Bulldog Print Co is the only vendor who can reprint them
-either — which is how this tool reveals that 101 and 103 are not two restock
-problems but one unpaid bill.
+> Ticket 103 wants 20 hoodies against 8 on hand, and this is the tool that
+> decides whether the missing 12 can be made at all — it finds that Bulldog
+> Print Co is the only vendor whose specialty is apparel reprint, that it is
+> blocked by an $840 invoice already 3 days overdue, and that even once freed
+> the reprint would not land until 2026-09-05.
 
 Verified: filtering on `"apparel"` returns exactly one vendor —
 `can_ship: false`, `blocked_amount: 840.0`, `days_overdue: 3`,
@@ -310,12 +305,27 @@ Verified: filtering on `"apparel"` returns exactly one vendor —
 
 **Reads:** `leases` (the obligation), `desk` (to measure urgency).
 
-**Unlocks ticket 102.** Ticket 102 is a landlord's email asserting that rent is
-due in two days, and this tool is the right one precisely because it does not
-take the email's word for it — it answers from lease 1 itself: **$2,400**, due
-**2026-09-02**, two days out from `desk.date_today`.
+**Unlocks ticket 102.**
+
+> Ticket 102 is a landlord's email asserting that rent is due in two days, and
+> this tool is the right one precisely because it does not take the email's
+> word for it — it answers from lease 1 itself: **$2,400**, due
+> **2026-09-02**, two days out from `desk.date_today`.
 
 Verified: `amount_due: 2400.0`, `days_until_due: 2`, `is_overdue: false`.
+
+### A note on overlap, kept out of the table above
+
+The mapping above is each tool's ticket. The tools are not *fenced* to that
+ticket, and one overlap matters to the run: ticket 101 also reaches
+`find_restock_vendors` once its shortfall of 1 is known, and ticket 103 also
+reaches `check_stock_by_size` to learn it is short by 12 in the first place.
+
+That overlap is the dataset's point rather than an accident. Both apparel
+tickets funnel into the same blocked vendor, so **101 and 103 are not two
+restock problems but one unpaid invoice** — clearing invoice 501 is the single
+action that unblocks both. Recorded here so the one-tool-one-ticket table
+stays readable without the shop's actual shape being lost.
 
 ### Design decisions worth recording
 

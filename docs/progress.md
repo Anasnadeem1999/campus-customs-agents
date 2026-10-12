@@ -75,8 +75,11 @@ with a note on what the initial prompt was missing.
 - `mcp_server/db.py` — resolves the working copy, raises if asked to open the
   seed, and reads the shop's clock from `desk.date_today`.
 - `mcp_server/readme.md` — purpose, database file, the three tools.
-- `output/harness.md` section 4 — each tool's tables, the tickets it unlocks,
-  and why it is the right tool for that ticket.
+- `output/harness.md` section 4 — one tool to one ticket (stock-by-size → 101,
+  restock vendors → 103, rent due → 102), each with the table it reads and a
+  one-sentence reason tied to that ticket. Revised from an earlier many-to-many
+  listing after the user pointed out the instruction reads singular; the
+  101/103 overlap is kept as a note below the table.
 - Pinned `mcp>=1.2,<2`: the 2.x SDK renamed `FastMCP` to `MCPServer`.
 
 Verified without running the server: all three tools register through

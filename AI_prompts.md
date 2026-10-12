@@ -227,9 +227,29 @@ per-table format and the ticket study.
 `mcp_server/readme.md`, and a new section 4 in `output/harness.md` tying each
 tool to the tickets it unlocks.
 
-**Follow-up needed:** none typed. The prompt was unusually specific — it named
-the three harness ingredients per tool and explicitly ruled out the vague
-phrasing that would score badly.
+**Follow-up prompt typed:**
+
+> Dont you think one tool should stick to one ticket as per instructions?
+
+**What the initial prompt was missing — and what the follow-up fixed:** the
+original prompt says *"which of the ticket it helps unlock"* and *"why that
+specific tool is the right one for that specific ticket"*. Both are singular,
+but the prompt never says outright that the mapping must be one-to-one, and
+the first pass took the looser reading: `check_stock_by_size` and
+`find_restock_vendors` were each listed against **both** 101 and 103, because
+that is genuinely how the shop works.
+
+The follow-up settled it in favour of the format the instruction implies. The
+harness now maps one tool to one ticket, and the three tools happen to cover
+the three tickets exactly — stock-by-size → 101, restock vendors → 103, rent
+due → 102. Nothing true was thrown away: the fact that 101 and 103 both funnel
+into the same blocked vendor moved into a short note *below* the table, so the
+required one-to-one mapping reads cleanly while the shop's real shape is still
+on record.
+
+Worth noting for later problems: when an instruction's wording and the data's
+shape pull apart, follow the instruction's format and keep the inconvenient
+truth adjacent to it rather than discarding it.
 
 **What the initial prompt did not cover, resolved while working:**
 
