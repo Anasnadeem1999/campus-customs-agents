@@ -33,7 +33,7 @@ REFLECTION = """  <div class="card">
       size-S tee was out of stock and that the vendor could not ship because of
       the unpaid <strong>$840</strong> invoice. Accounting handled the payment
       approval, and the team ordered the tee, received it into inventory, and
-      drafted a message for the customer. <strong>10 agent turns, 615,845
+      drafted a message for the customer. <strong>11 agent turns, 619,229
       tokens</strong> &mdash; the most expensive ticket, and the only one that
       had to move stock as well as money.
     </p>
@@ -53,7 +53,7 @@ REFLECTION = """  <div class="card">
       landlord's notice against the actual lease rather than taking the email at
       face value, and Accounting confirmed the amount and available cash before
       the payment was approved. The <strong>$2,400</strong> rent was paid and the
-      lease record was updated. It did this in <strong>4 agent turns and 184,773
+      lease record was updated. It did this in <strong>6 agent turns and 258,145
       tokens</strong>, the least of any ticket.
     </p>
 
@@ -64,7 +64,7 @@ REFLECTION = """  <div class="card">
       12 would cost <strong>$264</strong>. Since only <strong>$160</strong>
       remained after the invoice and rent payments, the team correctly refused the
       restock and Customer Service drafted an offer for the 8 hoodies in stock.
-      <strong>4 agent turns, 221,541 tokens.</strong>
+      <strong>7 agent turns, 371,465 tokens.</strong>
     </p>
 
     <h3>Ranking them</h3>
@@ -157,7 +157,7 @@ REFLECTION = """  <div class="card">
       decision.
     </p>
     <p>
-      The final run used <strong>1,022,159 tokens</strong> across the three
+      The final run used <strong>1,248,839 tokens</strong> across the three
       tickets, and the project records show that clearer rules reduced unnecessary
       loops compared with earlier runs &mdash; Ticket 103 alone had cost 995,949
       tokens on an earlier run without finishing. So I would not assume that

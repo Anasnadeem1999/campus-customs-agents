@@ -236,10 +236,10 @@
     <table>
       <thead><tr><th>Agent</th><th>Turns</th><th>Asked by</th><th>What they contributed</th><th>MCP tools used</th></tr></thead>
       <tbody>
-<tr><td><strong>Inventory</strong></td><td>3</td><td>Boss</td><td>Read the shelf: size S at qty 0 against a request for 1, and Bulldog Print Co the only apparel vendor, blocked from shipping while invoice 501 stood open. Paid that invoice once the owner approved it, which lifted the block.</td><td class='toolcell'><code>check_stock_by_size</code> <code>find_restock_vendors</code> <code>list_invoices</code> <code>list_approvals</code> <code>pay_invoice</code> <code>list_tickets</code></td></tr>
-<tr><td><strong>Accounting</strong></td><td>2</td><td>Boss</td><td>Priced the blocker at $840, three days overdue, checked it against the $3,400 balance, and raised the approval. Costed the restock at the pricing table's $8.00 a unit rather than guessing.</td><td class='toolcell'><code>get_cash_position</code> <code>list_approvals</code> <code>list_invoices</code> <code>check_rent_due</code> <code>check_stock_by_size</code> <code>find_restock_vendors</code> <code>list_tickets</code> <code>quote_discount</code> <code>request_approval</code></td></tr>
-<tr><td><strong>Boss</strong></td><td>3</td><td>the run</td><td>Followed the ticket's link to invoice 501, split the stock and cash questions, placed the $8 order on approval, then advanced the shop clock to the vendor's 2026-09-05 ETA and received the goods into stock before closing anything.</td><td class='toolcell'><code>list_approvals</code> <code>list_tickets</code> <code>check_stock_by_size</code> <code>list_invoices</code> <code>find_restock_vendors</code> <code>update_ticket</code> <code>get_cash_position</code> <code>quote_discount</code> <code>request_approval</code> <code>place_purchase_order</code> <code>advance_shop_date</code> <code>receive_purchase_order</code></td></tr>
-<tr><td><strong>Customer Service</strong></td><td>2</td><td>Boss</td><td>Drafted Tauhid Zaman a reply once the tee was actually on the shelf, telling him it is ready rather than merely ordered. Filed, not sent.</td><td class='toolcell'><code>list_tickets</code> <code>draft_customer_message</code> <code>update_ticket</code> <code>check_stock_by_size</code></td></tr>
+<tr><td><strong>Accounting</strong></td><td>3</td><td>Boss</td><td>Priced the blocker at $840, three days overdue, checked it against the $3,400 balance, and raised the approval. Costed the restock at the pricing table's $8.00 a unit rather than guessing.</td><td class='toolcell'><code>list_invoices</code> <code>get_cash_position</code> <code>check_stock_by_size</code> <code>find_restock_vendors</code> <code>quote_discount</code> <code>list_approvals</code></td></tr>
+<tr><td><strong>Customer Service</strong></td><td>3</td><td>Boss</td><td>Drafted Tauhid Zaman a reply once the tee was actually on the shelf, telling him it is ready rather than merely ordered. Filed, not sent.</td><td class='toolcell'><code>list_tickets</code> <code>list_approvals</code> <code>check_stock_by_size</code> <code>draft_customer_message</code> <code>update_ticket</code></td></tr>
+<tr><td><strong>Boss</strong></td><td>3</td><td>the run</td><td>Followed the ticket's link to invoice 501, split the stock and cash questions, placed the $8 order on approval, then advanced the shop clock to the vendor's 2026-09-05 ETA and received the goods into stock before closing anything.</td><td class='toolcell'><code>list_approvals</code> <code>list_tickets</code> <code>check_stock_by_size</code> <code>find_restock_vendors</code> <code>list_invoices</code> <code>get_cash_position</code> <code>request_approval</code> <code>update_ticket</code> <code>pay_invoice</code> <code>quote_discount</code> <code>advance_shop_date</code> <code>receive_purchase_order</code></td></tr>
+<tr><td><strong>Inventory</strong></td><td>2</td><td>Boss</td><td>Read the shelf: size S at qty 0 against a request for 1, and Bulldog Print Co the only apparel vendor, blocked from shipping while invoice 501 stood open. Paid that invoice once the owner approved it, which lifted the block.</td><td class='toolcell'><code>check_stock_by_size</code> <code>find_restock_vendors</code> <code>list_invoices</code> <code>list_approvals</code> <code>place_purchase_order</code></td></tr>
       </tbody>
     </table>
 
@@ -253,7 +253,7 @@
     </table>
 
     <h3>Left on the board</h3>
-    <ul class='tight'><li>customer message to <strong>Tauhid Zaman</strong> &mdash; Update on your Bulldog tee <em>(not sent)</em></li><li>purchase order to <strong>Bulldog Print Co</strong> &mdash; PO 1 x CC-TEE-WHITE (ETA 2026-09-05) <em>(received)</em></li><li>customer message to <strong>Tauhid Zaman</strong> &mdash; Your Bulldog tee is ready <em>(not sent)</em></li></ul>
+    <ul class='tight'><li>customer message to <strong>Tauhid Zaman</strong> &mdash; Update on your Bulldog tee <em>(not sent)</em></li><li>customer message to <strong>Tauhid Zaman</strong> &mdash; Update on your size S CC-TEE-WHITE order <em>(not sent)</em></li><li>purchase order to <strong>Bulldog Print Co</strong> &mdash; PO 1 x CC-TEE-WHITE (ETA 2026-09-05) <em>(received)</em></li><li>customer message to <strong>Tauhid Zaman</strong> &mdash; Your size-S Bulldog tee is available <em>(not sent)</em></li><li>customer message to <strong>Tauhid Zaman</strong> &mdash; Your size-S tee is available <em>(not sent)</em></li></ul>
 
     <h3>Cash effect</h3>
     <p>
@@ -374,9 +374,9 @@
     <table>
       <thead><tr><th>Agent</th><th>Turns</th><th>Asked by</th><th>What they contributed</th><th>MCP tools used</th></tr></thead>
       <tbody>
-<tr><td><strong>Accounting</strong></td><td>1</td><td>Boss</td><td>Confirmed the $2,400 fitted against uncommitted cash before the request went to the owner -- the second pair of eyes shop rule 4 asks for, so the agent spending the money is not the one certifying the shop can afford it.</td><td class='toolcell'><code>get_cash_position</code></td></tr>
-<tr><td><strong>Boss</strong></td><td>2</td><td>the run</td><td>Delegated verification to Facilities rather than trusting the notice, had Accounting confirm affordability, raised the request and paid on approval.</td><td class='toolcell'><code>list_approvals</code> <code>check_rent_due</code> <code>request_approval</code> <code>update_ticket</code> <code>get_cash_position</code> <code>list_tickets</code> <code>pay_rent</code></td></tr>
-<tr><td><strong>Facilities</strong></td><td>1</td><td>Boss</td><td>Checked the landlord's notice against lease 1 itself and confirmed $2,400 genuinely due 2026-09-02, two days out and not overdue.</td><td class='toolcell'><code>check_rent_due</code></td></tr>
+<tr><td><strong>Facilities</strong></td><td>2</td><td>Boss</td><td>Checked the landlord's notice against lease 1 itself and confirmed $2,400 genuinely due 2026-09-02, two days out and not overdue.</td><td class='toolcell'><code>check_rent_due</code></td></tr>
+<tr><td><strong>Accounting</strong></td><td>2</td><td>Boss</td><td>Confirmed the $2,400 fitted against uncommitted cash before the request went to the owner -- the second pair of eyes shop rule 4 asks for, so the agent spending the money is not the one certifying the shop can afford it.</td><td class='toolcell'><code>get_cash_position</code> <code>check_rent_due</code> <code>list_approvals</code></td></tr>
+<tr><td><strong>Boss</strong></td><td>2</td><td>the run</td><td>Delegated verification to Facilities rather than trusting the notice, had Accounting confirm affordability, raised the request and paid on approval.</td><td class='toolcell'><code>list_approvals</code> <code>check_rent_due</code> <code>get_cash_position</code> <code>request_approval</code> <code>update_ticket</code> <code>list_tickets</code> <code>pay_rent</code></td></tr>
       </tbody>
     </table>
 
@@ -531,10 +531,10 @@
     <table>
       <thead><tr><th>Agent</th><th>Turns</th><th>Asked by</th><th>What they contributed</th><th>MCP tools used</th></tr></thead>
       <tbody>
-<tr><td><strong>Inventory</strong></td><td>2</td><td>Boss</td><td>Confirmed the apparel vendor and the invoice 501 block that gated the restock, the same obstacle as ticket 101.</td><td class='toolcell'><code>find_restock_vendors</code></td></tr>
-<tr><td><strong>Accounting</strong></td><td>2</td><td>Boss</td><td>Quoted the deal from the pricing table -- $22 unit cost against a $58 list, and $264 to buy the missing twelve -- and put the funding gap against available cash in figures.</td><td class='toolcell'><code>quote_discount</code> <code>get_cash_position</code> <code>list_approvals</code> <code>list_invoices</code> <code>find_restock_vendors</code> <code>check_rent_due</code> <code>list_tickets</code></td></tr>
-<tr><td><strong>Boss</strong></td><td>2</td><td>the run</td><td>Reframed a discount ticket as a supply question, ranked the restock below the rent and the invoice, and closed it as an explained refusal with the eight real hoodies offered rather than a promise the shop could not keep.</td><td class='toolcell'><code>list_approvals</code> <code>quote_discount</code> <code>draft_customer_message</code> <code>update_ticket</code> <code>list_tickets</code> <code>check_stock_by_size</code> <code>get_cash_position</code></td></tr>
-<tr><td><strong>Customer Service</strong></td><td>1</td><td>Boss</td><td>Drafted the Yale AI Club an offer of the 8 size-M hoodies actually in stock at $58 each, presented as a choice and making clear the remaining 12 are not being promised. Filed, not sent.</td><td class='toolcell'><code>list_tickets</code> <code>check_stock_by_size</code> <code>quote_discount</code> <code>list_invoices</code> <code>get_cash_position</code> <code>draft_customer_message</code> <code>update_ticket</code></td></tr>
+<tr><td><strong>Inventory</strong></td><td>1</td><td>Boss</td><td>Confirmed the apparel vendor and the invoice 501 block that gated the restock, the same obstacle as ticket 101.</td><td class='toolcell'><code>check_stock_by_size</code> <code>find_restock_vendors</code></td></tr>
+<tr><td><strong>Accounting</strong></td><td>2</td><td>Boss</td><td>Quoted the deal from the pricing table -- $22 unit cost against a $58 list, and $264 to buy the missing twelve -- and put the funding gap against available cash in figures.</td><td class='toolcell'><code>get_cash_position</code> <code>quote_discount</code> <code>list_approvals</code></td></tr>
+<tr><td><strong>Customer Service</strong></td><td>2</td><td>Boss</td><td>Drafted the Yale AI Club an offer of the 8 size-M hoodies actually in stock at $58 each, presented as a choice and making clear the remaining 12 are not being promised. Filed, not sent.</td><td class='toolcell'><code>list_tickets</code> <code>check_stock_by_size</code> <code>draft_customer_message</code> <code>update_ticket</code></td></tr>
+<tr><td><strong>Boss</strong></td><td>2</td><td>the run</td><td>Reframed a discount ticket as a supply question, ranked the restock below the rent and the invoice, and closed it as an explained refusal with the eight real hoodies offered rather than a promise the shop could not keep.</td><td class='toolcell'><code>list_approvals</code> <code>list_tickets</code> <code>quote_discount</code> <code>update_ticket</code> <code>check_stock_by_size</code> <code>list_invoices</code> <code>find_restock_vendors</code></td></tr>
       </tbody>
     </table>
 
@@ -547,7 +547,7 @@
     </table>
 
     <h3>Left on the board</h3>
-    <ul class='tight'><li>customer message to <strong>Yale AI Club</strong> &mdash; Your bulk hoodie request <em>(not sent)</em></li><li>customer message to <strong>Yale AI Club</strong> &mdash; Your size-M navy hoodie request <em>(not sent)</em></li></ul>
+    <ul class='tight'><li>customer message to <strong>Yale AI Club</strong> &mdash; Your navy hoodie order <em>(not sent)</em></li><li>customer message to <strong>Yale AI Club</strong> &mdash; Your hoodie order <em>(not sent)</em></li></ul>
 
     <h3>Cash effect</h3>
     <p>
@@ -700,7 +700,7 @@
       size-S tee was out of stock and that the vendor could not ship because of
       the unpaid <strong>$840</strong> invoice. Accounting handled the payment
       approval, and the team ordered the tee, received it into inventory, and
-      drafted a message for the customer. <strong>10 agent turns, 615,845
+      drafted a message for the customer. <strong>11 agent turns, 619,229
       tokens</strong> &mdash; the most expensive ticket, and the only one that
       had to move stock as well as money.
     </p>
@@ -720,7 +720,7 @@
       landlord's notice against the actual lease rather than taking the email at
       face value, and Accounting confirmed the amount and available cash before
       the payment was approved. The <strong>$2,400</strong> rent was paid and the
-      lease record was updated. It did this in <strong>4 agent turns and 184,773
+      lease record was updated. It did this in <strong>6 agent turns and 258,145
       tokens</strong>, the least of any ticket.
     </p>
 
@@ -731,7 +731,7 @@
       12 would cost <strong>$264</strong>. Since only <strong>$160</strong>
       remained after the invoice and rent payments, the team correctly refused the
       restock and Customer Service drafted an offer for the 8 hoodies in stock.
-      <strong>4 agent turns, 221,541 tokens.</strong>
+      <strong>7 agent turns, 371,465 tokens.</strong>
     </p>
 
     <h3>Ranking them</h3>
@@ -824,7 +824,7 @@
       decision.
     </p>
     <p>
-      The final run used <strong>1,022,159 tokens</strong> across the three
+      The final run used <strong>1,248,839 tokens</strong> across the three
       tickets, and the project records show that clearer rules reduced unnecessary
       loops compared with earlier runs &mdash; Ticket 103 alone had cost 995,949
       tokens on an earlier run without finishing. So I would not assume that

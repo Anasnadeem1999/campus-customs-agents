@@ -1,6 +1,6 @@
 {
   "problem": "4 - Add the MCP server to the vibe coder and test each tool",
-  "run_at": "2026-10-12T01:36:47-04:00",
+  "run_at": "2026-10-14T18:12:52-04:00",
   "transport": "stdio",
   "launched_from": ".mcp.json",
   "server_name": "campus-customs",
@@ -39,7 +39,9 @@
     "pay_rent",
     "update_ticket",
     "draft_customer_message",
-    "place_purchase_order"
+    "place_purchase_order",
+    "receive_purchase_order",
+    "advance_shop_date"
   ],
   "tools_tested": [
     "check_stock_by_size",
@@ -74,10 +76,12 @@
     ],
     "all_read_tools_tested": true,
     "write_tools_not_smoke_tested": [
+      "advance_shop_date",
       "draft_customer_message",
       "pay_invoice",
       "pay_rent",
       "place_purchase_order",
+      "receive_purchase_order",
       "request_approval",
       "update_ticket"
     ],

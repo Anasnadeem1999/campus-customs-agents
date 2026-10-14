@@ -935,7 +935,7 @@ to the owner as a question**. Opening balance **$3,400.00**, opening shop date
 Bulldog Print Co. It is a liability on the books, not cash out, and is
 deliberately absent from the closing balance.
 
-### Human decisions — three requests, three answered, all recorded
+### Human decisions — three requests, three answered, all recorded in the trail
 
 | # | What | Amount | Decision |
 |---|---|---:|---|
@@ -953,8 +953,8 @@ comparison is the most useful number in this file:
 
 | | Before the rules | After |
 |---|---:|---:|
-| Ticket 103 | 995,949 tokens, unresolved | **131,349**, resolved |
-| Whole run | 1,617,595 tokens | **931,967** |
+| Ticket 103 | 995,949 tokens, unresolved | **371,465**, resolved |
+| Whole run | 1,617,595 tokens | **1,248,839** |
 | Ticket 101 | "resolved" with the shelf empty | resolved with stock on hand |
 
 Same model, same tools, same data. **A clear definition of done was worth more
@@ -962,7 +962,7 @@ than any change to the architecture.**
 
 ### Provenance
 
-- **17 steps appended** to `output/audit_trail.json`; earlier runs untouched.
+- **24 steps appended** to `output/audit_trail.json`; earlier runs untouched.
 - **Every step resolved to `gpt-6-luna-2026-09-22`**, checked against what the
   gateway reported rather than what was requested.
 
