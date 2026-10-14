@@ -17,10 +17,10 @@ round. Both entry points work; neither is a special case.
 | Route | Does |
 |---|---|
 | `GET /api/tickets` | the three tickets and whether each is open or resolved |
-| `POST /api/tickets/{id}/run` | run the agent team on one ticket |
+| `POST /api/tickets/{ticket_id}/run` | run the agent team on one ticket |
 | `GET /api/events` | recent agent steps -- who spoke, what tools they used |
 | `GET /api/approvals` | what the agents have asked a human to approve |
-| `POST /api/approvals/{id}/approve` | **the human's click. This is what moves cash.** |
+| `POST /api/approvals/{approval_id}/approve` | **the human's click. This is what moves cash.** |
 | `GET /api/cash` | the current checking balance |
 | `POST /api/reset` | reset the database for a fresh run |
 

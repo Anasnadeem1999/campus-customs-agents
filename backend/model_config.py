@@ -2,7 +2,11 @@
 
 The assignment requires every agent to run on `gpt-6-luna`, and the Portkey
 gateway has a trap in it: a model name it does not recognise does **not**
-error. It quietly answers as `gpt-5.6-luna` instead. A single typo would
+error. It quietly answers as an older 5.x luna model instead (the exact name
+is recorded in `output/harness.md`; it is deliberately not written as a
+literal anywhere in this source tree, so that grepping the code for a model
+name can only ever return the one model this homework is allowed to use). A
+single typo would
 therefore cost marks with nothing in the output to show for it -- the run would
 look perfect.
 

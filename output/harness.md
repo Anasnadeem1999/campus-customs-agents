@@ -762,12 +762,12 @@ uvicorn main:app --reload --port 8000
 | Method | URL | What it does |
 |---|---|---|
 | `GET` | `/api/tickets` | Returns all three tickets with each one's status and whether it is open or resolved. |
-| `POST` | `/api/tickets/{id}/run` | Runs the agent team on that ticket; returns a `run_id` at once and works it in the background. |
+| `POST` | `/api/tickets/{ticket_id}/run` | Runs the agent team on that ticket; returns a `run_id` at once and works it in the background. |
 | `GET` | `/api/runs/{run_id}` | Reports how one agent run is going — running, finished or failed. |
 | `GET` | `/api/events` | The board's refresh feed: recent agent steps, what each agent said and which MCP tools it called. |
 | `GET` | `/api/approvals` | Lists what the agents have asked a human to approve, filterable by status. |
-| `POST` | `/api/approvals/{id}/approve` | **The human's click, and the only thing in the backend that moves cash** — approves, then carries the payment out. |
-| `POST` | `/api/approvals/{id}/reject` | Says no, recording who refused it. |
+| `POST` | `/api/approvals/{approval_id}/approve` | **The human's click, and the only thing in the backend that moves cash** — approves, then carries the payment out. |
+| `POST` | `/api/approvals/{approval_id}/reject` | Says no, recording who refused it. |
 | `GET` | `/api/cash` | Returns the current checking balance, plus what is already approved but unpaid. |
 | `POST` | `/api/reset` | Resets the working database to the pristine seed for a fresh run. |
 | `GET` | `/api/health` | Confirms the backend is up and can reach the MCP server. |
