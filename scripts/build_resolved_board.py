@@ -35,10 +35,11 @@ CAPTIONS = {
         "the landlord's notice against lease 1 rather than taking it on trust."
     ),
     103: (
-        "Ticket 103, <strong>resolved</strong> as an explained refusal. Inventory reports "
-        "8 of 20 on hand with the same invoice 501 block; Accounting prices the deal and "
-        "states the funding gap. The 12-unit restock was declined rather than "
-        "half-promised, and a draft offering the eight real hoodies is on the board."
+        "Ticket 103, <strong>resolved</strong> as an explained refusal. All four colleagues "
+        "appear in the summary, including <strong>Customer Service</strong>, which wrote the "
+        "offer of the 8 size-M hoodies actually in stock. Inventory reports 8 of 20 and the "
+        "invoice 501 block; Accounting prices the deal and states the funding gap. The "
+        "12-unit restock was declined rather than half-promised."
     ),
 }
 

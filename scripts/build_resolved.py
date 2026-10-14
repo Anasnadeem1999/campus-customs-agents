@@ -72,6 +72,11 @@ CONTRIBUTIONS = {
         "to buy the missing twelve -- and put the funding gap against available cash in "
         "figures."
     ),
+    (103, "customer_service"): (
+        "Drafted the Yale AI Club an offer of the 8 size-M hoodies actually in stock at "
+        "$58 each, presented as a choice and making clear the remaining 12 are not being "
+        "promised. Filed, not sent."
+    ),
     (103, "boss"): (
         "Reframed a discount ticket as a supply question, ranked the restock below the rent "
         "and the invoice, and closed it as an explained refusal with the eight real hoodies "

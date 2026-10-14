@@ -81,15 +81,17 @@ VERDICTS = {
             "with the eight real hoodies offered instead.",
         ],
         "diverged": [
-            "<strong>Customer Service was not delegated to.</strong> The Boss wrote the "
-            "customer draft itself with <code>draft_customer_message</code>. The customer was "
-            "written to, which is what matters, but the plan expected the specialist to do it.",
-            "<strong>The ticket cost a fraction of what it used to.</strong> Earlier runs of "
-            "this same ticket burned 918k and 996k tokens going round in circles; this one "
-            "finished in <strong>3 agent turns and 131,349 tokens</strong>. Clearer rules, not "
-            "a cleverer model.",
+            "<strong>On the first attempt the Boss drafted the customer message itself</strong> "
+            "rather than handing it to Customer Service. The outcome was right but the planned "
+            "delegation was not, so the ticket was re-run with the drafting handed over. In the "
+            "run recorded here <strong>Customer Service wrote the draft</strong>, offering the 8 "
+            "hoodies in stock at $58 each.",
+            "<strong>The ticket costs a fraction of what it used to.</strong> Earlier runs of "
+            "this same ticket burned 918k and 996k tokens going round in circles without "
+            "finishing; this one resolved in <strong>4 agent turns and 221,541 tokens</strong>. "
+            "Clearer rules, not a cleverer model.",
         ],
-        "verdict": "2 of 3 delegations, the right outcome, and roughly an eighth of the previous cost.",
+        "verdict": "3 of 3 delegations once the drafting was handed to Customer Service, and the outcome the plan expected.",
     },
 }
 

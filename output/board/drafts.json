@@ -53,5 +53,17 @@
     "drafted_on_shop_date": "2026-09-05",
     "delivery_status": "not_sent",
     "note": "Draft only. This server has no tool that sends anything."
+  },
+  {
+    "id": 5,
+    "ticket_id": 103,
+    "ticket_requester": "Yale AI Club",
+    "recipient": "Yale AI Club",
+    "subject": "Your size-M navy hoodie request",
+    "body": "We can\u2019t supply or discount all 20 size-M navy hoodies now: 8 are available at the $58 list price, and the remaining 12 are not available for restock at this time. Bulldog Print Co is blocked by unpaid invoice 502 ($8); even if that block is cleared, the $264 restock order exceeds the shop\u2019s $152 uncommitted cash by $112, so no restock is currently possible.\n\nWould you like the 8 available hoodies at $58 each ($464 total)? That is an option, not an order or commitment; we\u2019ll wait for your choice.",
+    "drafted_by": "customer_service",
+    "drafted_on_shop_date": "2026-09-05",
+    "delivery_status": "not_sent",
+    "note": "Draft only. This server has no tool that sends anything."
   }
 ]
