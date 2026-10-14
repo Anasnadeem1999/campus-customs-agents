@@ -766,7 +766,9 @@ claims flagged for a decision, and approved unchanged.
    `output/github_url.txt` and has to be pasted into the assignment by hand -
    flagged rather than silently skipped.
 
-## Problem 12 - Full end-to-end audit and resubmission
+## Follow-up A - Full end-to-end audit and resubmission
+
+*Not one of the eleven numbered problems. Prompts typed after Problem 11, logged here because this file is the complete record of what was typed.*
 
 **Prompt, verbatim:**
 
@@ -814,7 +816,9 @@ against the repository.)
    validates an invoice - there is no record to compare against - so this is a
    genuine hole that only the human gate covers.
 
-## Problem 13 - The owner's shop rules
+## Follow-up B - The owner's shop rules
+
+*Not one of the eleven numbered problems. The shop rules in `backend/prompts/shop_rules.md` were rewritten in the owner's own words after Problem 11, and the tickets re-run under them.*
 
 **Prompt, verbatim:**
 

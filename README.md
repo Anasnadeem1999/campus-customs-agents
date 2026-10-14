@@ -17,6 +17,84 @@ the *resolved* model name is checked on every call.
 
 ---
 
+## Quickstart
+
+If you only do one thing, do this. Three terminals, from the repo root.
+
+```bash
+# once
+python -m venv .venv && .venv/Scripts/activate      # macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+cd frontend && npm install && cd ..
+cp .env.example .env                                 # then put a real PORTKEY_API_KEY in it
+python scripts/setup_mcp_config.py                   # rewrites .mcp.json for this machine
+```
+
+```bash
+# terminal 1 — backend
+cd backend && uvicorn main:app --reload --port 8000
+
+# terminal 2 — dashboard
+cd frontend && npm run dev                           # http://localhost:5173
+
+# terminal 3 — a clean run
+python scripts/reset_db.py                           # copies the seed over the working copy
+python -m backend.run_tickets                        # works the board, stops for your approval
+python scripts/approve.py --list                     # read what the team asked for
+python scripts/approve.py --id 1 --by "Your Name"
+python -m backend.run_tickets --no-reset             # team acts on your decision
+```
+
+**Nothing to run?** Open **`output/desk_tickets.html`** by double-clicking it —
+the finished board, the cash ledger and the reflection are all in that one file.
+
+---
+
+## How the three pieces fit
+
+```
+                         ┌───────────────────────────┐
+   you, at the desk ───► │  React dashboard  :5173   │
+   approve / decline     └─────────────┬─────────────┘
+                                       │ HTTP
+                         ┌─────────────▼─────────────┐
+                         │  FastAPI backend  :8000   │
+                         │  • runs the agent team    │
+                         │  • the ONLY route that    │
+                         │    moves cash is approve  │
+                         └─────────────┬─────────────┘
+                                       │
+         ┌─────────────────────────────▼──────────────────────────┐
+         │  Agent team  (PydanticAI, all on gpt-6-luna)           │
+         │                                                        │
+         │     Boss ──► Inventory ──► Accounting                  │
+         │       ▲          │              │                      │
+         │       └──────────┴──── Facilities ──── Customer Svc    │
+         │        fully connected: any agent may ask any other    │
+         └─────────────────────────────┬──────────────────────────┘
+                                       │ MCP (stdio)
+                         ┌─────────────▼─────────────┐
+                         │  MCP server — 16 tools    │
+                         │  the ONLY door to the DB  │
+                         │  no approve / no send     │
+                         └─────────────┬─────────────┘
+                                       │
+                 ┌─────────────────────▼─────────────────────┐
+                 │  data/campus_customs_new.db  (working)    │
+                 │  data/campus_customs.db      (seed, R/O)  │
+                 └───────────────────────────────────────────┘
+```
+
+Two things that matter most in that picture:
+
+- **The MCP server is the only door to the database.** Nothing in `backend/`
+  opens SQLite. If a figure is not in a tool result, no agent can know it.
+- **No agent can approve its own spending**, because the verb does not exist
+  on the MCP server. Approving lives in `scripts/approve.py` and in one HTTP
+  route — both outside anything an agent can call.
+
+---
+
 ## The shop, in one paragraph
 
 It is **2026-08-31**. Checking holds **$3,400.00**. Three tickets are open:
@@ -212,8 +290,14 @@ test asserts that none appears.
 ## Tests
 
 ```bash
-python -m pytest tests/ -q      # 38 tests
+python -m pytest tests/ -q              # 50 tests
+python scripts/verify_submission.py     # checks this submission against itself
 ```
+
+`verify_submission.py` re-derives every claim this project makes about its own
+result — the cash, the ticket outcomes, the model, the untouched seed, the
+required files — from the database and the audit trail, and fails if any of
+them disagree. It changes nothing.
 
 They run against the real MCP server and the real working database — a payment
 rule tested only against a mock is not tested — and they use no model and no

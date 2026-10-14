@@ -168,6 +168,25 @@ REFLECTION = """  <div class="card">
       tools, while keeping human approval and an independent financial check where
       they matter.</strong>
     </p>
+
+    <h3>Where the tokens actually went</h3>
+    <p>
+      I assumed the long shop rules were the expense, since every agent reloads
+      them on every turn. They are not. The rules are about
+      <strong>4,900 tokens</strong>, and all the prompt text across the whole run
+      comes to roughly <strong>118,000 of the 1,248,839 &mdash; about 9%</strong>.
+      The run averaged <strong>52,000 tokens a turn</strong>, so the cost is the
+      <em>conversation</em> growing as each turn carries the accumulated history,
+      not the instructions at the front of it.
+    </p>
+    <p>
+      That changes what I would do about it. Shortening the rules would have saved
+      almost nothing and cost me the detail that made the agents behave &mdash;
+      the opposite of the right move. Fewer agents helps for a different reason
+      than I first thought: not shorter prompts, but <strong>fewer separate
+      conversations</strong>, each of which has to be told the ticket from scratch
+      and then grows on its own.
+    </p>
   </div>
 
   <h2>4. Three problems this team could solve with the tools we built</h2>

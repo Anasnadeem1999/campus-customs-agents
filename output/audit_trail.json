@@ -1,4 +1,89 @@
 {
+  "submission": {
+    "read_this_first": "This file is append-only by design: Problem 5 requires that it accumulate across runs rather than be wiped. Everything before step 168 is development history and is kept deliberately. THE SUBMITTED RUN IS DESCRIBED BELOW.",
+    "submitted_run": {
+      "first_step": 168,
+      "last_step": 191,
+      "run_ids": [
+        "run-1a62ec4e",
+        "run-d70099d4",
+        "run-5c07b46e"
+      ],
+      "why_several_run_ids": "One ticket is worked across several passes, because the team stops at the human approval gate and resumes after a decision. Each pass gets its own run id.",
+      "agent_turns": 24,
+      "total_tokens": 1248839,
+      "model_resolved": [
+        "gpt-6-luna-2026-09-22"
+      ],
+      "every_step_on_required_model": true,
+      "shop_date_opened": "2026-08-31",
+      "shop_date_closed": "2026-09-05",
+      "opening_checking_balance": 3400.0,
+      "closing_checking_balance": 160.0,
+      "human_decisions": [
+        {
+          "approval_id": 1,
+          "kind": "invoice_payment",
+          "amount": 840.0,
+          "decision": "approved",
+          "decided_by": "Anas Nadeem"
+        },
+        {
+          "approval_id": 2,
+          "kind": "rent_payment",
+          "amount": 2400.0,
+          "decision": "approved",
+          "decided_by": "Anas Nadeem"
+        },
+        {
+          "approval_id": 3,
+          "kind": "purchase_order",
+          "amount": 8.0,
+          "decision": "approved",
+          "decided_by": "Anas Nadeem"
+        }
+      ],
+      "tickets": {
+        "101": {
+          "agent_turns": 11,
+          "tokens": 619229,
+          "agents": [
+            "accounting",
+            "boss",
+            "customer_service",
+            "inventory"
+          ],
+          "final_status": "resolved"
+        },
+        "102": {
+          "agent_turns": 6,
+          "tokens": 258145,
+          "agents": [
+            "accounting",
+            "boss",
+            "facilities"
+          ],
+          "final_status": "resolved"
+        },
+        "103": {
+          "agent_turns": 7,
+          "tokens": 371465,
+          "agents": [
+            "accounting",
+            "boss",
+            "customer_service",
+            "inventory"
+          ],
+          "final_status": "resolved"
+        }
+      }
+    },
+    "history_before_the_submitted_run": {
+      "steps": 167,
+      "runs": 30,
+      "note": "Earlier development runs, retained because this file must append, never wipe."
+    }
+  },
   "runs": [
     {
       "run_id": "run-baf616b4",

@@ -88,7 +88,7 @@ VERDICTS = {
             "hoodies in stock at $58 each.",
             "<strong>The ticket costs a fraction of what it used to.</strong> Earlier runs of "
             "this same ticket burned 918k and 996k tokens going round in circles without "
-            "finishing; this one resolved in <strong>4 agent turns and 221,541 tokens</strong>. "
+            "finishing; this one resolved in <strong>7 agent turns and 371,465 tokens</strong>. "
             "Clearer rules, not a cleverer model.",
         ],
         "verdict": "3 of 3 delegations once the drafting was handed to Customer Service, and the outcome the plan expected.",
