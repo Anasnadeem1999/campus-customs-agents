@@ -1011,6 +1011,19 @@ def place_purchase_order(
             "then place this order again."
         )
 
+    # Shop rule 8: no duplicate orders. Stock already on its way is not a
+    # reason to buy the same thing twice, and a second order would commit cash
+    # the shop has not got, for goods it is already receiving.
+    existing = board.open_purchase_orders(sku, size, needed_for_ticket)
+    if existing:
+        first = existing[0]
+        raise BoardError(
+            f"REFUSED: purchase order {first['id']} for {first['qty']} x {sku} size "
+            f"{size} is already placed with {first['vendor_name']} and has not been "
+            f"received yet (ETA {first['eta']}). Ordering again would buy the same "
+            "stock twice. Receive that order when it lands, or work from it."
+        )
+
     eta = (today + dt.timedelta(days=vendor["lead_days"])).isoformat()
     record = board.add_draft(
         {
@@ -1040,6 +1053,154 @@ def place_purchase_order(
         "lead_days": vendor["lead_days"],
         "cash_moved": False,
         "note": "Commitment recorded; cash leaves when the vendor invoices. No vendor contacted.",
+    }
+
+
+@mcp.tool()
+def receive_purchase_order(purchase_order_id: int) -> dict[str, Any]:
+    """Book a delivered purchase order into stock, and record the vendor's bill.
+
+    This is what makes "arrived" mean something different from "ordered".
+    Until an order is received, `inventory.qty` has not moved and the customer
+    still has nothing -- shop rule 7 turns on exactly that distinction.
+
+    Args:
+        purchase_order_id: the board id returned by `place_purchase_order`.
+
+    Refuses while the shop's own date is still before the vendor's ETA: goods
+    cannot be booked in before the lead time the `vendors` table committed to.
+    Move the clock with `advance_shop_date` first.
+
+    On success three things move inside one transaction -- `inventory.qty`
+    goes up by the ordered quantity, a new row appears in `invoices` for what
+    the vendor is now owed (quantity times `pricing.unit_cost`), and the order
+    is marked received. **No cash moves here.** The shop now owes the vendor,
+    and that bill is paid through the ordinary approval route like any other.
+    """
+    record = board.get_draft(purchase_order_id)
+    if record.get("record_type") != "purchase_order":
+        raise BoardError(f"Board record {purchase_order_id} is not a purchase order.")
+    if record.get("received_on_shop_date"):
+        raise BoardError(
+            f"Purchase order {purchase_order_id} was already received on "
+            f"{record['received_on_shop_date']}. Receiving it twice would invent stock."
+        )
+
+    sku, size, qty = record["sku"], record["size"], int(record["qty"])
+
+    with writing() as conn:
+        today = shop_today(conn)
+        eta = dt.date.fromisoformat(record["eta"])
+        if today < eta:
+            raise ShopDataError(
+                f"REFUSED: purchase order {purchase_order_id} is not due until {eta} "
+                f"and the shop's date is {today}. {record['vendor_name']} quoted "
+                f"{record['lead_days']} days, so the stock has not shipped yet. "
+                "Advance the shop date once the day arrives, then receive it."
+            )
+
+        row = conn.execute(
+            "SELECT qty, name FROM inventory WHERE sku = ? AND size = ?", (sku, size)
+        ).fetchone()
+        if row is None:
+            raise ShopDataError(f"No inventory row for {sku} size {size} to receive into.")
+
+        before = row["qty"]
+        after = before + qty
+        conn.execute(
+            "UPDATE inventory SET qty = ? WHERE sku = ? AND size = ?", (after, sku, size)
+        )
+
+        cost = conn.execute(
+            "SELECT unit_cost FROM pricing WHERE sku = ?", (sku,)
+        ).fetchone()
+        if cost is None:
+            raise ShopDataError(f"No pricing row for {sku}; cannot value the vendor's bill.")
+        amount = money(cost["unit_cost"] * qty)
+
+        next_id = conn.execute(
+            "SELECT COALESCE(MAX(id), 500) FROM invoices"
+        ).fetchone()[0] + 1
+        due = (today + dt.timedelta(days=14)).isoformat()
+        conn.execute(
+            "INSERT INTO invoices (id, vendor_id, amount, due_date, status, description) "
+            "VALUES (?, ?, ?, ?, 'open', ?)",
+            (
+                next_id,
+                record["vendor_id"],
+                amount,
+                due,
+                f"Restock {qty} x {sku} size {size} (PO {purchase_order_id})",
+            ),
+        )
+
+    board.update_draft(
+        purchase_order_id,
+        received_on_shop_date=today.isoformat(),
+        delivery_status="received",
+        vendor_invoice_id=next_id,
+    )
+
+    return {
+        "received": True,
+        "purchase_order_id": purchase_order_id,
+        "sku": sku,
+        "size": size,
+        "qty_received": qty,
+        "qty_before": before,
+        "qty_after": after,
+        "received_on": today.isoformat(),
+        "vendor_invoice_id": next_id,
+        "vendor_invoice_amount": amount,
+        "vendor_invoice_due": due,
+        "cash_moved": False,
+        "wrote": ["inventory.qty", "invoices (new row)"],
+        "note": (
+            f"{qty} unit(s) are now on the shelf. {record['vendor_name']} is owed "
+            f"{amount:.2f} on invoice {next_id}, payable through the usual "
+            "approval route."
+        ),
+    }
+
+
+@mcp.tool()
+def advance_shop_date(to_date: str) -> dict[str, Any]:
+    """Move the shop's clock forward to a later date.
+
+    `desk.date_today` is the shop's "today": every overdue test and every
+    delivery estimate is measured from it. Advancing it is how a lead time
+    actually elapses, so an order placed with a five-day lead can be received
+    rather than waiting forever on a date that never comes.
+
+    Args:
+        to_date: an ISO date, e.g. "2026-09-05". Must be later than the
+            current shop date.
+
+    Refuses to move backwards. Rewinding the clock would un-overdue an
+    invoice, un-due a rent payment, and silently change what the books mean.
+    """
+    try:
+        target = dt.date.fromisoformat(to_date)
+    except ValueError as exc:
+        raise ShopDataError(f"{to_date!r} is not an ISO date like 2026-09-05.") from exc
+
+    with writing() as conn:
+        today = shop_today(conn)
+        if target <= today:
+            raise ShopDataError(
+                f"REFUSED: the shop's date is already {today}; it only moves forward. "
+                "Rewinding would un-overdue invoices and change what the books mean."
+            )
+        conn.execute("UPDATE desk SET date_today = ?", (target.isoformat(),))
+
+    return {
+        "shop_date_was": today.isoformat(),
+        "shop_date_now": target.isoformat(),
+        "days_advanced": (target - today).days,
+        "note": (
+            "Overdue tests and delivery ETAs are measured from this date, so "
+            "re-read anything time-sensitive before acting on it."
+        ),
     }
 
 

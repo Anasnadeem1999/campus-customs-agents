@@ -27,7 +27,7 @@ import threading
 from pathlib import Path
 from typing import Any
 
-from .models import AuditStep, RunRecord
+from .models import AuditStep, HumanDecision, RunRecord
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 AUDIT_PATH = (REPO_ROOT / os.environ.get("AUDIT_TRAIL_PATH", "output/audit_trail.json")).resolve()
@@ -39,7 +39,7 @@ _EMPTY: dict[str, list[Any]] = {"runs": [], "steps": []}
 
 def _load() -> dict[str, list[Any]]:
     if not AUDIT_PATH.exists():
-        return {"runs": [], "steps": []}
+        return {"runs": [], "steps": [], "decisions": []}
     raw = AUDIT_PATH.read_text(encoding="utf-8").strip()
     if not raw:
         return {"runs": [], "steps": []}
@@ -50,13 +50,14 @@ def _load() -> dict[str, list[Any]]:
         # file beside the original so it can be inspected, and carry on.
         damaged = AUDIT_PATH.with_suffix(".corrupt.json")
         AUDIT_PATH.replace(damaged)
-        return {"runs": [], "steps": [],
+        return {"runs": [], "steps": [], "decisions": [],
                 "note": f"Previous trail was not valid JSON; kept at {damaged.name}."}
     if isinstance(data, list):
         # Tolerate an older flat-list shape rather than losing it.
-        return {"runs": [], "steps": data}
+        return {"runs": [], "steps": data, "decisions": []}
     data.setdefault("runs", [])
     data.setdefault("steps", [])
+    data.setdefault("decisions", [])
     return data
 
 
@@ -134,3 +135,20 @@ def summarise(value: Any, limit: int = 1200) -> str:
     if len(text) <= limit:
         return text
     return f"{text[:limit]}... [trimmed {len(text) - limit} chars]"
+
+
+def append_decision(decision: HumanDecision) -> None:
+    """Record a human approval or refusal in the trail.
+
+    Written from `scripts/approve.py` and the backend's approve route -- the
+    two places a person can actually decide. Agents never reach this, which is
+    the same guarantee the MCP server enforces by simply not having the verb.
+    """
+    with _LOCK:
+        data = _load()
+        data["decisions"].append(decision.model_dump())
+        _save(data)
+
+
+def decisions_for_approval(approval_id: int) -> list[dict[str, Any]]:
+    return [d for d in _load()["decisions"] if d.get("approval_id") == approval_id]

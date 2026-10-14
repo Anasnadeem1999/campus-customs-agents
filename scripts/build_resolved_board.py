@@ -22,23 +22,23 @@ OUT = REPO_ROOT / "output/resolved_board.html"
 
 CAPTIONS = {
     101: (
-        "Ticket 101 selected, <strong>resolved</strong> in green and struck through. The "
-        "summary shows Customer Service on the ticket &mdash; the delegation two earlier runs "
-        "dropped &mdash; so Tauhid Zaman has a draft carrying the real 2026-09-05 ETA. Below "
-        "it, Inventory reporting qty 0 and the invoice 501 block, with every figure traced "
-        "back to the tool that returned it."
+        "Ticket 101, <strong>resolved</strong>. Note the shop date in the masthead: "
+        "<strong>2026-09-05</strong>, advanced to the vendor's ETA so the order could "
+        "actually be received. The Boss's tool list shows <code>advance_shop_date</code> "
+        "and <code>receive_purchase_order</code> &mdash; the tee is on the shelf, not "
+        "merely ordered, which is what the owner's shop rule 7 requires."
     ),
     102: (
-        "Ticket 102 selected, <strong>resolved</strong>. The summary shows just two "
-        "colleagues, Facilities and the Boss, which is the whole team this ticket needed. "
-        "Facilities checked the landlord's notice against lease 1 itself rather than taking "
-        "it on trust."
+        "Ticket 102, <strong>resolved</strong>. The summary shows Facilities <em>and</em> "
+        "Accounting: shop rule 4 asks for a second pair of eyes on money, so the agent "
+        "spending it is not the one certifying the shop can afford it. Facilities checked "
+        "the landlord's notice against lease 1 rather than taking it on trust."
     ),
     103: (
-        "Ticket 103 selected, <strong>resolved</strong> as a priced partial offer. All four "
-        "colleagues appear. Inventory reports 8 of 20 on hand and the same invoice 501 block; "
-        "the owner approved $42 a unit for the 8 that exist and refused the $264 restock for "
-        "the 12 that do not. The till reads $160.00 with $8 promised and $152 free."
+        "Ticket 103, <strong>resolved</strong> as an explained refusal. Inventory reports "
+        "8 of 20 on hand with the same invoice 501 block; Accounting prices the deal and "
+        "states the funding gap. The 12-unit restock was declined rather than "
+        "half-promised, and a draft offering the eight real hoodies is on the board."
     ),
 }
 

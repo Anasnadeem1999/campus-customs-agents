@@ -592,3 +592,53 @@ After the re-run, a pass for things that had quietly gone out of date:
 Also corrected the evidence's own `vibe_coder_connection` status, which still
 read "requires a vibe-coder restart" long after that restart had happened and
 the tools had been called live from the chat.
+
+## 13 - The owner's shop rules
+
+The user supplied their own eleven shop rules. `backend/prompts/shop_rules.md`
+is now built on them: each rule quoted as the governing statement, then
+expanded into what it means at this desk. Two disagreed with the code and both
+were resolved the owner's way.
+
+**Rule 7 required a capability we did not have.** "Placing an order does not
+mean the product has arrived" -- but there was no tool to receive stock and no
+way to move `desk.date_today`, so ticket 101 was being marked resolved with the
+shelf empty. Added `receive_purchase_order` (books goods into `inventory`,
+raises the vendor's bill, refuses before the ETA) and `advance_shop_date`
+(forward only). **16 tools now.**
+
+**Rule 4 reversed an earlier judgement.** Facilities must consult Accounting on
+payments, even though the answer is one tool call it could make itself. The
+separation is the point.
+
+**Rule 8** -> `place_purchase_order` refuses a restock already open.
+**Rule 9** -> human approvals are written to the trail by both the CLI and the
+HTTP route. The test suite had been writing fake decisions into the real trail
+under a real name; `conftest.py` now restores it.
+
+### The run
+
+All three resolved, honestly this time: invoice 501 paid, tee ordered at
+$8.00, clock advanced to the 2026-09-05 ETA, **order received so
+`inventory.qty` went 0 -> 1**, customer told it is ready. Cash $3,400 ->
+**$160.00**, matching `cash_accounts`. Receiving raised **invoice 502 for
+$8.00** -- a debt, not cash out, kept out of the closing balance.
+
+### What the rules were worth
+
+| | Before | After |
+|---|---:|---:|
+| Ticket 103 | 995,949 tokens, unresolved | **131,349**, resolved |
+| Whole run | 1,617,595 tokens | **931,967** |
+
+Same model, same tools, same data. The reflection now argues that a clear
+definition of done mattered more than the architecture.
+
+### One self-inflicted incident, recorded
+
+A screenshot step clicked `.ticket` to select a card; the element's centre sits
+on the "Put the team on it" button, so it started a run and, with stale
+dashboard tabs still polling, the finished state was destroyed. The run was
+redone from reset. Screenshots now click `.ticket h3`.
+
+**50 tests passing.**

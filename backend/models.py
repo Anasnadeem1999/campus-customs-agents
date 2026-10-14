@@ -153,6 +153,31 @@ class AuditStep(BaseModel):
     error: str | None = None
 
 
+class HumanDecision(BaseModel):
+    """A decision only a person can make, written into the audit trail.
+
+    Shop rule 9 requires the trail to record human approvals and what they
+    led to, not just what the agents did. Without this the trail shows an
+    agent asking and then, some steps later, money moving, with the actual
+    authorisation nowhere in the record -- which is the one event an auditor
+    most wants to see.
+    """
+
+    approval_id: int
+    decision: str = Field(description="approved | rejected")
+    decided_by: str = Field(description="The person. Never an agent.")
+    kind: str = Field(description="invoice_payment | rent_payment | purchase_order | price_override")
+    ref_id: int | None = None
+    amount: float
+    agents_reason: str = Field(description="What the agent asked for, in its own words.")
+    reason_given: str | None = Field(default=None, description="Why, when refusing.")
+    decided_on_shop_date: str
+    recorded_at: str
+    result: str | None = Field(
+        default=None, description="What the decision led to, e.g. 'payment 2 written'."
+    )
+
+
 class RunRecord(BaseModel):
     """The header written once per run, before any agent is invoked."""
 

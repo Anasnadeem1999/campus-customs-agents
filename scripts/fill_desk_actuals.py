@@ -37,59 +37,59 @@ VERDICTS = {
             "planned: the stock answer reframed the ticket before any money was discussed.",
             "Boss &rarr; Accounting second, once Inventory reported the vendor block.",
             "Boss &rarr; <strong>Customer Service third</strong>, and Tauhid was drafted a "
-            "reply carrying the real 2026-09-05 ETA. <em>This is the delegation the two "
-            "earlier runs dropped</em>; the ticket only reaches a genuine resolution with it.",
+            "reply &mdash; this time saying the tee is <em>ready</em>, not merely ordered.",
             "<strong>Facilities was not called</strong> &mdash; correctly, as predicted.",
         ],
         "diverged": [
-            "Accounting first asked for the purchase order at <strong>$1.00</strong> when "
-            "<code>pricing.unit_cost</code> for <code>CC-TEE-WHITE</code> is <strong>$8.00</strong> "
-            "and the order is one unit &mdash; it appears to have put the quantity in the "
-            "amount field. <strong>The owner rejected it</strong> with that reason and the "
-            "team re-raised at the correct $8.00, which was then approved. The plan did not "
-            "anticipate an arithmetic slip, but the human gate caught it, which is exactly "
-            "what the gate is for.",
+            "The plan stopped at &ldquo;order placed, ETA 2026-09-05&rdquo;. Under the owner's "
+            "shop rule 7 that is not a finished customer order, so the run went further: the "
+            "shop's clock was advanced to the ETA and the order was <strong>received</strong>, "
+            "moving <code>inventory.qty</code> for size S from <strong>0 to 1</strong>. The "
+            "tee physically exists. The plan was written before the shop had any way to "
+            "receive stock at all.",
+            "Receiving created a new <strong>$8.00 bill</strong> from Bulldog Print Co "
+            "(invoice 502), which the plan did not anticipate. It is a debt, not a payment "
+            "&mdash; see the Cash tab.",
         ],
-        "verdict": "3 of 3 planned delegations, plus one agent error the human approval gate caught.",
+        "verdict": "3 of 3 planned delegations, and the ticket went further than the plan: the goods actually arrived.",
     },
     102: {
         "matched": [
-            "Boss called <strong>Facilities first</strong>, as planned, and Facilities did the "
-            "thing the plan existed for: it checked the landlord's claim against lease 1 "
-            "rather than taking the notice at face value.",
-            "<strong>Inventory and Customer Service were both left out</strong>, as predicted. "
-            "No stock question, and the landlord is not a customer.",
+            "Boss called <strong>Facilities first</strong>, as planned, and Facilities checked "
+            "the landlord's claim against lease 1 rather than taking the notice at face value.",
+            "<strong>Facilities &rarr; Accounting happened.</strong> After three runs where it "
+            "did not, the owner's shop rule 4 made it explicit, and Accounting confirmed the "
+            "$2,400 fitted before the request reached a human. The original plan called this "
+            "exactly right.",
+            "<strong>Inventory and Customer Service were both left out</strong>, as predicted.",
         ],
         "diverged": [
-            "<strong>The Facilities &rarr; Accounting hop did not happen</strong> &mdash; the "
-            "third run in a row it has not. Both agents called <code>get_cash_position</code> "
-            "themselves instead. <em>The team is right and the plan was wrong:</em> shop rule "
-            "7 says not to delegate what a tool in front of you already answers, and asking a "
-            "colleague would have spent a model call to return the same number. Three runs "
-            "agreeing is no longer a quirk; it is the rule working.",
+            "Nothing material. The consultation ran Boss &rarr; Accounting rather than "
+            "Facilities &rarr; Accounting, so the second pair of eyes was obtained as the rule "
+            "intends, by a slightly different route.",
         ],
-        "verdict": "1 of 2 planned delegations, and skipping the other was the better call.",
+        "verdict": "2 of 2. The plan's peer consultation finally happened, because the rule now requires it.",
     },
     103: {
         "matched": [
             "Boss called <strong>Inventory first, not Accounting</strong> &mdash; the call the "
-            "plan flagged as most likely to be got wrong, since the ticket is typed "
-            "<code>price_override</code> and reads like a pricing question.",
-            "Boss &rarr; Accounting second, with the 12-unit shortfall already in hand.",
-            "Boss &rarr; Customer Service third, and a draft offering the 8 real hoodies at "
-            "the approved $42 was filed.",
+            "plan flagged as most likely to be got wrong on a ticket typed "
+            "<code>price_override</code>.",
+            "Boss &rarr; Accounting second, with the shortfall already in hand.",
             "<strong>Facilities was not called</strong>, as predicted.",
+            "The outcome is the one the plan expected: a reasoned refusal of the 20-unit order "
+            "with the eight real hoodies offered instead.",
         ],
         "diverged": [
-            "The plan called a <code>price_override</code> approval <em>optional</em>. It was "
-            "raised, and the owner approved <strong>$42 a unit</strong> &mdash; so the ticket "
-            "ends with a real price on the 8 hoodies the shop actually holds, rather than a "
-            "flat refusal. That is a better outcome than the plan allowed for.",
-            "The $264 restock was <strong>refused by the owner</strong> rather than silently "
-            "dropped, which is what the plan wanted and what makes the cash squeeze visible on "
-            "the Cash tab.",
+            "<strong>Customer Service was not delegated to.</strong> The Boss wrote the "
+            "customer draft itself with <code>draft_customer_message</code>. The customer was "
+            "written to, which is what matters, but the plan expected the specialist to do it.",
+            "<strong>The ticket cost a fraction of what it used to.</strong> Earlier runs of "
+            "this same ticket burned 918k and 996k tokens going round in circles; this one "
+            "finished in <strong>3 agent turns and 131,349 tokens</strong>. Clearer rules, not "
+            "a cleverer model.",
         ],
-        "verdict": "3 of 3 planned delegations, and the optional price approval paid off.",
+        "verdict": "2 of 3 delegations, the right outcome, and roughly an eighth of the previous cost.",
     },
 }
 
@@ -300,17 +300,20 @@ def cash_tab(doc: dict) -> str:
     <h3>What did <em>not</em> move the balance, and why</h3>
     <ul class="tight">
       <li>
-        <strong>The $8 purchase order (ticket 101).</strong> Approved and placed with
-        Bulldog Print Co, ETA 2026-09-05. A purchase order is a commitment, not a
-        payment &mdash; cash leaves when the vendor invoices, which has not happened.
-        Counting it here would show the shop $8 poorer than its own books.
+        <strong>The $8 restock for ticket 101 &mdash; now owed, still not paid.</strong>
+        The order was placed, the shop's clock was advanced to the vendor's
+        2026-09-05 ETA, and the tee was <strong>received into stock</strong>. That
+        receipt raised <strong>invoice 502 for $8.00</strong> from Bulldog Print Co.
+        It is a <em>liability</em>: the shop owes it, and it will leave the account
+        only when a human approves paying it. Counting it as spent would show the
+        shop $8 poorer than <code>cash_accounts</code> actually says.
       </li>
       <li>
-        <strong>The $264 restock (ticket 103).</strong> Requested, and
-        <strong>refused by the owner</strong>: $160 of uncommitted cash will not cover
-        $264. It never became a payment, so it never touched the balance. This is the
-        seeded cash squeeze landing &mdash; $840 + $2,400 = $3,240 against $3,400 leaves
-        $160, and the third spend has to be refused.
+        <strong>The $264 restock (ticket 103).</strong> The twelve missing hoodies at
+        $22 each. <strong>Refused</strong> &mdash; the cash could not cover it &mdash;
+        so it never became a payment and never touched the balance. This is the seeded
+        squeeze landing: $840 + $2,400 = $3,240 against $3,400 leaves $160, and the
+        third spend has to go.
       </li>
       <li>
         <strong>The $50 price override (ticket 103).</strong> A price, not a payment.
@@ -321,8 +324,16 @@ def cash_tab(doc: dict) -> str:
 
     <p class="note">
       Revenue is not modelled in this homework &mdash; cash only goes out &mdash; so no
-      sale appears on the credit side, including the 8 hoodies offered at $50.
+      sale ever appears on the credit side, including the eight hoodies offered to the
+      Yale AI Club and the tee now waiting for Tauhid. The balance can only fall.
     </p>
+
+    <div class="cash-ok" style="border-left-color:#8a5a00;background:#fdf6e7">
+      <strong>Owed but not paid:</strong> invoice <strong>502</strong>, $8.00 to
+      Bulldog Print Co, raised when the restocked tee was received on 2026-09-05.
+      It is deliberately <em>not</em> in the closing balance above &mdash; the shop
+      owes it, it has not spent it, and <code>cash_accounts</code> agrees.
+    </div>
   </div>"""
 
 

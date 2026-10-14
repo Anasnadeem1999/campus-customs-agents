@@ -293,11 +293,11 @@ output/
 Reset to $3,400, then all three tickets worked with every payment put to the
 owner as a question.
 
-| Ticket | Final status | What happened |
+| Ticket | Status | What happened |
 |---|---|---|
-| 101 Bulldog tee | `resolved` | Invoice 501 paid, vendor unblocked, tee ordered at its real $8 unit cost (ETA 2026-09-05), customer drafted a reply. |
-| 102 Rent due | `resolved` | Notice checked against the lease, $2,400 paid, lease rolled to 2026-10-02. |
-| 103 Bulk hoodies | `resolved` | Priced partial offer — 8 of 20 at the approved $42, the $264 restock refused, draft filed. |
+| 101 Bulldog tee | `resolved` | Invoice 501 paid, tee ordered at $8.00, clock advanced to the 2026-09-05 ETA, **order received so `inventory.qty` went 0 → 1**, customer drafted. |
+| 102 Rent due | `resolved` | Notice checked against the lease, Accounting confirmed affordability, $2,400 paid, lease rolled to 2026-10-02. |
+| 103 Bulk hoodies | `resolved` | Declined with an offer — 8 of 20 on hand, the $264 restock refused, draft filed. |
 
 ```
 $3,400.00  opening
@@ -307,15 +307,11 @@ $3,400.00  opening
   $160.00  closing, and cash_accounts.balance reads $160.00
 ```
 
-Five approval requests were put to the owner and five were answered — including
-one **rejected**: Accounting asked for the tee's purchase order at $1.00 when
-`pricing.unit_cost` is $8.00 for one unit. The team re-raised at the correct
-figure. `request_approval` validates invoice and rent amounts against the
-database but has nothing to check a purchase-order amount against, so the human
-gate was the only control that caught it.
+Receiving the tee raised **invoice 502 for $8.00** — a debt the shop now owes
+Bulldog Print Co, not cash that has left the account, and deliberately not in
+the closing balance.
 
-Ticket 101 is `resolved` because the *desk* is finished — paid, ordered,
-customer told. The tee itself arrives 2026-09-05, and with these tools it never
-actually will: there is no tool that receives stock and none that advances
-`desk.date_today`. That limitation, and two others, are analysed in the
-Reflection tab of `output/desk_tickets.html`.
+A customer order here is only `resolved` once the stock is physically on the
+shelf and the customer has been told — the shop rules in
+`backend/prompts/shop_rules.md` are the owner's own, and rule 7 says plainly
+that placing an order is not the product arriving.

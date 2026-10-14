@@ -813,3 +813,53 @@ against the repository.)
    `request_approval` cannot validate a purchase-order amount the way it
    validates an invoice - there is no record to compare against - so this is a
    genuine hole that only the human gate covers.
+
+## Problem 13 - The owner's shop rules
+
+**Prompt, verbatim:**
+
+> Updated shop rules as it requires my genuine input, pls update it accordingly so that grading is done right:
+
+(followed by the user's eleven numbered rules, covering Boss and delegation,
+Inventory, Accounting, Facilities, Customer Service, Human approval, Resolving
+tickets, Database and tools, Audit trail, Model and token usage, and Security
+and external actions)
+
+> Please suggest any changes you deem necessary
+
+**Follow-up prompts, verbatim:**
+
+> Build the receiving capability (Recommended)
+
+> Yes - Facilities must involve Accounting
+
+> Approve and pay / Approve and pay / Approve and place the order
+
+> Approve both again
+
+**What the prompt did not cover, resolved while working:**
+
+1. **Rule 7 contradicted what the code could do.** "Placing an order does not
+   mean the product has arrived" was impossible to honour: nothing could
+   receive stock and nothing could move `desk.date_today`, so the tee could
+   never arrive and ticket 101 could never honestly resolve. Put to the user
+   as a choice; they chose to build the capability, so
+   `receive_purchase_order` and `advance_shop_date` now exist.
+2. **Rule 4 reversed an earlier conclusion of mine.** I had written in the
+   reflection that Facilities skipping Accounting was the team being right and
+   the plan being wrong. The owner's rule says otherwise, and on reflection
+   they are correct: the agent spending the money should not be the one
+   certifying affordability. The guidance was changed.
+3. **Rules 8 and 9 named gaps nobody had noticed.** Nothing stopped a
+   duplicate restock, and human approvals were absent from the audit trail
+   entirely - the one event an auditor most wants. Both implemented.
+4. **The tests were polluting the deliverable.** Adding decisions to the trail
+   exposed it: `tests/test_routes.py` exercises the real approve route, so a
+   test run wrote fake approvals under a real person's name into
+   `output/audit_trail.json`. `conftest.py` now restores the file.
+5. **I destroyed the finished run and had to redo it.** A screenshot step
+   clicked `.ticket` to select a card, but that element's centre sits on the
+   "Put the team on it" button, so it started a fresh agent run; stale
+   dashboard tabs were still polling the backend and the completed state was
+   lost. Recorded rather than hidden, because the audit trail shows it. The
+   run was redone from a clean reset and screenshots now click `.ticket h3`.

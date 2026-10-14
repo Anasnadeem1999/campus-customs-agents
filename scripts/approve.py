@@ -23,8 +23,28 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
+from backend import audit  # noqa: E402
+from backend.models import HumanDecision, utc_now  # noqa: E402
 from mcp_server import board  # noqa: E402
 from mcp_server.db import WORKING_DB, money  # noqa: E402
+
+
+def record(approval: dict, decision: str, by: str, shop_date: str, why: str | None = None) -> None:
+    """Write the decision into the audit trail (shop rule 9)."""
+    audit.append_decision(
+        HumanDecision(
+            approval_id=int(approval["id"]),
+            decision=decision,
+            decided_by=by,
+            kind=approval["kind"],
+            ref_id=approval.get("ref_id"),
+            amount=float(approval.get("amount") or 0),
+            agents_reason=approval.get("reason", ""),
+            reason_given=why,
+            decided_on_shop_date=shop_date,
+            recorded_at=utc_now(),
+        )
+    )
 
 
 def shop_today() -> str:
@@ -70,22 +90,26 @@ def main() -> int:
     if not (args.by or "").strip():
         ap.error("--by is required: an approval has to carry the name of the person giving it.")
 
-    record = board.get_approval(args.id)
-    if record.get("status") != "pending":
-        print(f"Approval #{args.id} is already '{record['status']}'. Nothing to do.")
+    approval = board.get_approval(args.id)
+    if approval.get("status") != "pending":
+        print(f"Approval #{args.id} is already '{approval['status']}'. Nothing to do.")
         return 1
 
     if args.reject:
+        today = shop_today()
         board.update_approval(
             args.id, status="rejected", approved_by=None,
-            rejected_by=args.by, rejected_at=shop_today(), rejected_reason=args.why,
+            rejected_by=args.by, rejected_at=today, rejected_reason=args.why,
         )
-        print(f"Rejected #{args.id} ({record['kind']} ref={record.get('ref_id')}).")
+        record(approval, "rejected", args.by, today, args.why)
+        print(f"Rejected #{args.id} ({approval['kind']} ref={approval.get('ref_id')}).")
         return 0
 
-    board.update_approval(args.id, status="approved", approved_by=args.by, approved_at=shop_today())
-    print(f"Approved #{args.id}: {record['kind']} ref={record.get('ref_id')} "
-          f"${money(record['amount']):,.2f}, by {args.by}.")
+    today = shop_today()
+    board.update_approval(args.id, status="approved", approved_by=args.by, approved_at=today)
+    record(approval, "approved", args.by, today)
+    print(f"Approved #{args.id}: {approval['kind']} ref={approval.get('ref_id')} "
+          f"${money(approval['amount']):,.2f}, by {args.by}.")
     print("The agent team can now act on it. Cash has not moved yet.")
     return 0
 

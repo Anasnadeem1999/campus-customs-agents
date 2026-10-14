@@ -37,8 +37,11 @@ ticket as dealt with.
 ## Getting it paid
 
 1. `check_rent_due` for the real amount and date.
-2. Confirm with Accounting that it fits against `uncommitted`, not the raw
-   balance.
+2. **Ask Accounting to confirm it fits** against `uncommitted`, not the raw
+   balance. Do this even though `get_cash_position` would give you the same
+   number directly — shop rule 4 is deliberate. The agent about to spend the
+   shop's money should not also be the one certifying it can afford to, and
+   one extra call is a cheap price for that separation.
 3. `request_approval` with `kind="rent_payment"`, the lease id, and the exact
    monthly rent — a mismatched amount will be refused, correctly.
 4. A human approves. Then `pay_rent`, which drops the cash, writes the payment

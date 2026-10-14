@@ -154,3 +154,43 @@ def require_spendable(approval: dict[str, Any], kind: str, ref_id: int | None) -
             f"Approval {approval['id']} is for {approval.get('kind')} "
             f"{approval.get('ref_id')}, not {ref_id}."
         )
+
+
+def get_draft(draft_id: int) -> dict[str, Any]:
+    for row in load_drafts():
+        if int(row["id"]) == int(draft_id):
+            return row
+    raise BoardError(f"No board record with id {draft_id}.")
+
+
+def update_draft(draft_id: int, **changes: Any) -> dict[str, Any]:
+    """Change one board record in place -- used to mark a purchase order received."""
+    with _LOCK:
+        rows = load_drafts()
+        for row in rows:
+            if int(row["id"]) == int(draft_id):
+                row.update(changes)
+                _save(DRAFTS, rows)
+                return row
+    raise BoardError(f"No board record with id {draft_id}.")
+
+
+def open_purchase_orders(sku: str, size: str, ticket_id: int | None = None) -> list[dict[str, Any]]:
+    """Purchase orders for this SKU and size that have not been received yet.
+
+    Shop rule 8 says the system must avoid duplicate orders. A restock that is
+    already on its way is not a reason to buy the same thing again, so this is
+    what `place_purchase_order` checks before it writes.
+    """
+    out = []
+    for row in load_drafts():
+        if row.get("record_type") != "purchase_order":
+            continue
+        if row.get("sku") != sku or row.get("size") != size:
+            continue
+        if row.get("received_on_shop_date"):
+            continue
+        if ticket_id is not None and row.get("needed_for_ticket") not in (None, ticket_id):
+            continue
+        out.append(row)
+    return out

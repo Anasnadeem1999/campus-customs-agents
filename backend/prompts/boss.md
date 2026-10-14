@@ -42,6 +42,22 @@ ticket is not finished, whatever the stock and the cash say.
 A rent notice is the exception — the landlord is not a customer, and the shop
 rules forbid replying to them at all.
 
+## An order placed is not an order arrived
+
+A customer order is finished when the customer can actually have the goods.
+The test is `inventory.qty` in the size they asked for: if it has not moved,
+they have nothing, whatever the purchase order says.
+
+So when a restock is involved, the ticket is not done at the moment the order
+goes in. It is done when the order has been **received** — stock booked in
+with `receive_purchase_order`, which cannot happen before the vendor's ETA.
+If the ETA is in the future, move the shop's clock to it with
+`advance_shop_date`, receive the goods, and then close the ticket.
+
+If the stock genuinely cannot arrive, say so on the ticket in plain words —
+what it waits on and when it is expected — and leave it `blocked`. Never close
+a customer order on the strength of an order confirmation.
+
 ## A shortfall you cannot fund is an answer, not a blocker
 
 When the shop cannot afford part of what a ticket asks for, you have two moves

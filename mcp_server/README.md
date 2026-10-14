@@ -44,10 +44,12 @@ the shop by accident, and a payment cannot half-happen.
 The shop's "today" is `desk.date_today` (**2026-08-31**), not the wall clock.
 Every overdue test and delivery estimate below is measured from that field.
 
-## The fourteen tools
+## The sixteen tools
 
 Three read tools came from Problem 3. Problem 5 added seven more, plus the
-approval board the agent team needs to work a ticket to resolution. Every one
+approval board. Two further tools arrived with the owner's shop rules, which
+insist that placing an order is not the same as the product arriving:
+`receive_purchase_order` and `advance_shop_date`. Every one
 of them reads or writes `data/campus_customs_new.db` and nothing else.
 
 | Tool | Tables | Answers / does |
@@ -65,7 +67,9 @@ of them reads or writes `data/campus_customs_new.db` and nothing else.
 | `pay_rent` | `leases`, `payments`, `cash_accounts`, `desk` | Pay rent against a signed approval and roll the lease to its next due date. |
 | `update_ticket` | `tickets`, `desk` | Record the outcome and move the ticket along the board. |
 | `draft_customer_message` | `tickets`, `desk` *(+ the board)* | Write a reply and file it. **Nothing is sent.** |
-| `place_purchase_order` | `vendors`, `invoices`, `desk` *(+ the board)* | Order a restock, refusing while the vendor holds an unpaid bill. |
+| `place_purchase_order` | `vendors`, `invoices`, `desk` *(+ the board)* | Order a restock, refusing while the vendor holds an unpaid bill or the same order is already open. |
+| `receive_purchase_order` | `inventory`, `pricing`, `desk` *(+ the board)* | Book a delivered order into stock and raise the vendor's bill. **This is what makes "arrived" different from "ordered".** |
+| `advance_shop_date` | `desk` | Move the shop's clock forward so a lead time can actually elapse. Refuses to go backwards. |
 
 ### The approval gate, and the verb that is missing
 
@@ -84,6 +88,22 @@ alone, and the guarantee is structural rather than a line in a prompt:
 - `pay_invoice` and `pay_rent` refuse — writing nothing at all — when the
   approval is missing, still pending, already spent, or for a different
   record, and when the balance will not cover the payment.
+
+### Ordered, arrived, and owed
+
+The owner's rule 7 turns on a distinction the tools now enforce:
+
+1. `place_purchase_order` commits the shop to buy. `inventory.qty` does not
+   move, and no cash leaves. It refuses if the same order is already open.
+2. `advance_shop_date` moves the shop's clock. A five-day lead time only
+   elapses because the date moves.
+3. `receive_purchase_order` books the goods in once the ETA has passed:
+   `inventory.qty` rises and a **new invoice** appears for what the vendor is
+   now owed. Still no cash moves — the shop has a debt, payable through the
+   ordinary approval route.
+
+So a restock costs nothing until the vendor's bill is approved and paid, and a
+customer order is only finished when step 3 has happened.
 
 ### What a payment moves, and why it is one transaction
 

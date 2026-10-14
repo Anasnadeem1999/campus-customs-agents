@@ -525,7 +525,9 @@ ticket, keeping turns cheap, and the model policy.
 
 ### 6.2 Every tool, and the tables behind it
 
-Fourteen tools: the three from Problem 3, seven added in Problem 5, plus
+Sixteen tools: the three from Problem 3, seven added in Problem 5, two added
+when the owner's shop rules required that an order placed be distinguished
+from a product delivered, plus
 `list_approvals`, `list_tickets` and `get_cash_position` that the team needs to
 see its own board.
 
@@ -545,10 +547,15 @@ see its own board.
 | `update_ticket` | 5 | `tickets`, `desk` | `tickets` |
 | `draft_customer_message` | 5 | `tickets`, `desk` | — *(board only)* |
 | `place_purchase_order` | 5 | `vendors`, `invoices`, `desk` | — *(board only)* |
+| `receive_purchase_order` | rules | `inventory`, `pricing`, `desk` | `inventory`, `invoices` |
+| `advance_shop_date` | rules | `desk` | `desk` |
 
 All nine tables are now reachable. The four that only a Problem 5 tool touches
 — `pricing`, `payments`, `cash_accounts`, `tickets` — are exactly the ones a
 team that *resolves* tickets needs and a team that only *reports* did not.
+
+All nine tables are now **written** as well as read: `inventory` and
+`invoices` by receiving, `desk` by the clock.
 
 **Approval requests, drafts and purchase orders are not in the database.** The
 nine-table schema has no room for them, and adding tables to the assignment's
@@ -896,19 +903,19 @@ Full reasoning, including what was deliberately left out, is in
 
 ---
 
-## 10. The full run (Problems 9 and 11)
+## 10. The full run (under the owner's shop rules)
 
-One run over all three tickets from a database reset immediately beforehand,
-with **every payment put to the owner as a question** rather than assumed.
-Opening balance **$3,400.00**, shop date **2026-08-31**.
+One run over all three tickets from a database reset, with **every payment put
+to the owner as a question**. Opening balance **$3,400.00**, opening shop date
+**2026-08-31**.
 
-### Outcomes — all three resolved
+### Outcomes — all three genuinely resolved
 
-| Ticket | Final status | What happened |
+| Ticket | Status | What happened |
 |---|---|---|
-| **101** Bulldog tee | `resolved` | Invoice 501 paid, lifting the vendor's shipping block; the size-S tee ordered at its real $8 unit cost, ETA **2026-09-05**; Tauhid Zaman drafted a reply carrying that date. The desk has nothing left to do. |
-| **102** Rent due | `resolved` | Notice checked against lease 1 and found correct; $2,400 paid; lease rolled to 2026-10-02 so the month cannot be paid twice. |
-| **103** Bulk hoodies | `resolved` | A priced partial offer: 8 of 20 on hand at the owner-approved **$42** a unit, the $264 restock for the other 12 refused against $152 uncommitted, and a draft saying so on the board. |
+| **101** Bulldog tee | `resolved` | Invoice 501 paid → vendor unblocked → tee ordered at its real **$8.00** unit cost → shop clock advanced to the **2026-09-05** ETA → **order received, `inventory.qty` 0 → 1** → Tauhid drafted a reply saying it is ready. The goods physically exist. |
+| **102** Rent due | `resolved` | Notice checked against lease 1, Accounting confirmed affordability, $2,400 paid, lease rolled to 2026-10-02. |
+| **103** Bulk hoodies | `resolved` | Declined with an offer: 8 of 20 on hand, the $264 restock refused, draft filed unsent. |
 
 ### The money
 
@@ -920,61 +927,44 @@ Opening balance **$3,400.00**, shop date **2026-08-31**.
 | Ticket 103 — restock refused | — | $160.00 |
 | **Closing** | **−3,240.00** | **$160.00** |
 
-`$3,400.00 − $840.00 − $2,400.00 = $160.00`, and `cash_accounts.balance` for
-`checking` reads **$160.00**. Checked rather than asserted:
-`scripts/build_resolved.py` exits non-zero if they disagree and
+`cash_accounts.balance` reads **$160.00**. Checked, not asserted:
+`scripts/build_resolved.py` exits non-zero on a mismatch and
 `scripts/fill_desk_actuals.py` refuses to write the page at all.
 
-Three things deliberately did **not** move the balance: the $8 purchase order
-(a commitment; cash leaves when the vendor invoices), the $264 restock
-(refused, so never a payment), and the $42 price override (a price).
+**Owed but not paid:** receiving the tee raised **invoice 502 for $8.00** from
+Bulldog Print Co. It is a liability on the books, not cash out, and is
+deliberately absent from the closing balance.
 
-### Human decisions — five requests, five answered
+### Human decisions — three requests, three answered, all recorded
 
 | # | What | Amount | Decision |
 |---|---|---:|---|
 | 1 | invoice payment, invoice 501 | $840.00 | approved → paid |
 | 2 | rent payment, lease 1 | $2,400.00 | approved → paid |
-| 3 | purchase order, 1 tee | $1.00 | **rejected — wrong amount** |
-| 4 | price override, ticket 103 | $42.00/unit | approved |
-| 5 | purchase order, 1 tee (re-raised) | $8.00 | approved → placed |
+| 3 | purchase order, 1 tee | $8.00 | approved → placed → received |
 
-**Request 3 is the most interesting event in the run.** Accounting asked for
-the tee's purchase order at $1.00 when `pricing.unit_cost` for
-`CC-TEE-WHITE` is **$8.00** and the order is one unit — it had put the
-quantity in the amount field. The owner rejected it with that reason and the
-team re-raised correctly at $8.00.
+Each is written into `output/audit_trail.json` under `decisions`, with who
+decided, the agent's own reason, and what it led to — shop rule 9.
 
-Nothing in the system would have caught it. `request_approval` validates
-invoice and rent amounts against the database, but a purchase-order amount has
-no record to compare against, so the tool had nothing to check. **The human
-gate was the only control that worked**, which is the strongest argument on
-this page for keeping it.
+### What the rules changed
 
-### Plan versus run
+The same three tickets were run before the owner rewrote the shop rules. The
+comparison is the most useful number in this file:
 
-Expected plans were written in Problem 6 **before** the run and restored
-byte-for-byte from their original commit before the Actual sections were
-filled.
+| | Before the rules | After |
+|---|---:|---:|
+| Ticket 103 | 995,949 tokens, unresolved | **131,349**, resolved |
+| Whole run | 1,617,595 tokens | **931,967** |
+| Ticket 101 | "resolved" with the shelf empty | resolved with stock on hand |
 
-- **101 — 3 of 3**, plus the pricing error the human caught. Insisting on
-  Customer Service in the plan is what got Tauhid written to; earlier runs of
-  this board dropped that delegation and closed the ticket in silence.
-- **102 — 1 of 2**, and the plan was wrong. The expected
-  `Facilities → Accounting` hop has not happened in three consecutive runs;
-  both agents read `get_cash_position` themselves, which shop rule 7 tells
-  them to do.
-- **103 — 3 of 3**, and the "optional" price override was raised and approved,
-  turning a flat refusal into a real offer on the eight hoodies that exist.
+Same model, same tools, same data. **A clear definition of done was worth more
+than any change to the architecture.**
 
 ### Provenance
 
-- **36 steps appended** to `output/audit_trail.json` across six run ids;
-  earlier runs untouched. The file holds every run since Problem 5.
+- **17 steps appended** to `output/audit_trail.json`; earlier runs untouched.
 - **Every step resolved to `gpt-6-luna-2026-09-22`**, checked against what the
   gateway reported rather than what was requested.
-- Artefacts: `output/resolved_tickets.json`, `output/desk_tickets.html`
-  (Expected vs Actual, Cash, Reflection), `output/resolved_board.html`.
 
 ## 11. What this harness covers
 

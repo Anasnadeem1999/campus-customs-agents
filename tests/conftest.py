@@ -37,6 +37,12 @@ WORKING_DB = REPO_ROOT / "data" / "campus_customs_new.db"
 BOARD = REPO_ROOT / "output" / "board"
 BOARD_FILES = ("approvals.json", "drafts.json")
 
+#: The audit trail is a deliverable, and `tests/test_routes.py` exercises the
+#: real approve route -- which, since shop rule 9, writes a human decision into
+#: it. Without restoring this file a test run leaves fake approvals by a real
+#: person's name in the shop's permanent record.
+AUDIT_TRAIL = REPO_ROOT / "output" / "audit_trail.json"
+
 
 @pytest.fixture(scope="session", autouse=True)
 def leave_the_shop_as_we_found_it(tmp_path_factory):
@@ -65,6 +71,8 @@ def leave_the_shop_as_we_found_it(tmp_path_factory):
         if path.exists():
             saved_board[name] = path.read_bytes()
 
+    saved_trail = AUDIT_TRAIL.read_bytes() if AUDIT_TRAIL.exists() else None
+
     yield
 
     if saved_db.exists():
@@ -79,3 +87,8 @@ def leave_the_shop_as_we_found_it(tmp_path_factory):
             path.write_bytes(saved_board[name])
         elif path.exists():
             path.unlink()
+
+    if saved_trail is not None:
+        AUDIT_TRAIL.write_bytes(saved_trail)
+    elif AUDIT_TRAIL.exists():
+        AUDIT_TRAIL.unlink()

@@ -63,7 +63,7 @@ from pydantic import BaseModel, Field  # noqa: E402
 from backend import audit, shop  # noqa: E402
 from backend.agent_team import OUTPUT_TOOL_NAMES, AgentTeam, new_run_id  # noqa: E402
 from backend.model_config import REQUIRED_MODEL  # noqa: E402
-from backend.models import RunRecord, utc_now  # noqa: E402
+from backend.models import HumanDecision, RunRecord, utc_now  # noqa: E402
 from mcp_server import board  # noqa: E402
 
 app = FastAPI(
@@ -407,6 +407,24 @@ async def approve(approval_id: int, body: ApproveBody) -> dict[str, Any]:
             f"Approval {approval_id} is approved, but carrying it out was refused: {exc}",
         ) from exc
 
+    # Shop rule 9: the authorisation itself belongs in the trail, not just
+    # the agent's request and the money that moved some steps later.
+    audit.append_decision(
+        HumanDecision(
+            approval_id=approval_id, decision="approved",
+            decided_by=body.approved_by.strip(), kind=kind, ref_id=ref_id,
+            amount=float(record.get("amount") or 0),
+            agents_reason=record.get("reason", ""),
+            decided_on_shop_date=shop_date, recorded_at=utc_now(),
+            result=(
+                f"payment {executed['payment_id']} written, balance "
+                f"{executed['balance_after']}"
+                if executed and executed.get("paid")
+                else "approved; no cash moved"
+            ),
+        )
+    )
+
     cash = await shop.call_tool("get_cash_position")
     return {
         "approval_id": approval_id,
@@ -437,6 +455,16 @@ async def reject(approval_id: int, body: ApproveBody) -> dict[str, Any]:
     board.update_approval(
         approval_id, status="rejected", rejected_by=body.approved_by.strip(),
         rejected_at=shop_date,
+    )
+    audit.append_decision(
+        HumanDecision(
+            approval_id=approval_id, decision="rejected",
+            decided_by=body.approved_by.strip(), kind=record["kind"],
+            ref_id=record.get("ref_id"), amount=float(record.get("amount") or 0),
+            agents_reason=record.get("reason", ""),
+            decided_on_shop_date=shop_date, recorded_at=utc_now(),
+            result="refused; nothing was written",
+        )
     )
     return {"approval_id": approval_id, "status": "rejected", "by": body.approved_by.strip()}
 
