@@ -12,13 +12,13 @@
     ],
     "every_step_on_required_model": true,
     "audit_run_ids": [
-      "run-1a62ec4e",
-      "run-5c07b46e",
-      "run-d70099d4"
+      "run-210e56ae",
+      "run-482b9364",
+      "run-e6999bab"
     ],
     "audit_steps_this_run": 24,
     "audit_trail": "output/audit_trail.json (appended, never overwritten)",
-    "generated_at": "2026-10-14T22:22:53.833729+00:00"
+    "generated_at": "2026-10-14T23:02:51.177010+00:00"
   },
   "cash": {
     "starting_checking_balance": 3400.0,
