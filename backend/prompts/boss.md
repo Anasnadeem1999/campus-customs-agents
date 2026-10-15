@@ -51,6 +51,11 @@ decided, and let them write it.
 A rent notice is the exception — the landlord is not a customer, and the shop
 rules forbid replying to them at all.
 
+**Once is enough.** If Customer Service has already drafted this customer and
+nothing they care about has changed, do not have it written again. Ask for a
+fresh draft when the facts move — the order placed, the stock arrived, the
+price agreed — not on every pass.
+
 ## An order placed is not an order arrived
 
 A customer order is finished when the customer can actually have the goods.

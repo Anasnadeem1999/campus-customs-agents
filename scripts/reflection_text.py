@@ -33,9 +33,9 @@ REFLECTION = """  <div class="card">
       size-S tee was out of stock and that the vendor could not ship because of
       the unpaid <strong>$840</strong> invoice. Accounting handled the payment
       approval, and the team ordered the tee, received it into inventory, and
-      drafted a message for the customer. <strong>11 agent turns, 619,229
-      tokens</strong> &mdash; the most expensive ticket, and the only one that
-      had to move stock as well as money.
+      drafted a message for the customer. <strong>8 agent turns, 504,194
+      tokens</strong> &mdash; the only ticket that had to move stock as well as
+      money.
     </p>
     <p>
       On an <em>earlier</em> run of this same ticket, Accounting requested
@@ -53,7 +53,7 @@ REFLECTION = """  <div class="card">
       landlord's notice against the actual lease rather than taking the email at
       face value, and Accounting confirmed the amount and available cash before
       the payment was approved. The <strong>$2,400</strong> rent was paid and the
-      lease record was updated. It did this in <strong>6 agent turns and 258,145
+      lease record was updated. It did this in <strong>6 agent turns and 257,925
       tokens</strong>, the least of any ticket.
     </p>
 
@@ -64,7 +64,11 @@ REFLECTION = """  <div class="card">
       12 would cost <strong>$264</strong>. Since only <strong>$160</strong>
       remained after the invoice and rent payments, the team correctly refused the
       restock and Customer Service drafted an offer for the 8 hoodies in stock.
-      <strong>7 agent turns, 371,465 tokens.</strong>
+      It also put the price itself to me rather than assuming one: approval #4
+      asked me to confirm <strong>$58</strong>, which is the list price, so no
+      discount was given away without my saying so.
+      <strong>9 agent turns, 674,274 tokens</strong> &mdash; the dearest of the
+      three, because the judgement call took more passes than the payments did.
     </p>
 
     <h3>Ranking them</h3>
@@ -73,8 +77,9 @@ REFLECTION = """  <div class="card">
       closely and cost the least. <strong>Ticket 103</strong> second, for the
       sharpest judgement call &mdash; refusing a spend the shop could not fund,
       and saying so in figures rather than half-promising. <strong>Ticket
-      101</strong> third, for completing the most complicated task, though it took
-      the most work to get there.
+      101</strong> third, for completing the most complicated task, though it
+      needed the most machinery to get there &mdash; a payment, an order, a
+      clock change and a receipt.
     </p>
     <p class="note">
       The main lesson for me is that the agents performed better when the rules
@@ -157,7 +162,7 @@ REFLECTION = """  <div class="card">
       decision.
     </p>
     <p>
-      The final run used <strong>1,248,839 tokens</strong> across the three
+      The final run used <strong>1,436,393 tokens</strong> across the three
       tickets, and the project records show that clearer rules reduced unnecessary
       loops compared with earlier runs &mdash; Ticket 103 alone had cost 995,949
       tokens on an earlier run without finishing. So I would not assume that
@@ -174,8 +179,8 @@ REFLECTION = """  <div class="card">
       I assumed the long shop rules were the expense, since every agent reloads
       them on every turn. They are not. The rules are about
       <strong>4,900 tokens</strong>, and all the prompt text across the whole run
-      comes to roughly <strong>118,000 of the 1,248,839 &mdash; about 9%</strong>.
-      The run averaged <strong>52,000 tokens a turn</strong>, so the cost is the
+      comes to roughly <strong>118,000 of the 1,436,393 &mdash; about 8%</strong>.
+      The run averaged <strong>62,000 tokens a turn</strong>, so the cost is the
       <em>conversation</em> growing as each turn carries the accumulated history,
       not the instructions at the front of it.
     </p>

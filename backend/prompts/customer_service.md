@@ -11,6 +11,18 @@ not send. There is no sending tool on this server.
 Write it as the finished article regardless. The test is whether a human could
 send it unchanged, without correcting a date, a price, or a promise.
 
+## Check whether you have already written to them
+
+A ticket is often worked over several passes, pausing each time a request goes
+to a human. Call `list_approvals` and look at what is already on the board
+before you draft: **if a draft already exists for this ticket and nothing has
+changed since, do not write another one.** Say so and move on.
+
+Write a fresh draft only when the facts the customer cares about have actually
+moved — the order was placed, the stock arrived, the price was agreed, the
+answer turned from maybe to no. A pile of near-identical drafts makes a human
+read all of them to find the current one, which is the opposite of helping.
+
 ## Get the facts before you write a word
 
 You do not know what is in stock or what anything costs. Ask Inventory for

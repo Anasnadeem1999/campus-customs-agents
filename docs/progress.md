@@ -26,14 +26,14 @@ the submission as it stands.
 ## The final run
 
 Reset from the pristine seed, then all three tickets worked with **every
-payment and purchase order put to the owner as a question**. Three requests
-were raised and three were answered; none was auto-approved.
+payment, purchase order and price put to the owner as a question**. Four
+requests were raised and four were answered; none was auto-approved.
 
 | Ticket | Final status | What happened |
 |---|---|---|
 | **101** Bulldog tee | `resolved` | Invoice 501 paid → vendor unblocked → tee ordered at its real **$8.00** unit cost → shop clock advanced to the **2026-09-05** ETA → **order received, `inventory.qty` 0 → 1** → Tauhid drafted a reply saying it is ready. |
 | **102** Rent due | `resolved` | Notice checked against lease 1, Accounting confirmed affordability, $2,400 paid, lease rolled to 2026-10-02. |
-| **103** Bulk hoodies | `resolved` | Declined with an offer: 8 of 20 on hand, the $264 restock refused, Customer Service drafted the offer of the eight. |
+| **103** Bulk hoodies | `resolved` | Declined with an offer: 8 of 20 on hand, the $264 restock refused. The price was put to the owner too &mdash; approval #4 confirmed **$58, the list price**, so no discount was conceded silently. Customer Service drafted the offer of the eight. |
 
 ### The money
 
@@ -57,10 +57,13 @@ deliberately absent from the closing balance.
 
 | Ticket | Agent turns | Tokens |
 |---|---:|---:|
-| 101 | 11 | 619,229 |
-| 102 | 6 | 258,145 |
-| 103 | 7 | 371,465 |
-| **Total** | **24** | **1,248,839** |
+| 101 | 8 | 504,194 |
+| 102 | 6 | 257,925 |
+| 103 | 9 | 674,274 |
+| **Total** | **23** | **1,436,393** |
+
+Ticket 103 is the dearest of the three. Deciding what to refuse, and getting a
+price confirmed, took more passes than either payment did.
 
 Every step resolved to `gpt-6-luna-2026-09-22`, checked against what the
 gateway reported rather than what was requested.
@@ -99,7 +102,7 @@ outcome more than any change to the architecture would have.
 
 ## Verification
 
-- **50 tests** pass, with no model and no network. They assert every refusal
+- **53 tests** pass, with no model and no network. They assert every refusal
   the shop depends on: no approval, pending approval, reused approval,
   redirected approval, wrong amount, insufficient funds, blocked vendor,
   duplicate order, receiving before the ETA, the clock running backwards, the
@@ -111,11 +114,33 @@ outcome more than any change to the architecture would have.
 - `.env` has never been committed on any branch, and the real key appears in
   no tracked file.
 
+## What the final pass fixed
+
+Four defects surfaced only when the whole thing was re-run from a clean reset.
+All four are the quiet kind: nothing crashed, and the board still showed three
+green tickets.
+
+| Defect | How it showed up | Fix |
+|---|---|---|
+| **The reset left the approval board standing.** | `reset_db.py` restored the database but not `output/board/`. The next run opened on a shop whose ledger said "$3,400, no payments" and whose board said "rent already approved and paid" — and closed ticket 102 as resolved with no rent payment behind it. | Reset clears both. `tests/test_reset_clears_board.py` holds the line. |
+| **Two writers on one board.** | A dashboard backend left listening on :8000 accepted approvals from a stale browser tab *while the team was mid-run*, including one for a request the owner had never been shown. | `backend/run_tickets.py` refuses to start while the backend is up. |
+| **A lost audit step.** | A Windows file lock made the trail's atomic write fail with `PermissionError`. The run carried on; the Boss turn that resolved ticket 103 was simply never recorded. The database said resolved, the trail could not prove it. | `backend/audit.py` retries the swap. A gap in the submitted range now stops `stamp_submission.py` outright. |
+| **Write-ups that described the previous run.** | The page filler expected an empty template, so re-running the board left last run's figures in place — and running it twice duplicated the stylesheet and shifted the markup two spaces right each time. | The fillers are idempotent; the same inputs give a byte-identical page. |
+
+The honest summary: the agent team was never the fragile part. Every one of
+these was in the plumbing around it — the reset, the ports, the file writes,
+the report generation — and every one of them would have produced a confident,
+wrong submission.
+
 ## A note on the audit trail
 
-`output/audit_trail.json` holds **191 steps across 33 runs**, going back to
+`output/audit_trail.json` holds **339 steps across 57 runs**, going back to
 Problem 5. That is deliberate: Problem 5 requires the file to append rather
 than be wiped, so the development history is evidence of compliance rather
 than clutter. The file opens with a `submission` block naming the final run —
-**steps 168–191** — with its outcomes, cash and token figures, so there is no
+**steps 317–339** — with its outcomes, cash and token figures, so there is no
 ambiguity about which run is being submitted.
+
+That block is not written by hand. `scripts/stamp_submission.py` regenerates
+it from the trail, the database and the board, so it cannot keep asserting the
+figures of a run that has since been replaced.

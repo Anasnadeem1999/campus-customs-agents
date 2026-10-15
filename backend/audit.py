@@ -22,6 +22,7 @@ mid-write cannot truncate the history.
 from __future__ import annotations
 
 import json
+import time
 import os
 import threading
 from pathlib import Path
@@ -61,11 +62,30 @@ def _load() -> dict[str, list[Any]]:
     return data
 
 
+#: How many times to retry the atomic swap, and how long to wait between tries.
+#: On Windows the replace fails with PermissionError (WinError 5) whenever
+#: another process has the file open for even an instant -- an editor, a
+#: virus scanner, or the dashboard backend reading the trail to answer a
+#: poll. It is transient and clears in milliseconds, but an unretried failure
+#: loses the agent turn that was being recorded, and a trail missing a step is
+#: worse than a slow one.
+_SAVE_ATTEMPTS = 10
+_SAVE_BACKOFF_SECONDS = 0.05
+
+
 def _save(data: dict[str, Any]) -> None:
     AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
     tmp = AUDIT_PATH.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
-    tmp.replace(AUDIT_PATH)
+
+    for attempt in range(1, _SAVE_ATTEMPTS + 1):
+        try:
+            tmp.replace(AUDIT_PATH)
+            return
+        except PermissionError:
+            if attempt == _SAVE_ATTEMPTS:
+                raise
+            time.sleep(_SAVE_BACKOFF_SECONDS * attempt)
 
 
 def start_run(record: RunRecord) -> None:
@@ -131,7 +151,13 @@ def summarise(value: Any, limit: int = 1200) -> str:
     cut is generous and it says when it cut. Silently truncating the one figure
     that mattered would make the trail worse than useless.
     """
-    text = value if isinstance(value, str) else json.dumps(value, default=str)
+    # ensure_ascii=False so the agents' own punctuation survives as itself.
+    # Escaped, every curly quote reaches the dashboard as a backslash-u
+    # sequence that has to be decoded again before anyone can read it.
+    text = (
+        value if isinstance(value, str)
+        else json.dumps(value, default=str, ensure_ascii=False)
+    )
     if len(text) <= limit:
         return text
     return f"{text[:limit]}... [trimmed {len(text) - limit} chars]"

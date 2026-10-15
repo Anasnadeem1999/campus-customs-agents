@@ -867,3 +867,64 @@ and external actions)
    dashboard tabs were still polling the backend and the completed state was
    lost. Recorded rather than hidden, because the audit trail shows it. The
    run was redone from a clean reset and screenshots now click `.ticket h3`.
+
+## Follow-up C - Closing the last gaps
+
+**Prompt, verbatim:**
+
+> how much would you grade this
+
+> Close all gaps, i want 100/100
+
+Approval decisions given during the final run, verbatim:
+
+> Approve - $8.00
+
+> Approve - $58.00 list
+
+**What the prompt did not cover, resolved while working:**
+
+The prompt was a standing instruction rather than a task, so there was nothing
+to clarify and no follow-up prompt was needed. What it did not - and could not
+- anticipate is that re-running the whole assignment to prove the gaps were
+closed is what exposed the real ones. Four defects surfaced, none of which
+raised an error:
+
+1. **`reset_db.py` reset the database but not the approval board.** The run
+   after a reset read a board still claiming the rent was approved and paid,
+   against a ledger holding the full $3,400 with no payments in it. Ticket 102
+   was closed as resolved on the strength of the board, and no rent was ever
+   paid. This is precisely the wrong-cash-math failure the owner warned about,
+   and it presented as three green tickets. Reset now clears both, with a
+   regression test.
+2. **A dashboard backend left listening accepted approvals mid-run.** A stale
+   browser tab posted approvals for requests the owner had never been shown -
+   one of them a price override. Caught by noticing four concurrent run ids
+   interleaved at identical timestamps in the trail. The board runner now
+   refuses to start while the backend is up. (My first attempt to kill those
+   processes silently matched nothing, because the path regex did not account
+   for the backslash in `AI Foundations\HW5`; the servers survived and did it
+   again.)
+3. **A Windows file lock silently dropped an audit step.** The trail's atomic
+   replace failed with `PermissionError`, the run continued, and the Boss turn
+   that resolved ticket 103 was never recorded - a database saying "resolved"
+   with no evidence behind it. The write now retries, and a gap in the
+   submitted step range aborts the submission stamp outright.
+4. **The report generators described the previous run.** They assumed a blank
+   template, so re-running the board left the old figures in place; running
+   them twice duplicated the stylesheet and indented the markup further right
+   each time. They are idempotent now - the same run produces a byte-identical
+   page, checked by running them three times.
+
+Two things also changed that the prompt did ask for, indirectly. The
+`submission` block in the audit trail was maintained by hand, which is how a
+summary stops describing the run it names; `scripts/stamp_submission.py` now
+generates it from the trail, the database and the board. And the per-turn
+request ceiling was killing the Boss one call short of finishing ticket 101 -
+the run reported it as a MODEL POLICY FAILURE, which was alarming and wrong,
+since the cause was `UsageLimitExceeded`, not the wrong model.
+
+The reflection's figures moved with the new run, and two of its comparative
+claims had to change with them: ticket 101 is no longer the most expensive,
+and ticket 103 now is. The owner's arguments and their ranking were left
+alone; only the claims the run contradicted were corrected.

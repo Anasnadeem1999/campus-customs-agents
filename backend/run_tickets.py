@@ -25,6 +25,7 @@ import argparse
 import asyncio
 import json
 import subprocess
+import socket
 import sys
 from pathlib import Path
 
@@ -153,6 +154,21 @@ async def main_async(args: argparse.Namespace) -> int:
     return 0
 
 
+def backend_is_listening(host: str = "127.0.0.1", port: int = 8000) -> bool:
+    """True if something already serves the dashboard API on this port.
+
+    The backend and this script are two writers to one database and one
+    approval board. When both are live, a dashboard tab left open in a browser
+    keeps polling and can re-post approvals while the team is mid-run: three
+    runs were corrupted that way, one of them recording an approval the owner
+    had never been asked for. Refusing to start is cheap; reconstructing which
+    decisions were real is not.
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.settimeout(0.4)
+        return probe.connect_ex((host, port)) == 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Run the Campus Customs agent team.")
     ap.add_argument("--ticket", type=int, help="work a single ticket")
@@ -160,7 +176,21 @@ def main() -> int:
                     help="keep the current database (use after approving something)")
     ap.add_argument("--dry-run", action="store_true",
                     help="build the team and read the board, but call no model")
+    ap.add_argument("--allow-backend", action="store_true",
+                    help="run even though the dashboard backend is up (not advised)")
     args = ap.parse_args()
+
+    if backend_is_listening() and not args.allow_backend:
+        for line in (
+            "The dashboard backend is listening on 127.0.0.1:8000.",
+            "It writes to the same database and the same approval board as",
+            "this script, and an open dashboard tab can post approvals while",
+            "the team is working -- which has already produced a run holding",
+            "a decision nobody made. Stop the backend, then run this again.",
+            "  (--allow-backend overrides this; not advised for a graded run.)",
+        ):
+            print(line, file=sys.stderr)
+        return 2
 
     if not args.no_reset and not args.dry_run:
         reset_database()

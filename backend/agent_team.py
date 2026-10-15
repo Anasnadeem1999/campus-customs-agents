@@ -71,13 +71,21 @@ MAX_STEPS_PER_TICKET = 14
 #: Per-agent-turn ceilings. Generous enough that a real chain of tool calls
 #: finishes; tight enough that a loop cannot run up a bill unnoticed.
 #:
+#: Both figures are measured, not guessed. The request ceiling was 12 and the
+#: Boss hit it on ticket 101's closing pass, which legitimately needs a long
+#: chain: check the approvals, read the stock, place the order, advance the
+#: clock to the vendor's ETA, receive the goods, have the customer written to,
+#: then update the ticket. It died one call short of finishing, which costs
+#: the whole turn and buys nothing, so the ceiling is set clear of the real
+#: maximum and left to catch genuine loops.
+#:
 #: The token figure is measured, not guessed. A Boss turn working ticket 101 --
 #: the hardest of the three, with two delegations and a payment -- came in at
 #: 120,980 tokens and was killed by a 120,000 ceiling after doing nearly all
 #: the work. A limit that stops a turn just before it finishes costs the whole
 #: turn and buys nothing, so the ceiling is set well clear of the real maximum
 #: and left to catch genuine runaways.
-AGENT_USAGE_LIMITS = UsageLimits(request_limit=12, total_tokens_limit=250_000)
+AGENT_USAGE_LIMITS = UsageLimits(request_limit=25, total_tokens_limit=250_000)
 
 #: Retries allowed per tool call. The default of 1 is too tight here: this
 #: server's tools refuse loudly and on purpose -- wrong amount, vendor blocked,

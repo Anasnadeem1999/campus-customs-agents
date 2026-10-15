@@ -4,8 +4,8 @@
     "kind": "invoice_payment",
     "ref_id": 501,
     "amount": 840.0,
-    "reason": "Pay invoice 501 ($840, due 2026-08-28 and 3 days overdue) to clear Bulldog Print Co's shipping block; it is the gate to the size-S CC-TEE-WHITE reprint needed for Tauhid Zaman's ticket 101. Refusal leaves ticket 101 without stock and the vendor unable to ship; payment leaves $2,560 in cash, with the $2,400 rent due 2026-09-02 still covered.",
-    "detail": "Ticket 101 also needs one size-S tee ordered and received after the invoice is paid; vendor lead time is 5 days, ETA 2026-09-05 if ordered today. The apparel vendor is Bulldog Print Co (apparel reprint).",
+    "reason": "Pay overdue invoice 501 ($840, 3 days overdue) to unblock Bulldog Print Co's size-S tee reprint for customer ticket 101; without payment, the vendor cannot ship. Paying leaves $2,560 against $2,400 rent due 2026-09-02, with $160 remaining; after payment, a separate purchase-order approval is still needed and the 5-day restock ETA is 2026-09-05 if ordered today.",
+    "detail": "Ticket 101: 1 CC-TEE-WHITE, size S. No units are on hand; this vendor is specialty-matched for apparel reprints. Approval covers invoice payment only, not a purchase order.",
     "requested_by": "boss",
     "requested_on_shop_date": "2026-08-31",
     "status": "approved",
@@ -29,8 +29,8 @@
     "kind": "rent_payment",
     "ref_id": 1,
     "amount": 2400.0,
-    "reason": "Approve the $2,400 rent payment for lease 1, due 2026-09-02, to keep the Chapel Street shop premises current. It fits within $3,400 uncommitted cash and leaves $1,000; refusal risks the shop's space, and rent takes priority over discretionary spending.",
-    "detail": "Lease record verified for Elm City Properties; rent is due in 2 days from shop date 2026-08-31. No rent payment has been made; payment awaits human approval.",
+    "reason": "Approve the $2,400 rent payment for lease 1 to keep the Chapel Street shop premises current; rent is due 2026-09-02. It fits the current $3,400 uncommitted cash and would leave $1,000, while refusal risks the shop's space and prevents it from fulfilling orders.",
+    "detail": "Ticket 102; Elm City Properties; lease-record rent due 2026-09-02 (shop date 2026-08-31). Human approval required before payment; this request does not itself pay rent.",
     "requested_by": "boss",
     "requested_on_shop_date": "2026-08-31",
     "status": "approved",
@@ -54,8 +54,8 @@
     "kind": "purchase_order",
     "ref_id": 1,
     "amount": 8.0,
-    "reason": "Approve an $8 restock purchase order for one size-S CC-TEE-WHITE from Bulldog Print Co, now able to ship after invoice 501 was paid. This supplies Tauhid Zaman\u2019s ticket 101; refusing leaves the requested size unavailable. The order fits within $160 uncommitted cash and leaves $152, while $2,400 rent remains reserved.",
-    "detail": "Ticket 101; SKU CC-TEE-WHITE, size S, qty 1. Unit cost $8 from campus-customs_quote_discount. Vendor 1 is Bulldog Print Co (apparel reprint), lead time 5 days; ETA 2026-09-05 if ordered on 2026-08-31. This approval authorizes the purchase order only; receipt creates a separate invoice requiring its own approval/payment.",
+    "reason": "Approve $8.00 to restock one CC-TEE-WHITE in size S from Bulldog Print Co, which can now ship after invoice 501 was paid; this is the remaining step to fulfill Tauhid Zaman\u2019s ticket 101. If refused, the tee remains unavailable and the customer cannot receive it. With $2,560 in cash and $2,400 already committed to rent, paying for this order would leave $152 after both commitments.",
+    "detail": "Ticket 101; vendor 1 Bulldog Print Co, apparel reprint, 5-day lead time; 1 unit at $8.00. Current shop date 2026-08-31, ETA 2026-09-05 if placed today. Invoice payment approval #1 has been consumed; this approval is for purchase order only.",
     "requested_by": "boss",
     "requested_on_shop_date": "2026-08-31",
     "status": "approved",
@@ -75,6 +75,32 @@
       "already_approved_unpaid": 2400.0,
       "uncommitted": 160.0,
       "would_leave_uncommitted": 152.0,
+      "fits_within_uncommitted": true
+    }
+  },
+  {
+    "id": 4,
+    "kind": "price_override",
+    "ref_id": 103,
+    "amount": 58.0,
+    "reason": "Approve a $58 per-hoodie price for Yale AI Club\u2019s 20 size-M CC-HOOD-NAVY order; this is the verified list price, not a discount. No discount amount was proposed, and any lower price requires your explicit decision. At $58 the sale leaves $36 per hoodie above $22 unit cost, but only 8 are on hand; the other 12 would require a $264 restock, which exceeds the $160 uncommitted cash by $104. If refused, we can offer only the 8 currently in stock and should not promise the remaining 12.",
+    "detail": "Ticket 103 price_override decision at list price; separate purchase-order approval and sufficient uncommitted funds would still be needed to restock 12. Bulldog Print Co has no open invoices and estimates 2026-09-05 if ordered today.",
+    "requested_by": "boss",
+    "requested_on_shop_date": "2026-08-31",
+    "status": "approved",
+    "approved_by": "Anas Nadeem",
+    "approved_at": "2026-08-31",
+    "consumed_by_payment_id": null,
+    "spends_cash": false,
+    "checks_at_request_time": {
+      "ticket_sku": "CC-HOOD-NAVY",
+      "ticket_qty": 20
+    },
+    "cash_at_request_time": {
+      "total_balance": 160.0,
+      "already_approved_unpaid": 0.0,
+      "uncommitted": 160.0,
+      "would_leave_uncommitted": 160.0,
       "fits_within_uncommitted": true
     }
   }

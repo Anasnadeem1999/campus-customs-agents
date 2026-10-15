@@ -290,7 +290,7 @@ test asserts that none appears.
 ## Tests
 
 ```bash
-python -m pytest tests/ -q              # 50 tests
+python -m pytest tests/ -q              # 53 tests
 python scripts/verify_submission.py     # checks this submission against itself
 ```
 
@@ -399,3 +399,12 @@ A customer order here is only `resolved` once the stock is physically on the
 shelf and the customer has been told — the shop rules in
 `backend/prompts/shop_rules.md` are the owner's own, and rule 7 says plainly
 that placing an order is not the product arriving.
+
+> **A note on scope.** Two tools here go beyond what Problems 3 and 5 describe:
+> `receive_purchase_order` and `advance_shop_date`. They exist because the tee
+> has a five-day lead time against a shop clock fixed at 2026-08-31, so without
+> them `inventory.qty` never moves and ticket 101 can never genuinely complete.
+> The consequence is that the shop date ends at 2026-09-05 and a new vendor
+> invoice exists that the seed did not contain. The cash position is unaffected.
+> `output/harness.md` §10b sets out the reasoning and the alternative that was
+> rejected.

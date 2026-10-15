@@ -122,6 +122,18 @@ function extractField(source: string, field: string): string | null {
       // quote -- agents quote the shop's own wording often enough that this
       // is the difference between a readable sentence and a severed one.
       const next = source[i + 1] ?? ''
+      if (next === 'u') {
+        // \uXXXX, which is how the trail stores every curly quote, dash
+        // and accent the agents write. Without this the backslash is
+        // dropped and the digits are left on the page: a vendor's
+        // "apparel reprint" came out as u201capparel reprintu201d.
+        const hex = source.slice(i + 2, i + 6)
+        if (/^[0-9a-fA-F]{4}$/.test(hex)) {
+          out += String.fromCharCode(parseInt(hex, 16))
+          i += 5
+          continue
+        }
+      }
       out += ESCAPES[next] ?? next
       i++
       continue

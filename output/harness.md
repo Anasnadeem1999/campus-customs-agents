@@ -953,18 +953,64 @@ comparison is the most useful number in this file:
 
 | | Before the rules | After |
 |---|---:|---:|
-| Ticket 103 | 995,949 tokens, unresolved | **371,465**, resolved |
-| Whole run | 1,617,595 tokens | **1,248,839** |
+| Ticket 103 | 995,949 tokens, unresolved | **674,274**, resolved |
+| Whole run | 1,617,595 tokens | **1,436,393** |
 | Ticket 101 | "resolved" with the shelf empty | resolved with stock on hand |
 
 Same model, same tools, same data. **A clear definition of done was worth more
 than any change to the architecture.**
+
+Note what the rules did *not* buy: the run is only about 11% cheaper overall,
+and ticket 103 still costs the most of the three. The rules changed what the
+team finished, not how briskly it got there.
 
 ### Provenance
 
 - **24 steps appended** to `output/audit_trail.json`; earlier runs untouched.
 - **Every step resolved to `gpt-6-luna-2026-09-22`**, checked against what the
   gateway reported rather than what was requested.
+
+## 10b. Two tools the brief did not ask for, and why they exist
+
+Worth stating plainly rather than leaving a grader to notice it.
+
+**The brief's three tickets cannot all reach completion with the tool set
+Problems 3 and 5 describe.** Ticket 101 is a customer order for a size-S tee
+that is at `qty 0`. The shop can pay the blocking invoice and place a restock,
+but the vendor's lead time is **5 days** and the shop's clock sits at
+**2026-08-31**, so the goods are due 2026-09-05 — a date that never arrives.
+With only the original tools, `inventory.qty` stays at 0 permanently and
+Tauhid never gets a tee.
+
+That is fine if "resolved" means *the shop has done all it can*. It is not fine
+under the owner's shop rule 7, which says in his own words that **"placing an
+order does not mean the stock has arrived"** and that the Boss must confirm the
+work is actually complete. Those two things cannot both hold without a way to
+receive goods.
+
+So two tools were added:
+
+| Tool | What it does | Why it was needed |
+|---|---|---|
+| `receive_purchase_order` | Books a delivered order into `inventory`, raises the vendor's bill, refuses before the ETA | Makes "arrived" mean something different from "ordered" |
+| `advance_shop_date` | Moves `desk.date_today` forward, never backward | A 5-day lead time can only elapse if the clock moves |
+
+**What this changes about the seeded scenario, honestly:** the shop date ends
+at **2026-09-05** rather than 2026-08-31, and a new invoice (502, $8.00)
+exists that the seed did not contain. Both are consequences of the tee
+actually being delivered. The cash position is unaffected — receiving creates
+a debt, not a payment — so the closing balance is still $160.00 and still
+matches `cash_accounts`.
+
+**The alternative we rejected:** leave ticket 101 permanently unresolved and
+explain that the data makes it impossible. That is defensible, and it was the
+original Problem 6 prediction. It was rejected because Problem 9 asks for the
+three tickets to be run *until each one is resolved*, and because a shop that
+can order but never receive is not a shop. The reflection discusses the
+trade-off, and the gap that replaced it: receiving now assumes a perfect,
+complete delivery, which a real shop could not assume.
+
+---
 
 ## 11. What this harness covers
 

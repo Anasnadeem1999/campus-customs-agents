@@ -86,10 +86,12 @@ VERDICTS = {
             "delegation was not, so the ticket was re-run with the drafting handed over. In the "
             "run recorded here <strong>Customer Service wrote the draft</strong>, offering the 8 "
             "hoodies in stock at $58 each.",
-            "<strong>The ticket costs a fraction of what it used to.</strong> Earlier runs of "
-            "this same ticket burned 918k and 996k tokens going round in circles without "
-            "finishing; this one resolved in <strong>7 agent turns and 371,465 tokens</strong>. "
-            "Clearer rules, not a cleverer model.",
+            "<strong>It finishes now, where it used to run on and stop.</strong> Earlier "
+            "runs of this same ticket burned 918k and 996k tokens going round in circles "
+            "without finishing; this one resolved in <strong>9 agent turns and 674,274 "
+            "tokens</strong>. It is still the dearest of the three tickets &mdash; deciding "
+            "what to refuse, and getting a price confirmed, took more passes than either "
+            "payment did. Clearer rules bought the ending, not a cheaper route to it.",
         ],
         "verdict": "3 of 3 delegations once the drafting was handed to Customer Service, and the outcome the plan expected.",
     },
@@ -138,6 +140,11 @@ def approval_rows(ticket: dict) -> str:
             "</tr>"
         )
     return "\n".join(rows)
+
+
+#: The first thing actual_block emits. Also how this script finds last run's
+#: output when re-filling a page that has already been written once.
+FILLED_MARKER = "<h2>Actual &mdash; what the run did</h2>"
 
 
 def actual_block(ticket: dict) -> str:
@@ -358,9 +365,30 @@ def main() -> int:
         start = html.index(marker)
         end = html.index("</section>", start)
         body = html[start:end]
-        placeholder_start = body.index('<div class="actual">')
-        placeholder_end = body.index("</div>", body.index("<p>", placeholder_start)) + len("</div>")
-        new_body = body[:placeholder_start] + actual_block(by_id[tid]) + body[placeholder_end:]
+
+        # Two shapes to handle. On a page straight from the template there is
+        # an empty placeholder div. On a page that has already been filled by
+        # an earlier run, the Actual heading and everything after it is last
+        # run's content. Either way the replacement is the same, and running
+        # this twice has to give the same page as running it once -- otherwise
+        # re-running the board leaves the write-up describing the run before.
+        if '<div class="actual">' in body:
+            cut_from = body.index('<div class="actual">')
+            cut_to = body.index("</div>", body.index("<p>", cut_from)) + len("</div>")
+        elif FILLED_MARKER in body:
+            # Cut from the start of the marker's own line. The replacement
+            # carries its own indentation, so cutting at the marker itself
+            # would leave the old leading spaces in place and the block would
+            # drift two spaces further right on every re-fill.
+            cut_from = body.rindex(chr(10), 0, body.index(FILLED_MARKER)) + 1
+            cut_to = len(body)
+        else:
+            raise SystemExit(
+                f"Ticket {tid}: found neither the empty placeholder nor a "
+                f"previously filled block. Refusing to guess where to write."
+            )
+
+        new_body = body[:cut_from] + actual_block(by_id[tid]) + body[cut_to:]
         html = html[:start] + new_body + html[end:]
 
     # Replace the Cash tab placeholder.
@@ -374,9 +402,12 @@ def main() -> int:
         + html[cash_end:]
     )
 
-    # Styles the new blocks need.
-    html = html.replace(
-        "  footer { color: var(--muted);",
+    # Styles the new blocks need. Inserted once: the replacement text contains
+    # the string being matched, so an unguarded replace appends another copy of
+    # the whole stylesheet on every re-fill.
+    if "td.num { text-align: right;" not in html:
+        html = html.replace(
+            "  footer { color: var(--muted);",
         """  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   tr.opening td, tr.closing td { background: var(--ghost); }
   tr.closing td { border-top: 2px solid var(--yale); }
@@ -388,7 +419,7 @@ def main() -> int:
   .cash-bad { border-left-color: var(--stop); background: #fbe9ea; }
   .sum { font-size: 17px; background: var(--ghost); padding: 12px 16px; border-radius: 8px; }
   footer { color: var(--muted);""",
-    )
+        )
 
     # The Cash tab is no longer "later".
     html = html.replace(
