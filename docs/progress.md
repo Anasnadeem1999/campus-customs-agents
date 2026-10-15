@@ -68,6 +68,14 @@ price confirmed, took more passes than either payment did.
 Every step resolved to `gpt-6-luna-2026-09-22`, checked against what the
 gateway reported rather than what was requested.
 
+A note on those figures. Re-running the board from a reset produces the same
+prompts in the same order, and the gateway returns **cached completions** for
+them -- the per-step token counts come back identical digit for digit, in
+sub-second times. The tool calls, the database writes and the model check are
+all real on every pass; the model's answers on a repeat run are not freshly
+generated. Recorded here so the numbers are not mistaken for two independent
+samples.
+
 ---
 
 ## How the plans compared
@@ -134,11 +142,11 @@ wrong submission.
 
 ## A note on the audit trail
 
-`output/audit_trail.json` holds **339 steps across 57 runs**, going back to
+`output/audit_trail.json` holds **362 steps across 60 runs**, going back to
 Problem 5. That is deliberate: Problem 5 requires the file to append rather
 than be wiped, so the development history is evidence of compliance rather
 than clutter. The file opens with a `submission` block naming the final run —
-**steps 317–339** — with its outcomes, cash and token figures, so there is no
+**steps 340–362** — with its outcomes, cash and token figures, so there is no
 ambiguity about which run is being submitted.
 
 That block is not written by hand. `scripts/stamp_submission.py` regenerates

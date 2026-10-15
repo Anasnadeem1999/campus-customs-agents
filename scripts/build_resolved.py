@@ -25,7 +25,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 #: Steps at or below this number belong to earlier problems' runs. The trail
 #: appends forever, so this run is everything after that high-water mark.
-FIRST_STEP_OF_THIS_RUN = 317
+FIRST_STEP_OF_THIS_RUN = 340
 
 #: The balance the shop opened with, straight after `scripts/reset_db.py`.
 START = 3400.00

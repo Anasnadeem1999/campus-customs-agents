@@ -928,3 +928,35 @@ The reflection's figures moved with the new run, and two of its comparative
 claims had to change with them: ticket 101 is no longer the most expensive,
 and ticket 103 now is. The owner's arguments and their ranking were left
 alone; only the claims the run contradicted were corrected.
+
+## Follow-up D - One final verification run
+
+**Prompt, verbatim:**
+
+> Rerun one final time pls. I need perfection.
+
+(The full assignment brief was pasted again with it, unchanged from Follow-up
+A.)
+
+**What the prompt did not cover, resolved while working:**
+
+No follow-up prompt was needed - the instruction was unambiguous and the four
+approval decisions had already been given, so each regenerated request was
+checked against the kind, reference and amount already decided before it was
+applied. Nothing new was asked of the owner.
+
+The run was its own test of the fixes from Follow-up C, and they held: the
+reset cleared the board, the runner refused nothing because no backend was up,
+no audit step was dropped, and the report generators rewrote cleanly over the
+previous run's figures instead of leaving them in place.
+
+One thing this run did surface. The step-by-step token counts came back
+**identical to the previous run, digit for digit**, across different run ids -
+28,092 then 20,281 then 40,944, the same sequence both times - with sub-second
+durations on calls of a hundred thousand tokens. That is the Portkey gateway
+serving cached completions for identical prompts, which is exactly what should
+happen when a deterministic reset feeds the same prompts in the same order.
+Worth recording rather than presenting two runs with suspiciously matching
+figures as independent evidence: the work is real (the tools executed, the
+database moved, every call was checked against the gateway's reported model),
+but the model's answers on the second pass were cache hits.
